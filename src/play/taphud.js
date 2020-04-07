@@ -1,5 +1,6 @@
 import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
+import TapButton from './tapbutton';
 
 export default function TapHud(play, ctx, bs) {
 
@@ -17,9 +18,27 @@ export default function TapHud(play, ctx, bs) {
     texture: textures['hud']
   });
 
+  let dUpgrade = new TapButton(this, ctx, {
+    x: bs.upgrade.x,
+    y: bs.upgrade.y,
+    width: bs.upgrade.width,
+    height: bs.upgrade.height,
+    textures: [textures['toggleOn'],
+               textures['toggleOff']],
+    icon: textures['iconUpgrade'],
+    onClick: onUpgradeClick
+  });
+
+  function onUpgradeClick() {
+    console.log('here');
+  }
+
   const initContainer = () => {
     dBg.add(container);
     components.push(dBg);
+
+    dUpgrade.add(container);
+    components.push(dUpgrade);
   };
   initContainer();
 

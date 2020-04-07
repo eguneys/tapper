@@ -10,7 +10,6 @@ import Play from './play';
 export function app(element, options) {
 
   const config = Config();
-  const canvas = new Canvas(element);
 
   let play;
 
@@ -21,14 +20,12 @@ export function app(element, options) {
     .add('hud', aBase('Sprite-Hud-0001.json'))
     .load((loader, resources) => {
 
+      const canvas = new Canvas(element);
+
       const textures = sprites(resources);
 
-      const keyboard = new Keyboard();
-
-      const events = new Events();
-
-      // events.bindTouch();
-      keyboard.bind();
+      const events = new Events(canvas);
+      events.bindTouch();
 
       canvas.bindResize();
 
@@ -36,8 +33,7 @@ export function app(element, options) {
         canvas,
         config,
         textures,
-        events,
-        keyboard
+        events
       };
 
       const data = {};
