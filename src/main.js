@@ -48,7 +48,7 @@ export function app(element, options) {
 
       canvas.withApp(app => {
 
-        app.stage.addChild(play.container);
+        play.add(app.stage);
 
         app.ticker.add(delta => {
           events.update(delta);

@@ -2,17 +2,16 @@ import { dContainer } from '../asprite';
 
 export default function Play(play, ctx) {
 
+  const container = dContainer();
+  const initContainer = () => {
+  };
+  initContainer();
+
   this.init = data => {
-    initContainer();
   };
 
   this.update = delta => {
   };
-
-  const initContainer = () => {
-  };
-
-  const container = this.container = dContainer();
 
   this.render = () => {
   };

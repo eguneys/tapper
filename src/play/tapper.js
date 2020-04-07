@@ -1,32 +1,24 @@
-import { dContainer, sprite } from '../asprite';
-import Tapper from './tapper';
+import { dContainer } from '../asprite';
+import TapHud from './taphud';
 
-export default function Play(ctx) {
+export default function Play(play, ctx, bs) {
 
-  const { textures, canvas } = ctx;
-
-  let bs = (() => {
-    let { width, height } = canvas;
-
-    return {
-      width,
-      height
-    };
-  })();
+  const { textures } = ctx;
 
   let container = dContainer();
-  let tapper = new Tapper(this, ctx, bs);
+
+  let dHud = new TapHud(this, ctx, bs);
+
   let components = [];
 
   const initContainer = () => {
-    tapper.add(container);
-    components.push(tapper);
+    dHud.add(container);
+    components.push(dHud);
   };
   initContainer();
 
-
   this.init = data => {
-    
+    dHud.init({});
   };
 
   this.add = (parent) => {
@@ -36,6 +28,7 @@ export default function Play(ctx) {
   this.remove = () => {
     container.parent.removeChild(container);
   };
+
 
   this.update = delta => {
     components.forEach(_ => _.update(delta));
