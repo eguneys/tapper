@@ -15,9 +15,14 @@ export function app(element, options) {
 
   let assetsBase = 'assets/images/';
   const aBase = (url) => assetsBase + url;
-  
+
+  // https://pixijs.download/dev/docs/PIXI.settings.html
+  // PIXI.settings.RESOLUTION = window.devicePixelRatio;
+  PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
   PIXI.Loader.shared
-    .add('hud', aBase('Sprite-Hud-0001.json'))
+    .add('mhud', aBase('mhud.png'))
+    .add('mletters', aBase('letters.png'))
     .load((loader, resources) => {
 
       const canvas = new Canvas(element);
@@ -51,7 +56,19 @@ export function app(element, options) {
           play.update(delta);
           play.render();
         });
-      });
 
+        if (module.hot) {
+          module.hot.accept('./play', function() {
+            try {
+              play.remove();
+              play = new Play(ctx);
+              play.init(data);
+              play.add(app.stage);
+            } catch (e) {
+              console.log(e);
+            }
+          });
+        }
+      });
     });
 }

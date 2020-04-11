@@ -11,16 +11,12 @@ export default function TapHud(play, ctx, bs) {
   let components = [];
 
   let dBg = new TapSprite(this, ctx, {
-    x: 0,
-    y: 0,
     width: bs.width,
     height: bs.height,
     texture: textures['hud']
   });
 
   let dUpgrade = new TapButton(this, ctx, {
-    x: bs.upgrade.x,
-    y: bs.upgrade.y,
     width: bs.upgrade.width,
     height: bs.upgrade.height,
     textures: [textures['toggleOn'],
@@ -30,7 +26,7 @@ export default function TapHud(play, ctx, bs) {
   });
 
   function onUpgradeClick() {
-    console.log('here');
+    play.toggleUpgradeMenu();
   }
 
   const initContainer = () => {
@@ -39,6 +35,8 @@ export default function TapHud(play, ctx, bs) {
 
     dUpgrade.add(container);
     components.push(dUpgrade);
+    dUpgrade.move(bs.upgrade.x,
+                  bs.upgrade.y);
   };
   initContainer();
 

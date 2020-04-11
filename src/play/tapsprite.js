@@ -21,6 +21,15 @@ export default function TapSprite(play, ctx, bs) {
   this.init = data => {
   };
 
+  this.move = (_x, _y) => {
+    x = _x;
+    y = _y;
+  };
+
+  this.texture = (texture) => {
+    dBody.texture = texture;
+  };
+
   this.add = (parent) => {
     parent.addChild(container);
   };

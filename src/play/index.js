@@ -1,6 +1,8 @@
 import { rect } from '../dquad/geometry';
 import { dContainer, sprite } from '../asprite';
-import Tapper from './tapper';
+import TapperView from './tapper';
+
+import Tapper from '../tapper';
 
 export default function Play(ctx) {
 
@@ -57,18 +59,19 @@ export default function Play(ctx) {
   })();
 
   let container = dContainer();
-  let tapper = new Tapper(this, ctx, bs);
+  let dTapper = new TapperView(this, ctx, bs);
   let components = [];
 
   const initContainer = () => {
-    tapper.add(container);
-    components.push(tapper);
+    dTapper.add(container);
+    components.push(dTapper);
   };
   initContainer();
 
+  let tapper = Tapper();
 
   this.init = data => {
-    
+    dTapper.init({tapper});
   };
 
   this.add = (parent) => {
