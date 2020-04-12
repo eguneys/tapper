@@ -22,8 +22,21 @@ export default function TapList(play, ctx, bs) {
     dScroll.init({});
   };
 
+  const updateAdapter = (delta) => {
+    adapter.update(delta);
+
+    adapter.added().forEach(_ => {
+      dScroll.addComponent(_);      
+    });
+
+
+    adapter.removed().forEach(_ => {
+      dScroll.removeComponent(_);
+    });
+  };
+
   this.move = (x, y) => {
-    container.position.set(x, y);
+    dScroll.move(x, y);
   };
 
   this.add = (parent) => {
@@ -36,6 +49,8 @@ export default function TapList(play, ctx, bs) {
   };
 
   this.update = delta => {
+    updateAdapter(delta);
+
     components.forEach(_ => _.update(delta));
   };
 

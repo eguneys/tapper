@@ -2,11 +2,13 @@ import Pool from 'poolf';
 import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
 
-export default function TapText(play, ctx, bs) {
+export default function FText(play, ctx, bs) {
+
+  let { texture, kerning } = bs;
 
   let { size } = bs;
 
-  let pool = new Pool(() => new TapLetter(this, ctx, { size }));
+  let pool = new Pool(() => new TapLetter(this, ctx, { size, texture, kerning }));
 
   const container = dContainer();
   const initContainer = () => {
@@ -18,13 +20,23 @@ export default function TapText(play, ctx, bs) {
     let x = 0,
         y = 0;
 
+
+    let lastSize;
+
     for (let i = 0; i < text.length; i++) {
       let letter = text[i];
 
+      if (letter === '\n') {
+        x = 0;
+        y += lastSize?lastSize.h:0;
+        continue;
+      }
+
       pool.acquire(_ => {
         _.init({ x, y, letter });
+        lastSize = _.getSize();
       });
-      x += size;
+      x += lastSize.w;
     }
 
     pool.each(_ => _.add(container));
@@ -80,15 +92,11 @@ export default function TapText(play, ctx, bs) {
 
 function TapLetter(play, ctx, bs) {
 
-  const { textures } = ctx;
+  const { texture, kerning } = bs;
 
   let { size } = bs;
 
-  let dBg = new TapSprite(this, ctx, {
-    x: 0, y: 0, 
-    width: size,
-    height: size
-  });
+  let dBg = new TapSprite(this, ctx, {});
 
   const container = dContainer();
   const initContainer = () => {
@@ -97,18 +105,30 @@ function TapLetter(play, ctx, bs) {
   initContainer();
 
 
+  let w, h;
+
   this.init = data => {
     let x = data.x,
         y = data.y,
         letter = data.letter;
 
-    let texture = textures['letters'][letter];
+    let textureLetter = texture[letter] || texture['?'];
 
-    texture = texture || textures['letters']['?'];
+    let kerningLetter = kerning[letter] || kerning['?'],
+        kW = kerningLetter.w,
+        kH = kerningLetter.h;
 
+    w = size * (kW / kH),
+    h = size;
+
+    dBg.size(w, h);
     dBg.move(x, y);
-    dBg.texture(texture);
+    dBg.texture(textureLetter);
   };
+
+  this.getSize = () => ({
+    w, h
+  });
 
   this.add = (parent) => {
     parent.addChild(container);

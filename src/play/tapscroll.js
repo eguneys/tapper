@@ -97,12 +97,10 @@ export default function TapScroll(play, ctx, bs) {
 
       const cb = container.getBounds();
 
-      if (cb.y === bounds.y) {
-        let diff = bounds.height - cb.height;
-
-        if (scrollY < 0 && scrollYBuffer === 0 && diff > 0) {
-          iScrollOffset.both(scrollY, scrollY + diff);
-        }
+      let diff = (cb.y + cb.height) - (bounds.y + bounds.height);
+      
+      if (diff < 0 && scrollY < 0 && scrollYBuffer === 0) {
+        iScrollOffset.both(scrollY, scrollY - diff);
       }
     }
   };
@@ -114,7 +112,8 @@ export default function TapScroll(play, ctx, bs) {
   };
 
   this.render = () => {
-    container.position.set(0, scrollY + scrollYBuffer);
+    let scrollOffset = scrollY + scrollYBuffer;
+    container.position.set(bounds.x,  bounds.y + scrollOffset);
 
     components.forEach(_ => _.render());
   };

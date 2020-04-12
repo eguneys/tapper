@@ -30,7 +30,7 @@ export default function Play(play, ctx, bs) {
     dHud.init({tapper});
     dUpgradeMenu.init({tapper});
 
-    dUpgradeMenu.toggle();
+    // dUpgradeMenu.toggle();
   };
 
   this.add = (parent) => {

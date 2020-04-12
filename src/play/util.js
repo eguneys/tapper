@@ -1,7 +1,8 @@
 
 
-export function tapHandler(events, bounds, fn) {
+export function tapHandler(events, boundsFn, fn) {
   const hitTest = (posX, posY) => {
+    let bounds = boundsFn();
     let left = bounds.x,
         right = bounds.x + bounds.width,
         top = bounds.y,

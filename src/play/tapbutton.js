@@ -13,19 +13,11 @@ export default function TapButton(play, ctx, bs) {
     texture: bs.textures[0]
   });
 
-  let bounds;
-
-  const updateBounds = () => {
-    bounds = container.getBounds();
-  };
-
   let components = [];
   const container = dContainer();
   const initContainer = () => {
     dBg.add(container);
     components.push(dBg);
-
-    updateBounds();
   };
   initContainer();
 
@@ -33,9 +25,10 @@ export default function TapButton(play, ctx, bs) {
     dBg.init({});
   };
 
+  this.bounds = () => container.getBounds();
+
   this.move = (x, y) => {
     container.position.set(x, y);
-    updateBounds();
   };
 
   this.add = (parent) => {
@@ -50,7 +43,7 @@ export default function TapButton(play, ctx, bs) {
     bs.onClick();
   }, 100);
 
-  const handleTap = tapHandler(events, bounds, safeTap);
+  const handleTap = tapHandler(events, this.bounds, safeTap);
 
   this.update = delta => {
     handleTap();

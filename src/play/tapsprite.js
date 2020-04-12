@@ -11,8 +11,13 @@ export default function TapSprite(play, ctx, bs) {
     dBody.height = height;
   };
 
+  const setPosition = () => {
+    dBody.position.set(x, y);
+  };
+
   const container = dContainer();
   const initContainer = () => {
+    setPosition();
     setSize();
     container.addChild(dBody);
   };
@@ -24,6 +29,13 @@ export default function TapSprite(play, ctx, bs) {
   this.move = (_x, _y) => {
     x = _x;
     y = _y;
+    setPosition();
+  };
+
+  this.size = (w, h) => {
+    width = w;
+    height = h;
+    setSize();
   };
 
   this.texture = (texture) => {
@@ -42,7 +54,6 @@ export default function TapSprite(play, ctx, bs) {
   };
 
   this.render = () => {
-    dBody.position.set(x, y);
   };
 
 }

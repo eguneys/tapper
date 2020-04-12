@@ -2,20 +2,38 @@ import * as PIXI from 'pixi.js';
 
 export default function sprites(resources) {
 
+  const json = name => resources[name].data;
   const texture = name => resources[name].texture;
   const ssTextures = name => resources[name].spritesheet.textures;
 
   const mhud = (x, y, w, h) => frameTexture(texture('mhud'), x, y, w, h);
+  const mtapper = (x, y, w, h) => frameTexture(texture('mtapper'), x, y, w, h);
 
   return {
     'menubg9': slice9(texture('mhud'), 0, 16, 16, 16),
     'upgradebg9': slice9(texture('mhud'), 48, 16, 16, 32 / 3),
     'letters': letters(texture('mletters')),
+    'fletters': fletters(texture('fletters'), json('flettersjson')),
+    'fkerning': json('flettersjson'),
+    'mbg': texture('mbg'),
+    'coin': mtapper(0, 0, 32),
     'menuclose': mhud(32, 0, 16),
     'toggleOn': mhud(0, 0, 32, 16),
-    'toggleOff': mhud(64, 0, 32, 16)
+    'toggleOff': mhud(64, 0, 32, 16),
+    'costButton': mhud(96, 0, 16 * 3, 32)
   };
 }
+
+const fletters = (texture, json) => {
+  let mFrame = (x, y, w, h) => frameTexture(texture, x, y, w, h);
+
+  let res = {};
+  for (let letter in json) {
+    let data = json[letter];
+    res[letter] = mFrame(data.x, data.y, data.w, data.h);
+  }
+  return res;
+};
 
 const letters = (texture, x = 0, y = 0, size = 16) => {
   let mFrame = (x, y, w, h) => frameTexture(texture, x, y, w, h);
@@ -34,7 +52,7 @@ const letters = (texture, x = 0, y = 0, size = 16) => {
   ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].forEach((_, i) => 
     res[_] = mFrame(x + i * size, y + size * 4, size, size));
 
-  ['?', '.', '+', '-', '/', ','].forEach((_, i) =>
+  ['?', '.', '+', '-', '/', ',', ' '].forEach((_, i) =>
     res[_] = mFrame(x + (8 + i) * size, y, size, size));
 
   return res;

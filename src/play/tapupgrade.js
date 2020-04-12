@@ -6,6 +6,7 @@ import TapButton from './tapbutton';
 import Tap9 from './tap9';
 import TapText from './taptext';
 import TapList from './taplist';
+import TapCostButton from './tapcostbutton';
 import ipol from '../ipol';
 
 export default function TapUpgrade(play, ctx, bs) {
@@ -15,9 +16,14 @@ export default function TapUpgrade(play, ctx, bs) {
   let marginX = 6;
   let marginY = 8;
   let upgradeHeight = bs.menuUpgrade.height,
-      upgradeWidth = bs.menu.width * 0.5 - marginX * 3.0;
+      upgradeWidth = bs.menu.width - marginX * 3.0;
 
-  let upgradeAdapter = new UpgradeAdapter(this, ctx, bs);
+  let upgradeAdapter = new UpgradeAdapter(this, ctx, {
+    marginX,
+    marginY,
+    upgradeWidth,
+    upgradeHeight
+  });
 
   let dList = new TapList(this, ctx, {
     width: bs.menu.width,
@@ -46,19 +52,6 @@ export default function TapUpgrade(play, ctx, bs) {
     play.toggleUpgradeMenu();
   };
 
-  const dScrollComponents = () => {
-
-    comp.init({upgrade});
-    dScroll.addComponent(comp);
-
-    
-    let x = marginX * 3.0 + 
-        (i % 2) * (upgradeWidth + marginX),
-        y = marginY * 5.0 + 
-        Math.floor(i / 2) * (upgradeHeight + marginY);
-    comp.move(x, y);
-  };
-
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -75,7 +68,7 @@ export default function TapUpgrade(play, ctx, bs) {
 
     dList.add(container);
     components.push(dList);
-    dList.move(bs.menu.x,
+    dList.move(bs.menu.x + 10,
                bs.menu.y + 20);
   };
   initContainer();
@@ -91,6 +84,7 @@ export default function TapUpgrade(play, ctx, bs) {
 
     dBg.init({});
     dClose.init({});
+    dList.init({});
   };
 
   this.add = (parent) => {
@@ -150,12 +144,55 @@ export default function TapUpgrade(play, ctx, bs) {
 
 function UpgradeAdapter(play, ctx, bs) {
 
+  let { marginX, marginY, upgradeWidth, upgradeHeight } = bs;
+
   let model;
+
+  let pool = new Pool(() => new Upgrade(play, ctx, {
+    width: upgradeWidth,
+    height: upgradeHeight
+  }));
+
+  let dViews = {},
+      lAdded,
+      lRemoved;
   
   this.init = data => {
     model = data.upgrades;
   };
 
+  this.added = () => lAdded;
+  this.removed = () => lRemoved;
+
+  this.update = (delta) => {
+
+    let newRemoved = dViews,
+        newViews = {},
+        newAdded = [];
+
+    for (let i = 0; i < model.length; i++) {
+      let upgrade = model[i];
+      let comp = dViews[upgrade.key];
+
+      if (!comp) {
+        comp = pool.acquire(_ => {
+          _.init({upgrade});
+        });
+        newAdded.push(comp);
+      } else {
+        delete newRemoved[upgrade.key];
+      }
+      newViews[upgrade.key] = comp;
+
+      let x = 0,
+          y = i * (upgradeHeight + marginY);
+      comp.move(x, y);
+    }
+
+    lRemoved = Object.values(newRemoved);
+    lAdded = newAdded;
+    dViews = newViews;
+  };
 }
 
 function Upgrade(play, ctx, bs) {
@@ -170,19 +207,32 @@ function Upgrade(play, ctx, bs) {
   });
 
   let dLevel = new TapText(this, ctx, {
-    size: bs.width * 0.2,
+    size: bs.width * 0.05,
     textures: textures['letters']
   });
+
+  let dCostButton = new TapCostButton(this, ctx, {
+    width: bs.width * 0.4,
+    height: bs.height - 8,
+    onClick: onUpgradeClick
+  });
+
 
   let components = [];
   const container = dContainer();
   const initContainer = () => {
-    container.position.set(bs.x, bs.y);
     dBg.add(container);
     components.push(dBg);
 
     dLevel.add(container);
     components.push(dLevel);
+    dLevel.move(4, 4);
+
+    let costBounds = dCostButton.bounds();
+    dCostButton.move(bs.width - costBounds.width - 4,
+                     bs.height - costBounds.height - 4);
+    dCostButton.add(container);
+    components.push(dCostButton);
   };
   initContainer();
 
@@ -192,9 +242,14 @@ function Upgrade(play, ctx, bs) {
     upgrade = data.upgrade;
 
     dBg.init({});
-
     dLevel.init({});
-    dLevel.setText('LV.9/10');
+    dCostButton.init({upgrade});
+
+    dLevel.setText(`LV.${upgrade.level}`);
+  };
+
+  function onUpgradeClick() {
+    console.log(upgrade);
   };
 
   this.move = (x, y) => {
