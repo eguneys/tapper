@@ -16,11 +16,13 @@ export function tapHandler(events, boundsFn, fn) {
     const { current } = events.data;
 
     if (current) {
-      let { tapping, epos } = current;
+      let { ending, epos } = current;
 
-      if (tapping) {
-        if (hitTest(...epos)) {
-          fn(...epos);
+      if (ending) {
+        let { swipe: { swiped } } = ending;
+
+        if (!swiped & hitTest(...epos)) {
+            fn(...epos);
         }
       }
     }
