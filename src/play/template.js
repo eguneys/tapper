@@ -11,6 +11,10 @@ export default function Play(play, ctx) {
   this.init = data => {
   };
 
+  this.move = (x, y) => {
+    container.position.set(x, y);
+  };
+
   this.add = (parent) => {
     parent.addChild(container);
   };

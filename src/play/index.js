@@ -2,6 +2,7 @@ import { rect } from '../dquad/geometry';
 import { dContainer, sprite } from '../asprite';
 
 import FutureGame from './futuregame';
+import { NbFutureTimes, RoomRows, RoomCols } from '../future';
 
 
 export default function Play(ctx) {
@@ -13,7 +14,7 @@ export default function Play(ctx) {
 
     let margin = width * 0.01;
 
-    let timelineEntries = 9;
+    let timelineEntries = NbFutureTimes;
 
     let timelineW = width * 0.8,
         timelineH = timelineW / timelineEntries;
@@ -24,12 +25,21 @@ export default function Play(ctx) {
                         timelineH);
 
 
+    let roomHeight = height - timelineH - margin * 2.0;
+    let roomWidth = width - margin * 2.0;
+
+    let tileSizeW = roomHeight / RoomRows;
+    let tileSizeH = roomWidth / RoomCols;
+
+    let tileSize = rect(0, 0, tileSizeW, tileSizeH);
+
     let room = rect(margin,
                     timelineH + margin,
-                    width,
-                    height);
+                    roomWidth,
+                    roomHeight);
 
     return {
+      tileSize,
       timeline,
       room,
       width,
