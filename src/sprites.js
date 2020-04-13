@@ -23,7 +23,26 @@ const all = (mall) => {
     'timeline1': mall(0, 0, 16),
     'timeline2': mall(16, 0, 16),
     'timeline3': mall(32, 0, 16),
-    'timelineNow': mall(16 * 3, 0, 16)
+    'timelineNow': mall(16 * 3, 0, 16),
+    'rooms': {
+      'room4': room(mall, 0, 48)
+    }
+  };
+};
+
+const room = (mall, x, y) => {
+  return {
+    'upleft': mall(x + 0, y + 0, 16),
+    'up': mall(x + 16, y + 0, 16),
+    'upright': mall(x + 32, y + 0, 16),
+    'middleleft': mall(x + 0, y + 16, 16),
+    'floor': mall(x + 16, y + 16, 16),
+    'middleright': mall(x + 32, y + 16, 16),
+    'doorleft': mall(x + 0, y + 32, 16),
+    'doorright': mall(x + 32, y + 32, 16),
+    'downleft': mall(x + 0, y + 48, 16),
+    'down': mall(x + 16, y + 48, 16),
+    'downright': mall(x + 32, y + 48, 16)
   };
 };
 

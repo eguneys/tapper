@@ -23,8 +23,15 @@ export default function Play(ctx) {
                         timelineW,
                         timelineH);
 
+
+    let room = rect(margin,
+                    timelineH + margin,
+                    width,
+                    height);
+
     return {
       timeline,
+      room,
       width,
       height
     };

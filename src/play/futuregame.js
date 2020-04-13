@@ -3,6 +3,7 @@ import { dContainer } from '../asprite';
 import FutureFuture from '../future';
 import FutureTimeline from './futuretimeline';
 import FutureUser from './futureuser';
+import FutureRoom from './futureroom';
 
 export default function FutureGame(play, ctx, bs) {
 
@@ -10,6 +11,7 @@ export default function FutureGame(play, ctx, bs) {
 
   let user = new FutureUser(this, ctx, bs);
   let dTimeline = new FutureTimeline(this, ctx, bs);
+  let dRoom = new FutureRoom(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
@@ -17,6 +19,10 @@ export default function FutureGame(play, ctx, bs) {
     dTimeline.add(container);
     components.push(dTimeline);
     dTimeline.move(bs.timeline.x, bs.timeline.y);
+
+    dRoom.add(container);
+    components.push(dRoom);
+    dRoom.move(bs.room.x, bs.room.y);
   };
   initContainer();
 
@@ -25,6 +31,8 @@ export default function FutureGame(play, ctx, bs) {
     
     user.init({});
     dTimeline.init({ future });
+
+    dRoom.init({future});
   };
 
 
