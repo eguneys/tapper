@@ -25,16 +25,16 @@ export default function Play(ctx) {
                         timelineH);
 
 
-    let roomHeight = height - timelineH - margin * 2.0;
-    let roomWidth = width - margin * 2.0;
+    let roomHeight = height;
+    let roomWidth = width;
 
-    let tileSizeW = roomHeight / RoomRows;
-    let tileSizeH = roomWidth / RoomCols;
+    let tileSizeW = roomWidth / RoomCols;
+    let tileSizeH = roomHeight / RoomRows;
 
     let tileSize = rect(0, 0, tileSizeW, tileSizeH);
 
-    let room = rect(margin,
-                    timelineH + margin,
+    let room = rect(0,
+                    0,
                     roomWidth,
                     roomHeight);
 

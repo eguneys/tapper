@@ -62,14 +62,6 @@ function Blueprint() {
         bottomRightPos = [RoomCols - 1, RoomRows - 1];
 
 
-  single(topLeftPos, makeTile(Tiles.topleft));
-  single(topRightPos, makeTile(Tiles.topright));
-  leftRight();
-  middle();
-  topBottom();
-  single(bottomLeftPos, makeTile(Tiles.bottomleft));
-  single(bottomRightPos, makeTile(Tiles.bottomright));
-
   
   const topBottom = () => {
     for (let i = 1; i < RoomCols - 1; i++) {
@@ -81,7 +73,7 @@ function Blueprint() {
   const middle = () => {
     for (let i = 1; i < RoomRows - 1; i++) {
       for (let j = 1; j < RoomCols - 1; j++) {
-        single([i, j], makeTile(Tiles.floor));
+        single([j, i], makeTile(Tiles.floor));
       }
     }
   };
@@ -105,6 +97,14 @@ function Blueprint() {
     tiles[key] = tile;
   };
 
+  single(topLeftPos, makeTile(Tiles.topleft));
+  single(topRightPos, makeTile(Tiles.topright));
+  leftRight();
+  middle();
+  topBottom();
+  single(bottomLeftPos, makeTile(Tiles.bottomleft));
+  single(bottomRightPos, makeTile(Tiles.bottomright));
+
   return tiles;  
 }
 
@@ -114,7 +114,7 @@ const makeTile = (type) => {
   };
 };
 
-const Tiles = {
+export const Tiles = {
   topleft: 'topleft',
   topright: 'topright',
   bottomleft: 'bottomleft',

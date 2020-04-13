@@ -32,17 +32,17 @@ const all = (mall) => {
 
 const room = (mall, x, y) => {
   return {
-    'upleft': mall(x + 0, y + 0, 16),
-    'up': mall(x + 16, y + 0, 16),
-    'upright': mall(x + 32, y + 0, 16),
-    'middleleft': mall(x + 0, y + 16, 16),
+    'topleft': mall(x + 0, y + 0, 16),
+    'top': mall(x + 16, y + 0, 16),
+    'topright': mall(x + 32, y + 0, 16),
+    'left': mall(x + 0, y + 16, 16),
     'floor': mall(x + 16, y + 16, 16),
-    'middleright': mall(x + 32, y + 16, 16),
-    'doorleft': mall(x + 0, y + 32, 16),
-    'doorright': mall(x + 32, y + 32, 16),
-    'downleft': mall(x + 0, y + 48, 16),
-    'down': mall(x + 16, y + 48, 16),
-    'downright': mall(x + 32, y + 48, 16)
+    'right': mall(x + 32, y + 16, 16),
+    'leftdoor': mall(x + 0, y + 32, 16),
+    'rightdoor': mall(x + 32, y + 32, 16),
+    'bottomleft': mall(x + 0, y + 48, 16),
+    'bottom': mall(x + 16, y + 48, 16),
+    'bottomright': mall(x + 32, y + 48, 16)
   };
 };
 

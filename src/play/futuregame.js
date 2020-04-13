@@ -16,13 +16,13 @@ export default function FutureGame(play, ctx, bs) {
   let components = [];
   const container = dContainer();
   const initContainer = () => {
-    dTimeline.add(container);
-    components.push(dTimeline);
-    dTimeline.move(bs.timeline.x, bs.timeline.y);
-
     dRoom.add(container);
     components.push(dRoom);
     dRoom.move(bs.room.x, bs.room.y);
+
+    dTimeline.add(container);
+    components.push(dTimeline);
+    dTimeline.move(bs.timeline.x, bs.timeline.y);
   };
   initContainer();
 
