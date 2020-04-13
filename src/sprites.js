@@ -6,8 +6,12 @@ export default function sprites(resources) {
   const texture = name => resources[name].texture;
   const ssTextures = name => resources[name].spritesheet.textures;
 
-  const mhud = (x, y, w, h) => frameTexture(texture('mhud'), x, y, w, h);
-  const mtapper = (x, y, w, h) => frameTexture(texture('mtapper'), x, y, w, h);
+  const fT = atlas =>
+        (x, y, w, h) => frameTexture(texture(atlas), x, y, w, h);
+
+  const mall = fT('mall');
+  const mhud = fT('mhud');
+  const mtapper = fT('mtapper');
 
   return {
     'menubg9': slice9(texture('mhud'), 0, 16, 16, 16),
@@ -17,12 +21,20 @@ export default function sprites(resources) {
     'fkerning': json('flettersjson'),
     'mbg': texture('mbg'),
     'coin': mtapper(0, 0, 32),
+    'mall': all(mall),
     'menuclose': mhud(32, 0, 16),
     'toggleOn': mhud(0, 0, 32, 16),
     'toggleOff': mhud(64, 0, 32, 16),
     'costButton': mhud(96, 0, 16 * 3, 32)
   };
 }
+
+const all = (mall) => {
+  return {
+    'sleep': mall(0, 0, 32),
+    'idle': mall(0, 32, 32)
+  };
+};
 
 const fletters = (texture, json) => {
   let mFrame = (x, y, w, h) => frameTexture(texture, x, y, w, h);

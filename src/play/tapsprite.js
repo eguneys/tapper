@@ -38,6 +38,10 @@ export default function TapSprite(play, ctx, bs) {
     setSize();
   };
 
+  this.alpha = (alpha) => {
+    dBody.alpha = alpha;
+  };
+
   this.texture = (texture) => {
     dBody.texture = texture;
   };

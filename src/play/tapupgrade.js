@@ -4,7 +4,7 @@ import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
 import TapButton from './tapbutton';
 import Tap9 from './tap9';
-import TapText from './taptext';
+import FText from './ftext';
 import TapList from './taplist';
 import TapCostButton from './tapcostbutton';
 import ipol from '../ipol';
@@ -158,7 +158,7 @@ function UpgradeAdapter(play, ctx, bs) {
       lRemoved;
   
   this.init = data => {
-    model = data.upgrades;
+    model = data.upgrades();
   };
 
   this.added = () => lAdded;
@@ -206,9 +206,10 @@ function Upgrade(play, ctx, bs) {
     textures: textures['upgradebg9']
   });
 
-  let dLevel = new TapText(this, ctx, {
+  let dLevel = new FText(this, ctx, {
     size: bs.width * 0.05,
-    textures: textures['letters']
+    texture: textures['fletters'],
+    kerning: textures['fkerning']
   });
 
   let dCostButton = new TapCostButton(this, ctx, {

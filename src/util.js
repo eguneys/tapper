@@ -17,6 +17,21 @@ export const throttle = (fn, delay = 50) => {
   };
 };
 
+export function withDelay(fn, delay, { onUpdate }) {
+  let lastUpdate = 0;
+
+  return (delta) => {
+    lastUpdate += delta;
+    if (lastUpdate >= delay) {
+      fn();
+      lastUpdate = 0;
+    } else {
+      if (onUpdate)
+        onUpdate(lastUpdate / delay);
+    }
+  };
+};
+
 export const safeRemoveFromArray = (arr, item) => {
   let i = arr.indexOf(item);
   if (i > -1) {

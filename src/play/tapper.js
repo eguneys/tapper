@@ -1,6 +1,8 @@
 import { dContainer } from '../asprite';
 import TapHud from './taphud';
 import TapUpgrade from './tapupgrade';
+import TapFx from './tapfx';
+import TapGame from './tapgame';
 
 export default function Play(play, ctx, bs) {
 
@@ -8,15 +10,25 @@ export default function Play(play, ctx, bs) {
 
   let container = dContainer();
 
+  let dFx = new TapFx(this, ctx, bs);
+
   let dHud = new TapHud(this, ctx, bs);
 
   let dUpgradeMenu = new TapUpgrade(this, ctx, bs);
+
+  let dGame = new TapGame(this, ctx, bs);
 
   let components = [];
 
   const initContainer = () => {
     dHud.add(container);
     components.push(dHud);
+
+    dGame.add(container);
+    components.push(dGame);
+
+    dFx.add(container);
+    components.push(dFx);
 
     dUpgradeMenu.add(container);
     components.push(dUpgradeMenu);
@@ -27,10 +39,10 @@ export default function Play(play, ctx, bs) {
   this.init = data => {
     tapper = data.tapper;
 
+    dFx.init({tapper});
     dHud.init({tapper});
     dUpgradeMenu.init({tapper});
-
-    // dUpgradeMenu.toggle();
+    dGame.init({tapper});
   };
 
   this.add = (parent) => {

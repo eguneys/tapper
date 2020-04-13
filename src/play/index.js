@@ -16,17 +16,17 @@ export default function Play(ctx) {
     let buttonHeight = 60,
         buttonWidth = buttonHeight * 2;
 
-    let score = rect(margin, margin, 20, 20);
+    let taps = rect(margin, margin, 20, 20);
 
     let upgrade = rect(margin, 
                        height - margin - buttonHeight,
                        buttonWidth,
                        buttonHeight);
 
-    let tap = rect(score.x,
+    let tap = rect(taps.x,
                    40,
                    width,
-                   height - score.height * 4.0 - upgrade.height);
+                   height - taps.height * 4.0 - upgrade.height);
 
 
     let menuWidth = width * 0.9,
@@ -46,12 +46,15 @@ export default function Play(ctx) {
 
     let menuUpgrade = rect(0, 0, width, buttonHeight * 1.5);
 
+    let hero = rect(0, 0, 64, 64);
+
     return {
+      hero,
       menuClose,
       menuUpgrade,
       menu,
       tap,
-      score,
+      taps,
       upgrade,
       width,
       height
@@ -68,9 +71,11 @@ export default function Play(ctx) {
   };
   initContainer();
 
-  let tapper = Tapper();
+  let tapper = new Tapper();
 
   this.init = data => {
+    tapper.init({});
+
     dTapper.init({tapper});
   };
 
@@ -83,6 +88,7 @@ export default function Play(ctx) {
   };
 
   this.update = delta => {
+    tapper.update(delta);
     components.forEach(_ => _.update(delta));
   };
 

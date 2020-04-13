@@ -26,8 +26,8 @@ export default function TapHud(play, ctx, bs) {
     onClick: onUpgradeClick
   });
 
-  let dTest = new FText(this, ctx, {
-    size: bs.width * 0.08,
+  let dTaps = new FText(this, ctx, {
+    size: bs.taps.height,
     texture: textures['fletters'],
     kerning: textures['fkerning']
   });
@@ -45,24 +45,22 @@ export default function TapHud(play, ctx, bs) {
     dUpgrade.move(bs.upgrade.x,
                   bs.upgrade.y);
 
-    dTest.add(container);
-    components.push(dTest);
-    dTest.move(bs.width * 0.00,
-               bs.height * 0.0);
+    dTaps.add(container);
+    components.push(dTaps);
+    dTaps.move(bs.taps.x,
+               bs.taps.y);
   };
   initContainer();
 
+  let tapper;
+
   this.init = data => {
+    tapper = data.tapper;
     dBg.init({});
 
     dUpgrade.init({});
     
-    dTest.init({});
-    // dTest.setText('ABCD\nEFGH\nIJKL\nMNOP\nQRST\nUVW\nXYZ');
-    // dTest.setText('EFGH\nIJKL\nMNOP\nQRST\nUVW\nXYZ');
-    //dTest.setText('0123\n4567\n890');
-    // dTest.setText('?.+\n-/,');
-    dTest.setText('THE \nBROWN\nFOX\nJUMPS\nOVER, THE\nLAZY\nDOG.\n+1,000M');
+    dTaps.init({});
   };
 
   this.add = (parent) => {
@@ -75,6 +73,8 @@ export default function TapHud(play, ctx, bs) {
 
 
   this.update = delta => {
+    dTaps.setText("" + tapper.taps());
+
     components.forEach(_ => _.update(delta));
   };
 

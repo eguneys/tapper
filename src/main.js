@@ -21,6 +21,7 @@ export function app(element, options) {
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   PIXI.Loader.shared
+    .add('mall', aBase('all.png'))
     .add('mhud', aBase('mhud.png'))
     .add('mbg', aBase('mbg.png'))
     .add('mletters', aBase('letters.png'))

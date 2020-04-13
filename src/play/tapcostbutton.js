@@ -2,6 +2,7 @@ import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
 import TapButton from './tapbutton';
 import TapText from './taptext';
+import FText from './ftext';
 
 import { shortenNumber } from './taputil';
 
@@ -25,14 +26,17 @@ export default function TapCostButton(play, ctx, bs) {
     texture: textures['coin']
   });
 
-  let dCostText = new TapText(this, ctx, {
+  let dCostText = new FText(this, ctx, {
     size: textSize,
-    textures: textures['letters']
+    texture: textures['fletters'],
+    kerning: textures['fkerning'],
+    // textures: textures['letters']
   });
 
-  let dCostText2 = new TapText(this, ctx, {
+  let dCostText2 = new FText(this, ctx, {
     size: textSize * 1.2,
-    textures: textures['letters']
+    texture: textures['fletters'],
+    kerning: textures['fkerning']
   });
 
   let components = [];

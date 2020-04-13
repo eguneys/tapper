@@ -4,7 +4,10 @@ import TapSprite from './tapsprite';
 
 export default function FText(play, ctx, bs) {
 
-  let { texture, kerning } = bs;
+  const { textures } = ctx;
+
+  let { texture = textures['fletters'], 
+        kerning = textures['fkerning'] } = bs;
 
   let { size } = bs;
 
@@ -31,7 +34,6 @@ export default function FText(play, ctx, bs) {
         y += lastSize?lastSize.h:0;
         continue;
       }
-
       pool.acquire(_ => {
         _.init({ x, y, letter });
         lastSize = _.getSize();
@@ -69,6 +71,10 @@ export default function FText(play, ctx, bs) {
   this.move = (_x, _y) => {
     x = _x;
     y = _y;
+  };
+
+  this.alpha = (alpha) => {
+    container.alpha = alpha;
   };
 
   this.add = (parent) => {
