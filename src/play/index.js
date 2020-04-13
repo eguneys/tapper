@@ -1,8 +1,8 @@
 import { rect } from '../dquad/geometry';
 import { dContainer, sprite } from '../asprite';
-import TapperView from './tapper';
 
-import Tapper from '../tapper';
+import FutureGame from './futuregame';
+
 
 export default function Play(ctx) {
 
@@ -11,72 +11,40 @@ export default function Play(ctx) {
   let bs = (() => {
     let { width, height } = canvas;
 
-    let margin = 10;
+    let margin = width * 0.01;
 
-    let buttonHeight = 60,
-        buttonWidth = buttonHeight * 2;
+    let timelineEntries = 9;
 
-    let taps = rect(margin, margin, 20, 20);
+    let timelineW = width * 0.8,
+        timelineH = timelineW / timelineEntries;
 
-    let upgrade = rect(margin, 
-                       height - margin - buttonHeight,
-                       buttonWidth,
-                       buttonHeight);
-
-    let tap = rect(taps.x,
-                   40,
-                   width,
-                   height - taps.height * 4.0 - upgrade.height);
-
-
-    let menuWidth = width * 0.9,
-        menuHeight = height * 0.8;
-    
-    let menuCloseWidth = width * 0.16;
-
-    let menu = rect((width - menuWidth) * 0.5,
-                    (height - menuHeight) * 0.5,
-                    menuWidth,
-                    menuHeight);
-
-    let menuClose = rect(menu.x1 - menuCloseWidth,
-                         menu.y - menuCloseWidth,
-                         menuCloseWidth,
-                         menuCloseWidth);
-
-    let menuUpgrade = rect(0, 0, width, buttonHeight * 1.5);
-
-    let hero = rect(0, 0, 64, 64);
+    let timeline = rect((width - timelineW) * 0.5, 
+                        margin,
+                        timelineW,
+                        timelineH);
 
     return {
-      hero,
-      menuClose,
-      menuUpgrade,
-      menu,
-      tap,
-      taps,
-      upgrade,
+      timeline,
       width,
       height
     };
   })();
 
-  let container = dContainer();
-  let dTapper = new TapperView(this, ctx, bs);
+  let futureGame = new FutureGame(this, ctx, bs);
+
   let components = [];
+  let container = dContainer();
 
   const initContainer = () => {
-    dTapper.add(container);
-    components.push(dTapper);
+    futureGame.add(container);
+    components.push(futureGame);
   };
   initContainer();
 
-  let tapper = new Tapper();
-
   this.init = data => {
-    tapper.init({});
+    
+    futureGame.init({});
 
-    dTapper.init({tapper});
   };
 
   this.add = (parent) => {
@@ -88,7 +56,6 @@ export default function Play(ctx) {
   };
 
   this.update = delta => {
-    tapper.update(delta);
     components.forEach(_ => _.update(delta));
   };
 

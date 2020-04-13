@@ -22,12 +22,9 @@ export function app(element, options) {
 
   PIXI.Loader.shared
     .add('mall', aBase('all.png'))
-    .add('mhud', aBase('mhud.png'))
-    .add('mbg', aBase('mbg.png'))
     .add('mletters', aBase('letters.png'))
     .add('fletters', aBase('fletters.png'))
     .add('flettersjson', aBase('fletters.json'))
-    .add('mtapper', aBase('tapper.png'))
     .load((loader, resources) => {
 
       const canvas = new Canvas(element);
@@ -37,10 +34,14 @@ export function app(element, options) {
       const events = new Events(canvas);
       events.bindTouch();
 
+      const keyboard = new Keyboard();
+      keyboard.bind();
+
       canvas.bindResize();
 
       const ctx = {
         canvas,
+        keyboard,
         config,
         textures,
         events
