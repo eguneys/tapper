@@ -1,24 +1,32 @@
 import { dContainer } from '../asprite';
 
 import FutureFuture from '../future';
-import FutureTimeline from './futuretimeline';
 import FutureUser from './futureuser';
-import FutureRoom from './futureroom';
+
+import FutureTimeline from './futuretimeline';
+import FutureTimes from './futuretimes';
+import FutureCrab from './futurecrab';
 
 export default function FutureGame(play, ctx, bs) {
 
-  let future = new FutureFuture();
+  let future = new FutureFuture(bs);
 
+  let dTimes = new FutureTimes(this, ctx, bs);
   let user = new FutureUser(this, ctx, bs);
   let dTimeline = new FutureTimeline(this, ctx, bs);
-  let dRoom = new FutureRoom(this, ctx, bs);
+
+
+  let dCrab = new FutureCrab(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
   const initContainer = () => {
-    dRoom.add(container);
-    components.push(dRoom);
-    dRoom.move(bs.room.x, bs.room.y);
+    dTimes.add(container);
+    components.push(dTimes);
+    dTimes.move(bs.room.x, bs.room.y);
+
+    dCrab.add(container);
+    components.push(dCrab);
 
     dTimeline.add(container);
     components.push(dTimeline);
@@ -27,12 +35,13 @@ export default function FutureGame(play, ctx, bs) {
   initContainer();
 
   this.init = data => {
-    future.init({ time: 4, vision: 0 });
+    future.init();
     
-    user.init({});
-    dTimeline.init({ future });
+    user.init({future});
+    dTimeline.init({future});
+    dTimes.init({future});
 
-    dRoom.init({future});
+    dCrab.init({ future });
   };
 
 

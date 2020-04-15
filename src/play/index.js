@@ -2,7 +2,7 @@ import { rect } from '../dquad/geometry';
 import { dContainer, sprite } from '../asprite';
 
 import FutureGame from './futuregame';
-import { NbFutureTimes, RoomRows, RoomCols } from '../future';
+import { NbFutureTimes, RoomRows, RoomCols } from '../futureutil';
 
 
 export default function Play(ctx) {

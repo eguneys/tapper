@@ -139,7 +139,8 @@ export default function FutureTimeline(play, ctx, bs) {
   };
 
   this.render = () => {
-    let { time, vision } = future.state();
+    let time = future.time(),
+        vision = future.vision();
 
     dYear.setText(years[time]);
 

@@ -26,7 +26,19 @@ const all = (mall) => {
     'timelineNow': mall(16 * 3, 0, 16),
     'rooms': {
       'room4': room(mall, 0, 48)
+    },
+    items: {
+      'crab': moveanimation(mall, 160, 0)
     }
+  };
+};
+
+const moveanimation = (mall, x, y) => {
+  return {
+    'idle': mall(x, y, 16),
+    'walk': mall(x + 16, y, 16),
+    'right': mall(x + 32, y, 16),
+    'left': mall(x + 16 * 3, y, 16)
   };
 };
 
@@ -39,6 +51,7 @@ const room = (mall, x, y) => {
     'floor': mall(x + 16, y + 16, 16),
     'right': mall(x + 32, y + 16, 16),
     'leftdoor': mall(x + 0, y + 32, 16),
+    'floor2': mall(x + 16, y + 32, 16),
     'rightdoor': mall(x + 32, y + 32, 16),
     'bottomleft': mall(x + 0, y + 48, 16),
     'bottom': mall(x + 16, y + 48, 16),

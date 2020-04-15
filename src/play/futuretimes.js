@@ -1,6 +1,6 @@
 import { dContainer } from '../asprite';
 
-export default function Play(play, ctx, bs) {
+export default function FutureTimes(play, ctx, bs) {
 
   let components = [];
   const container = dContainer();

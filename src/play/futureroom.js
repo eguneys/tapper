@@ -79,7 +79,8 @@ const tileTextureByType = {
   [Tiles.right]: 'right',
   [Tiles.leftdoor]: 'leftdoor',
   [Tiles.rightdoor]: 'rightdoor',
-  [Tiles.floor]: 'floor'
+  [Tiles.floor]: 'floor',
+  [Tiles.floor2]: 'floor2'
 };
 
 const roomKeyByTime = {
