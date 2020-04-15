@@ -83,11 +83,6 @@ const tileTextureByType = {
   [Tiles.floor2]: 'floor2'
 };
 
-const roomKeyByTime = {
-  0: 'room0',
-  4: 'room4'
-};
-
 function RoomTile(play, ctx, bs) {
 
   const { textures } = ctx;
@@ -112,7 +107,7 @@ function RoomTile(play, ctx, bs) {
 
     let time = data.time;
 
-    let roomTextures = textures['mall']['rooms'][roomKeyByTime[time]];
+    let roomTextures = textures['mall']['rooms']['room' + time];
 
     dBody.texture(roomTextures[tileTextureByType[tile.type]]);
   };

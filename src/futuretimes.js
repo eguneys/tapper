@@ -7,6 +7,8 @@ const {
   NbFutureTimes,
   middleX,
   middleY,
+  rightX,
+  leftX,
   key2pos,
   pos2key } = fu;
 
@@ -63,11 +65,17 @@ export default function FutureTimes(future, bs) {
 
 
   const travelPast = () => {
+    time--;
 
+    initTime();
+    future.crab.init({ pos: [rightX, middleY] });
   };
 
   const travelFuture = () => {
+    time++;
 
+    initTime();
+    future.crab.init({ pos: [leftX, middleY] });
   };
 
   const travelUpdate = () => {

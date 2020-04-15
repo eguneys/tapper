@@ -25,7 +25,15 @@ const all = (mall) => {
     'timeline3': mall(32, 0, 16),
     'timelineNow': mall(16 * 3, 0, 16),
     'rooms': {
-      'room4': room(mall, 0, 48)
+      'room0': room(mall, 0, 48),
+      'room1': room(mall, 0, 48),
+      'room2': room(mall, 0, 48),
+      'room3': room(mall, 0, 48),
+      'room4': room(mall, 0, 48),
+      'room5': room(mall, 0, 48),
+      'room6': room(mall, 0, 48),
+      'room7': room(mall, 0, 48),
+      'room8': room(mall, 0, 48),
     },
     items: {
       'crab': moveanimation(mall, 160, 0)

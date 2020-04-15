@@ -4,6 +4,8 @@ export const RoomCols = 20;
 
 export const middleX = Math.floor(RoomCols / 2);
 export const middleY = Math.floor(RoomRows / 2);
+export const rightX = RoomCols - 2;
+export const leftX = 1;
 
 
 export const Dirs = {
