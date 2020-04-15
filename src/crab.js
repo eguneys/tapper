@@ -47,7 +47,7 @@ export default function Crab(future, bs) {
     pos = data.pos;
     moves = [];
 
-    facing = 'down';
+    facing = 'idle';
 
     this.state('idle', {});
   };
@@ -63,9 +63,8 @@ export default function Crab(future, bs) {
   };
 
   const collides = () => {
-    let collider = future.collider;
+    let collider = future.collider();
     let cdata = collisionData();
-
     return collider.collides(cdata);
   };
 
@@ -143,12 +142,12 @@ function Walking(crab, future) {
   let life;
 
   this.init = data => {
-    life = 2;
+    life = 5;
     dirs = data.dirs;
   };
 
   const updateMove = () => {
-    crab.move(dirs);
+    dirs.forEach(crab.move);
   };
 
   this.update = (delta) => {

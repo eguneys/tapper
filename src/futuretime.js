@@ -44,13 +44,20 @@ export default function FutureTimes(future, bs) {
 
   this.time = () => time;
   this.vision = () => vision;
+  this.tiles = () => times[time].tiles;
+  this.collider = () => times[time].collider;
 
   this.init = () => {
 
     time = 4;
     vision = 0;
 
+    initTime();
     future.crab.init({ pos: [middleX, middleY] });
+  };
+
+  const initTime = () => {
+    times[time].init({});
   };
   
 
@@ -75,6 +82,7 @@ export default function FutureTimes(future, bs) {
 
   this.update = delta => {
     travelUpdate();
+    times[time].update(delta);
   };
 }
 
@@ -84,7 +92,7 @@ function FutureTime(future, bs) {
       tileHeight = bs.tileSize.height;
 
   let collider;
-  let tiles = fu.Blueprint();
+  let tiles = this.tiles = fu.Blueprint();
 
   this.init = () => {
     initCollider();

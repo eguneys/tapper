@@ -52,7 +52,6 @@ export default function FutureCrab(play, ctx, bs) {
   this.render = () => {
 
     let crab = future.crab,
-        state = crab.state(),
         pos = crab.pos();
 
     this.move(pos[0] * bs.tileSize.width,

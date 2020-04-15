@@ -1,12 +1,12 @@
 import Pool from 'poolf';
 import { dContainer } from '../asprite';
-import { Tiles, key2pos } from '../future';
+import { Tiles, key2pos } from '../futureutil';
 
 import TapSprite from './tapsprite';
 
 export default function FutureRoom(play, ctx, bs) {
 
-  let tiles = new Pool(() => new RoomTile(this, ctx, {
+  let pTiles = new Pool(() => new RoomTile(this, ctx, {
     width: bs.tileSize.width,
     height: bs.tileSize.height
   }));
@@ -17,25 +17,25 @@ export default function FutureRoom(play, ctx, bs) {
   };
   initContainer();
 
-  let future;
+  let time,
+      tiles;
 
   this.init = data => {
-    future = data.future;
+    time = data.time;
+    tiles = data.tiles;
 
     acquireTiles();
   };
 
   const acquireTiles = () => {
-    let { time } = future.state();
+    pTiles.each(_ => _.remove());
 
-    tiles.each(_ => _.remove());
+    pTiles.releaseAll();
 
-    tiles.releaseAll();
-
-    for (let tileKey in future.tiles) {
+    for (let tileKey in tiles) {
       let pos = key2pos(tileKey);
-      let tile = future.tiles[tileKey];
-      tiles.acquire(_ => {
+      let tile = tiles[tileKey];
+      pTiles.acquire(_ => {
         _.init({ 
           tile,
           time

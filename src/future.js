@@ -8,6 +8,8 @@ export default function Future(bs) {
 
   this.time = times.time;
   this.vision = times.vision;
+  this.tiles = times.tiles;
+  this.collider = times.collider;
 
   this.init = (data) => {
 

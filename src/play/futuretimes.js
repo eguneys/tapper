@@ -1,14 +1,26 @@
 import { dContainer } from '../asprite';
+import FutureRoom from './futureroom';
 
 export default function FutureTimes(play, ctx, bs) {
 
+  let dRoom = new FutureRoom(this, ctx, bs);
+
   let components = [];
   const container = dContainer();
-  const initContainer = () => {
+  const createContainer = () => {
+    dRoom.add(container);
+    components.push(dRoom);
   };
-  initContainer();
+  createContainer();
 
+  let future;
   this.init = data => {
+    future = data.future;
+
+    dRoom.init({
+      time: future.time(),
+      tiles: future.tiles()
+    });
   };
 
   this.move = (x, y) => {
