@@ -6,6 +6,7 @@ import FutureUser from './futureuser';
 import FutureTimeline from './futuretimeline';
 import FutureTimes from './futuretimes';
 import FutureCrab from './futurecrab';
+import FutureShoots from './futureshoots';
 
 export default function FutureGame(play, ctx, bs) {
 
@@ -15,7 +16,7 @@ export default function FutureGame(play, ctx, bs) {
   let user = new FutureUser(this, ctx, bs);
   let dTimeline = new FutureTimeline(this, ctx, bs);
 
-
+  let dShoots = new FutureShoots(this, ctx, bs);
   let dCrab = new FutureCrab(this, ctx, bs);
 
   let components = [];
@@ -24,6 +25,9 @@ export default function FutureGame(play, ctx, bs) {
     dTimes.add(container);
     components.push(dTimes);
     dTimes.move(bs.room.x, bs.room.y);
+
+    dShoots.add(container);
+    components.push(dShoots);
 
     dCrab.add(container);
     components.push(dCrab);
@@ -42,6 +46,7 @@ export default function FutureGame(play, ctx, bs) {
     dTimes.init({future});
 
     dCrab.init({ future });
+    dShoots.init({ future });
   };
 
 

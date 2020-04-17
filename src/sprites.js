@@ -36,9 +36,18 @@ const all = (mall) => {
       'room8': room(mall, 0, 48),
     },
     items: {
-      'crab': moveanimation(mall, 160, 0)
+      'crab': moveanimation(mall, 160, 0),
+      'shoots': animation(mall, 160, 32, 16, 3)
     }
   };
+};
+
+const animation = (mall, x, y, size, n) => {
+  let res = [];
+  for (let i = 0; i < n; i++) {
+    res.push(mall(x + i * size, y, size));
+  }
+  return res;
 };
 
 const moveanimation = (mall, x, y) => {

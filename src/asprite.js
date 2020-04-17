@@ -28,8 +28,8 @@ export function text(txt, opts) {
   return new PIXI.Text(txt, opts);
 }
 
-export function asprite(textures, duration) {
-  return new AnimatedSprite(textures, duration);
+export function asprite(textures, duration, loop) {
+  return new AnimatedSprite(textures, duration, loop);
 }
 
 class AnimatedSprite extends PIXI.Sprite {
@@ -42,11 +42,14 @@ class AnimatedSprite extends PIXI.Sprite {
     this.lastTime = Date.now();
   }
 
+  play() {
+    this.lastTime = Date.now();
+  }
+
   update() {
     let now = Date.now(),
         lastTime = this.lastTime,
         elapsed = (now - lastTime) / this.duration;
-
     if (elapsed >= 1) {
       if (this.loop) {
         this.lastTime = now;

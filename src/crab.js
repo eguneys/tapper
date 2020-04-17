@@ -7,7 +7,8 @@ export default function Crab(future, bs) {
 
   const States = [
     new Idle(this, future),
-    new Walking(this, future)
+    new Walking(this, future),
+    new Shooting(this, future)
   ];
 
   let dirtyState;
@@ -36,18 +37,24 @@ export default function Crab(future, bs) {
   let pos;
   let facing;
 
-  this.facing = () => facing;
+  this.facing = () => facing.facing;
 
   this.pos = () => pos;
   this.move = (dir) => {
     moves.push(dir);
   };
 
+  this.shoot = () => {
+    let x = pos[0] + facing.v[0],
+        y = pos[1] + facing.v[1];
+    future.shoot(x, y);
+  };
+
   this.init = data => {
     pos = data.pos;
     moves = [];
 
-    facing = 'idle';
+    facing = Dirs.up;
 
     this.state('idle', {});
   };
@@ -74,7 +81,9 @@ export default function Crab(future, bs) {
 
   const updateMoves = () => {
 
-    moves.forEach(({ facing: _facing, v }) => {
+    moves.forEach(dir => {
+
+      let { v } = dir;
 
       pos[0] += v[0];
       pos[1] += v[1];
@@ -83,7 +92,7 @@ export default function Crab(future, bs) {
         pos[0] -= v[0];
         pos[1] -= v[1];
       } else {
-        facing = _facing;
+        facing = dir;
       }
     });
 
@@ -111,7 +120,7 @@ function Idle(crab, future) {
       return;
     }
 
-    let { up, left, right, down } = usermove;
+    let { up, left, right, down, space } = usermove;
 
     let dirs = [];
 
@@ -125,6 +134,10 @@ function Idle(crab, future) {
       dirs.push(Dirs.left);
     } else if (right) {
       dirs.push(Dirs.right);
+    }
+
+    if (space) {
+      crab.state('shooting', {});
     }
 
     if (dirs.length > 0) {
@@ -152,7 +165,7 @@ function Walking(crab, future) {
 
   this.update = (delta) => {
 
-    if (life === 1) {
+    if (life === 4) {
       updateMove();
     }
 
@@ -160,4 +173,25 @@ function Walking(crab, future) {
       crab.state('idle', {});
     }
   };
+}
+
+function Shooting(crab, future) {
+  this.key = 'shooting';
+  
+  let life;
+  this.init = data => {
+    life = 20;
+  };
+
+  this.update = (delta) => {
+
+    if (life === 10) {
+      crab.shoot();
+    }
+
+    if (life-- < 0) {
+      crab.state('idle', {});
+    }
+  };
+
 }
