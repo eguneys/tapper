@@ -7,6 +7,7 @@ import FutureTimeline from './futuretimeline';
 import FutureTimes from './futuretimes';
 import FutureCrab from './futurecrab';
 import FutureShoots from './futureshoots';
+import FutureMessage from './futuremessage';
 
 export default function FutureGame(play, ctx, bs) {
 
@@ -18,6 +19,8 @@ export default function FutureGame(play, ctx, bs) {
 
   let dShoots = new FutureShoots(this, ctx, bs);
   let dCrab = new FutureCrab(this, ctx, bs);
+
+  let dMessage = new FutureMessage(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
@@ -31,6 +34,9 @@ export default function FutureGame(play, ctx, bs) {
 
     dCrab.add(container);
     components.push(dCrab);
+
+    dMessage.add(container);
+    components.push(dMessage);
 
     dTimeline.add(container);
     components.push(dTimeline);
@@ -47,6 +53,8 @@ export default function FutureGame(play, ctx, bs) {
 
     dCrab.init({ future });
     dShoots.init({ future });
+
+    dMessage.init({ future });
   };
 
 

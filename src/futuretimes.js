@@ -100,11 +100,11 @@ export default function FutureTimes(future, bs) {
 
     if (crabPos[0] * tileWidth < 0) {
       if (!travelPast()) {
-        
+        future.message('No vision to travel past,\n come back');
       }
     } else if (crabPos[0] * tileWidth + crabWidth > bs.width) {
       if (!travelFuture()) {
-        
+        future.message('No vision to travel future,\n come back');
       }
     }
   };

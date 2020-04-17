@@ -8,6 +8,8 @@ export default function Future(bs) {
   let times = this.times = new FutureTimes(this, bs);
   let shoots = new FutureShoots(this, bs);
 
+  let message;
+
   this.time = times.time;
   this.vision = times.vision;
   this.tiles = times.tiles;
@@ -21,6 +23,15 @@ export default function Future(bs) {
     times.init({});
     shoots.init({});
 
+  };
+
+  this.message = (msg) => {
+    if (msg) {
+      message = {
+        text: msg.toUpperCase()
+      };
+    }
+    return message;
   };
 
   this.random = () => {
@@ -46,6 +57,13 @@ export default function Future(bs) {
   };
 
   this.update = delta => {
+    if (message) {
+      if (!message.handled) {
+        message.handled = true;
+      } else {
+        message = undefined;
+      }
+    }
     crab.update(delta);
     times.update(delta);
     shoots.update(delta);

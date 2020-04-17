@@ -24,6 +24,9 @@ const all = (mall) => {
     'timeline2': mall(16, 0, 16),
     'timeline3': mall(32, 0, 16),
     'timelineNow': mall(16 * 3, 0, 16),
+    'messageBar': [mall(0, 16, 16),
+                   mall(16, 16, 16),
+                   mall(32, 16, 16)],
     'rooms': {
       'room0': room(mall, 0, 48),
       'room1': room(mall, 0, 48),
