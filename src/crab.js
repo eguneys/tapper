@@ -79,6 +79,10 @@ export default function Crab(future, bs) {
     return !cs.some(({ crab }) => crab);
   };
 
+  const findPickup = (cs) => {
+    return cs.find(({ vision }) => vision);
+  };
+
   const updateMoves = () => {
 
     moves.forEach(dir => {
@@ -88,12 +92,17 @@ export default function Crab(future, bs) {
       pos[0] += v[0];
       pos[1] += v[1];
 
-      if (!canMove(collides())) {
+      let cs = collides();
+      let pickup =  findPickup(cs);
+      if (pickup) {
+        pickup.pickup = true;
+      }
+
+      if (!canMove(cs)) {
         pos[0] -= v[0];
         pos[1] -= v[1];
-      } else {
-        facing = dir;
       }
+      facing = dir;
     });
 
     moves = [];

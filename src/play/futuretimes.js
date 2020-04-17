@@ -1,15 +1,21 @@
 import { dContainer } from '../asprite';
 import FutureRoom from './futureroom';
+import FutureDogs from './futuredogs';
 
 export default function FutureTimes(play, ctx, bs) {
 
   let dRoom = new FutureRoom(this, ctx, bs);
+
+  let dDogs = new FutureDogs(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
   const createContainer = () => {
     dRoom.add(container);
     components.push(dRoom);
+
+    dDogs.add(container);
+    components.push(dDogs);
   };
   createContainer();
 
@@ -26,6 +32,8 @@ export default function FutureTimes(play, ctx, bs) {
       time: time,
       tiles: future.tiles()
     });
+
+    dDogs.init({future});
   };
 
   const travelPast = () => {
@@ -41,6 +49,8 @@ export default function FutureTimes(play, ctx, bs) {
       time: time,
       tiles: future.tiles()
     });
+
+    dDogs.init({future});
   };
 
   const updateTransition = delta => {

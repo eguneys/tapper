@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "pixi.js": "^5.2.1",
-    "poolf": "^1.0.5"
+    "poolf": "^1.0.6"
   }
 }

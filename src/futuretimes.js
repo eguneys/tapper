@@ -2,6 +2,7 @@ import { objMap } from './util2';
 
 import * as fu from './futureutil';
 import FutureCollider from './futurecollider';
+import FutureDogs from './futuredogs';
 
 const { 
   NbFutureTimes,
@@ -48,6 +49,14 @@ export default function FutureTimes(future, bs) {
   this.vision = () => vision;
   this.tiles = () => times[time].tiles;
   this.collider = () => times[time].collider;
+  this.dogs = () => times[time].dogs();
+
+  this.hit = (...args) => times[time].hit(...args);
+
+  this.addVision = () => {
+    console.log(vision);
+    vision++;
+  };
 
   this.init = () => {
 
@@ -61,30 +70,42 @@ export default function FutureTimes(future, bs) {
   const initTime = () => {
     times[time].init({});
   };
-  
-
 
   const travelPast = () => {
+    if (time === 0 || vision <= 0) {
+      return false;
+    }
     time--;
+    vision--;
 
     initTime();
     future.crab.init({ pos: [rightX, middleY] });
+    return true;
   };
 
   const travelFuture = () => {
+    if (time === NbFutureTimes - 1 || vision <= 0) {
+      return false;
+    }
     time++;
+    vision--;
 
     initTime();
     future.crab.init({ pos: [leftX, middleY] });
+    return true;
   };
 
   const travelUpdate = () => {
     let crabPos = future.crab.pos();
 
     if (crabPos[0] * tileWidth < 0) {
-      travelPast();
+      if (!travelPast()) {
+        
+      }
     } else if (crabPos[0] * tileWidth + crabWidth > bs.width) {
-      travelFuture();
+      if (!travelFuture()) {
+        
+      }
     }
   };
 
@@ -99,20 +120,23 @@ function FutureTime(future, bs) {
   let tileWidth = bs.tileSize.width,
       tileHeight = bs.tileSize.height;
 
-  let collider;
+  let collider = this.collider = new FutureCollider({x: 0,
+                                                     y: 0, 
+                                                     width: bs.width,
+                                                     height: bs.height});
+
   let tiles = this.tiles = fu.Blueprint();
+  let dogs = new FutureDogs(future, collider, bs);
+  
+  this.dogs = () => dogs.dogs();
+  this.hit = dogs.hit;
 
   this.init = () => {
     initCollider();
+    dogs.init({});
   };
 
   const initCollider = () => {
-
-    collider = this.collider = new FutureCollider({x: 0,
-                                                   y: 0, 
-                                                   width: bs.width,
-                                                   height: bs.height});
-
     objMap(tiles, (key, tile) => {
       let pos = key2pos(key);
 
@@ -127,6 +151,7 @@ function FutureTime(future, bs) {
 
   this.update = delta => {
     collider.update();
+    dogs.update(delta);
   };
 
 }

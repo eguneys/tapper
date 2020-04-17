@@ -37,8 +37,17 @@ const all = (mall) => {
     },
     items: {
       'crab': moveanimation(mall, 160, 0),
-      'shoots': animation(mall, 160, 32, 16, 3)
+      'shoots': animation(mall, 160, 32, 16, 3),
+      'dogs': dogs(mall, 160, 16)
     }
+  };
+};
+
+const dogs = (mall, x, y) => {
+  return {
+    alive: mall(x, y, 16),
+    dead: mall(x + 16, y, 16),
+    vision: mall(x + 32, y, 16)
   };
 };
 

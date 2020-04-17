@@ -7,6 +7,8 @@ export const middleY = Math.floor(RoomRows / 2);
 export const rightX = RoomCols - 2;
 export const leftX = 1;
 
+export const randomFloor = () => [1 + Math.floor(Math.random() * (RoomCols - 2)),
+                                  1 + Math.floor(Math.random() * (RoomRows - 2))];
 
 export const Dirs = {
   left: {

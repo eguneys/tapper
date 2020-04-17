@@ -12,6 +12,7 @@ export default function Future(bs) {
   this.vision = times.vision;
   this.tiles = times.tiles;
   this.collider = times.collider;
+  this.dogs = times.dogs;
 
   this.shoots = () => shoots.shoot();
 
@@ -22,8 +23,17 @@ export default function Future(bs) {
 
   };
 
+  this.random = () => {
+    return Math.random() < 0.8;
+  };
+
   this.shoot = (x, y) => {
     shoots.shoot(x, y);
+    times.hit([x, y]);
+  };
+
+  this.addVision = () => {
+    times.addVision();
   };
 
   let userMove;
