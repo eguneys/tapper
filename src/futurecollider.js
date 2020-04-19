@@ -5,6 +5,7 @@ export default function FutureCollider(bounds, opts) {
   let collt = new Collt(bounds, opts);
 
   this.addRectangle = collt.addRectangle;
+  this.clear = collt.clear;
 
   this.collides = (bounds) => {
     let res = [];

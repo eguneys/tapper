@@ -23,6 +23,10 @@ export default function Collt(bounds, opts) {
     }
   };
 
+  this.clear = () => {
+    collts = [];
+  };
+
   this.queryRectangles = (r) => {
     return collts;
   };

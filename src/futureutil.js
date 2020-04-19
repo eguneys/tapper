@@ -1,6 +1,6 @@
 export const NbFutureTimes = 9;
-export const RoomRows = 10;
-export const RoomCols = 20;
+export const RoomRows = 8;
+export const RoomCols = 16;
 
 export const middleX = Math.floor(RoomCols / 2);
 export const middleY = Math.floor(RoomRows / 2);

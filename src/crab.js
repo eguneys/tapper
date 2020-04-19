@@ -164,7 +164,7 @@ function Walking(crab, future) {
   let life;
 
   this.init = data => {
-    life = 5;
+    life = 6;
     dirs = data.dirs;
   };
 
@@ -174,7 +174,7 @@ function Walking(crab, future) {
 
   this.update = (delta) => {
 
-    if (life === 4) {
+    if (life === 5) {
       updateMove();
     }
 

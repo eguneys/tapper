@@ -54,7 +54,6 @@ export default function FutureTimes(future, bs) {
   this.hit = (...args) => times[time].hit(...args);
 
   this.addVision = () => {
-    console.log(vision);
     vision++;
   };
 
@@ -137,6 +136,9 @@ function FutureTime(future, bs) {
   };
 
   const initCollider = () => {
+    collider.clear();
+
+
     objMap(tiles, (key, tile) => {
       let pos = key2pos(key);
 

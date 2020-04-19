@@ -23,6 +23,7 @@ export default function FutureDogs(future, collider, bs) {
     if (dog && dog.alive === true) {
 
       if (future.random()) {
+        dog.crab = false;
         dog.alive = false;
       } else {
         place(randomFloor());

@@ -102,7 +102,6 @@ export default function FutureMessage(play, ctx, bs) {
   this.render = () => {
     let vAlpha = iAlpha.value();
     container.alpha = vAlpha;
-    console.log(vAlpha);
     components.forEach(_ => _.render());
   };
 }

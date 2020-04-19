@@ -23,6 +23,8 @@ export default function Future(bs) {
     times.init({});
     shoots.init({});
 
+    this.message('space to shoot,\n arrow keys to move');
+
   };
 
   this.message = (msg) => {
@@ -34,8 +36,22 @@ export default function Future(bs) {
     return message;
   };
 
+  const randomTimes = [
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.7,
+    0.6,
+    0.5,
+    0.4
+  ];
   this.random = () => {
-    return Math.random() < 0.8;
+    let time = this.time();
+    
+    console.log(time);
+    return Math.random() < randomTimes[time];
   };
 
   this.shoot = (x, y) => {
@@ -44,6 +60,7 @@ export default function Future(bs) {
   };
 
   this.addVision = () => {
+    this.message("Vision");
     times.addVision();
   };
 
