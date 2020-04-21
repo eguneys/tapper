@@ -11,6 +11,14 @@ export default function Play(play, ctx, bs) {
   this.init = data => {
   };
 
+  this.update = delta => {
+    components.forEach(_ => _.update(delta));
+  };
+
+  this.render = () => {
+    components.forEach(_ => _.render());
+  };
+
   this.add = (parent) => {
     parent.addChild(container);
   };
@@ -20,13 +28,4 @@ export default function Play(play, ctx, bs) {
   };
 
   this.move = (x, y) => container.position.set(x, y);
-
-  this.update = delta => {
-    components.forEach(_ => _.update(delta));
-  };
-
-  this.render = () => {
-    components.forEach(_ => _.render());
-  };
-
 }

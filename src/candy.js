@@ -5,10 +5,19 @@ import ipol from './ipol';
 
 export default function Candy() {
   const data = this.data = {
-    ground: {}
+    ground: {},
+    anims: {}
   };
 
-  let viCollect = new ViewIPol(data, 'collects', 0.001);
+  let viCollect = new ViewIPol(data, 'collects', 300);
+
+  let viFalls = {};
+  allKeys.forEach(key => {
+
+    let anim = {};
+    viFalls[key] = new ViewIPol(anim, 'falls', 300);
+    data.anims[key] = anim;
+  });
 
   this.init = () => {
     data.ground = {};
@@ -48,7 +57,10 @@ export default function Candy() {
   this.tap = (key) => {
     let neighbors = sameNeighbors(key);
     if (neighbors.length > 2) {
-      beginConsume(neighbors);
+      beginConsume({
+        keys: neighbors,
+        resource: resource(key)
+      });
     }
   };
 
@@ -56,8 +68,16 @@ export default function Candy() {
     viCollect.begin(consumes);
   };
 
+  const updateFalls = (delta) => {
+    for (let key in viFalls) {
+      viFalls[key].update(delta);
+    }
+
+    
+  };
   
   this.update = (delta) => {
+    updateFalls(delta);
     viCollect.update(delta);
   };
   
@@ -78,7 +98,7 @@ function ViewIPol(data, key, duration) {
   };
 
   this.update = (delta) => {
-    iPol.update(delta * duration);
+    iPol.update(delta / duration);
 
     if (data[key]) {
       let vPol = iPol.value();

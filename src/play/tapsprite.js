@@ -23,8 +23,14 @@ export default function TapSprite(play, ctx, bs) {
   };
   initContainer();
 
-  this.init = data => {
+  let data;
+  this.init = _data => {
+    data = _data;
   };
+
+  this.data = () => data;
+
+  this.bounds = () => dBody.getBounds();
 
   this.move = (_x, _y) => {
     x = _x;

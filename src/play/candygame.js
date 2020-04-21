@@ -118,18 +118,20 @@ function CandyTile(play, ctx, bs) {
 
   const handleCollects = animHandler({
     onBegin(collects) {
-      if (collects.includes(key)) {
+      let { keys } = collects;
+
+      if (keys.includes(key)) {
         dFg.visible(false);
         return true;
       }
       return false;
     },
     onUpdate(collects, i) {
-      let alpha = bgAlpha + (1.0 - bgAlpha) * 0.5 * Math.sin(i * mu.PI * 4);
+      let alpha = bgAlpha + 0.25 + (1.0 - bgAlpha + 0.25) * i;
       dBg.alpha(alpha);
     },
     onEnd() {
-      dBg.alpha(bgAlpha);
+      dBg.alpha(0);
     }
   }, () => candy.data.collects);
 

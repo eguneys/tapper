@@ -5,6 +5,7 @@ import Candy from '../candy';
 import CandyResources from './candyresources';
 import CandyBackground from './candybackground';
 import CandyGame from './candygame';
+import CandyFx from './candyfx';
 
 export default function CandyView(play, ctx, bs) {
 
@@ -13,6 +14,7 @@ export default function CandyView(play, ctx, bs) {
   let dGame = new CandyGame(this, ctx, bs);
   let dBackground = new CandyBackground(this, ctx, bs);
   let dResources = new CandyResources(this, ctx, bs);
+  let dFx = new CandyFx(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
@@ -27,6 +29,9 @@ export default function CandyView(play, ctx, bs) {
     dGame.add(container);
     components.push(dGame);
     dGame.move(bs.game.x, bs.game.y);
+
+    dFx.add(container);
+    components.push(dFx);
   };
   initContainer();
 
@@ -36,6 +41,7 @@ export default function CandyView(play, ctx, bs) {
     dBackground.init({});
     dResources.init({});
     dGame.init({candy});
+    dFx.init({candy});
   };
 
   this.add = (parent) => {
