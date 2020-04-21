@@ -1,8 +1,7 @@
 import { rect } from '../dquad/geometry';
 import { dContainer, sprite } from '../asprite';
-import TapperView from './tapper';
 
-import Tapper from '../tapper';
+import CandyView from './candy';
 
 export default function Play(ctx) {
 
@@ -11,72 +10,47 @@ export default function Play(ctx) {
   let bs = (() => {
     let { width, height } = canvas;
 
-    let margin = 10;
+    let margin = width * 0.01;
 
-    let buttonHeight = 60,
-        buttonWidth = buttonHeight * 2;
+    let resourceW = width * 0.6,
+        resourceH = height * 0.05;
 
-    let taps = rect(margin, margin, 20, 20);
+    let resource = rect(margin, margin,
+                        resourceW,
+                        resourceH);
 
-    let upgrade = rect(margin, 
-                       height - margin - buttonHeight,
-                       buttonWidth,
-                       buttonHeight);
-
-    let tap = rect(taps.x,
-                   40,
-                   width,
-                   height - taps.height * 4.0 - upgrade.height);
-
-
-    let menuWidth = width * 0.9,
-        menuHeight = height * 0.8;
-    
-    let menuCloseWidth = width * 0.16;
-
-    let menu = rect((width - menuWidth) * 0.5,
-                    (height - menuHeight) * 0.5,
-                    menuWidth,
-                    menuHeight);
-
-    let menuClose = rect(menu.x1 - menuCloseWidth,
-                         menu.y - menuCloseWidth,
-                         menuCloseWidth,
-                         menuCloseWidth);
-
-    let menuUpgrade = rect(0, 0, width, buttonHeight * 1.5);
-
-    let hero = rect(0, 0, 64, 64);
+    let gameW = (width - margin * 2);
+    let gameX = (width - gameW) * 0.5,
+        gameY = (resourceH + margin) * 3 + margin * 3;
+    let game = rect(gameX, gameY,
+                    gameW,gameW);
+                    
 
     return {
-      hero,
-      menuClose,
-      menuUpgrade,
-      menu,
-      tap,
-      taps,
-      upgrade,
+      margin,
+      game,
+      resource,
       width,
       height
     };
   })();
 
-  let container = dContainer();
-  let dTapper = new TapperView(this, ctx, bs);
-  let components = [];
+  let dCandy = new CandyView(this, ctx, bs);
 
+  let components = [];
+  let container = dContainer();
   const initContainer = () => {
-    dTapper.add(container);
-    components.push(dTapper);
+
+    dCandy.add(container);
+    components.push(dCandy);
+
   };
   initContainer();
 
-  let tapper = new Tapper();
-
   this.init = data => {
-    tapper.init({});
 
-    dTapper.init({tapper});
+    dCandy.init({});
+
   };
 
   this.add = (parent) => {
@@ -88,7 +62,6 @@ export default function Play(ctx) {
   };
 
   this.update = delta => {
-    tapper.update(delta);
     components.forEach(_ => _.update(delta));
   };
 

@@ -1,10 +1,22 @@
 import { dContainer } from '../asprite';
 
-export default function Play(play, ctx, bs) {
+import TapSprite from './tapsprite';
+
+export default function CandyBackground(play, ctx, bs) {
+
+  const { textures } = ctx;
+
+  let dBg = new TapSprite(this, ctx, {
+    width: bs.width,
+    height: bs.height,
+    texture: textures['mbg']
+  });
 
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+    dBg.add(container);
+    components.push(dBg);
   };
   initContainer();
 

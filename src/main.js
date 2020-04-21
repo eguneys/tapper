@@ -22,8 +22,8 @@ export function app(element, options) {
 
   PIXI.Loader.shared
     .add('mall', aBase('all.png'))
+    .add('mbg', aBase('bg.png'))
     .add('mhud', aBase('mhud.png'))
-    .add('mbg', aBase('mbg.png'))
     .add('mletters', aBase('letters.png'))
     .add('fletters', aBase('fletters.png'))
     .add('flettersjson', aBase('fletters.json'))
@@ -57,6 +57,9 @@ export function app(element, options) {
         play.add(app.stage);
 
         app.ticker.add(delta => {
+
+          delta = 16 / delta;
+
           events.update(delta);
           play.update(delta);
           play.render();

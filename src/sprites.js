@@ -31,9 +31,20 @@ export default function sprites(resources) {
 
 const all = (mall) => {
   return {
-    'sleep': mall(0, 0, 32),
-    'idle': mall(0, 32, 32)
+    'wood': mall(0, 0, 32),
+    'gold': mall(0, 32, 32),
+    'food': mall(0, 64, 32),
+    'tilebg': mall(0, 96, 32),
+    'resourcebg3': slice3(mall, 0, 144, 16, 32)
   };
+};
+
+const slice3 = (mall, x, y, w, h) => {
+  return [
+    mall(x, y, w, h),
+    mall(x + w, y, w, h),
+    mall(x + w * 2, y, w, h)
+  ];
 };
 
 const fletters = (texture, json) => {

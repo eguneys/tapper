@@ -1,6 +1,33 @@
+export function animHandler({ onBegin,
+                              onUpdate,
+                              onEnd }, animationFn) {
+  let beginAnimation = false;
+
+  return delta => {
+    let animData = animationFn();
+
+      if (!beginAnimation) {
+        if (animData) {
+          let { value, i, iPol } = animData;
+          if (onBegin(value, i, iPol)) {
+            beginAnimation = true;
+          }
+        }
+      } else {
+        if (animData) {
+          let { value, i, iPol } = animData;
+
+          onUpdate(value, i, iPol);
+        } else {
+          beginAnimation = false;
+          onEnd();
+        }
+      }
+  };
+};
 
 
-export function tapHandler(events, boundsFn, fn) {
+export function tapHandler(fn, events, boundsFn) {
   const hitTest = (posX, posY) => {
     let bounds = boundsFn();
     let left = bounds.x,
