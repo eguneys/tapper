@@ -30,8 +30,14 @@ export const allRows = (() => {
   return res;
 })();
 
+export const topRow = 0;
+export const bottomRow = rows - 1;
+
 export const topHalfRows = allRows.slice(0, Math.floor(rows / 2));
 export const bottomHalfRows = allRows.slice(Math.floor(rows / 2), rows);
+
+export const topPoss = allCols(topRow);
+export const bottomPoss = allCols(bottomRow);
 
 export const topHalfPoss = (() => {
   let res = [];

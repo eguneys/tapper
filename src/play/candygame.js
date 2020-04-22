@@ -151,7 +151,7 @@ function CandyTile(play, ctx, bs) {
 
     let fxs = candy.data.fxs[key];
 
-    let visible = !ground.trail && !fxs.falls;
+    let visible = !ground.trail && !ground.empty && !fxs.falls;
     dFg.visible(visible);
     components.forEach(_ => _.render());
   };

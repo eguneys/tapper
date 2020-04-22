@@ -1,4 +1,8 @@
-import { fallPoss, allKeys, key2pos, pos2key, allResources, randomResource, neighborPoss } from './candyutil';
+import { topPoss, bottomPoss, fallPoss,
+         allKeys, key2pos, pos2key,
+         allResources,
+         randomResource, 
+         neighborPoss } from './candyutil';
 
 import PMaker from './pmaker';
 import ipol from './ipol';
@@ -12,9 +16,12 @@ export default function Candy() {
 
   let frame;
 
-  const onFallEnd = ({ to, resource }) => {
-    let fG = ground(to);
-    fG.trail = false;
+  const onFallEnd = ({ from, to, resource }) => {
+    let fromG = ground(from);
+    let toG = ground(to);
+    toG.trail = false;
+    toG.empty = false;
+    fromG.trail = false;
   };
 
   const onScoresEnd = ({value, resource}) => {
@@ -58,6 +65,8 @@ export default function Candy() {
     allKeys.forEach(key => {
       data.ground[key] = {
         key,
+        trail: false,
+        empty: true,
         resource: randomResource(),
         frame
       };
@@ -91,14 +100,14 @@ export default function Candy() {
   this.tap = (key) => {
     let neighbors = sameNeighbors(key);
     if (neighbors.length > 2) {
-      doConsume(neighbors, resource(key));
+      beginConsume(neighbors, resource(key));
     }
   };
 
-  const doConsume = (keys, resource) => {
+  const beginConsume = (keys, resource) => {
     keys.forEach(key => {
       let g = ground(key);
-      g.trail = true;
+      g.empty = true;
     });
 
     fxCollect.begin({
@@ -107,10 +116,11 @@ export default function Candy() {
     });
   };
 
-  const doFall = (fromKey, toKey) => {
+  const beginFall = (fromKey, toKey) => {
     let fromG = ground(fromKey);
     let toG = ground(toKey);
 
+    fromG.empty = true;
     fromG.trail = true;
     toG.resource = fromG.resource;
 
@@ -129,19 +139,43 @@ export default function Candy() {
         continue;
       }
       g.frame = frame;
-      if (g.trail) {
+      if (g.empty) {
         let fP = fallPoss(pos);
         if (fP) {
           let fK = pos2key(fP);
           let fG = ground(fK);
 
-          if (!fG.trail) {
+          if (!fG.empty) {
             fG.frame = frame;
-            doFall(fK, key);
+            beginFall(fK, key);
           }
         } else {
 
         }
+      }
+    }
+  };
+
+  const beginNewPop = key => {
+    let g = ground(key);
+    g.resource = randomResource();
+    g.trail = false;
+    g.empty = false;
+  };
+
+  const updateNewPops = () => {
+    for (let pos of topPoss) {
+      let key = pos2key(pos);
+      let g = ground(key);
+      if (!g.trail && g.empty) {
+        beginNewPop(key);
+      }
+    }
+    for (let pos of bottomPoss) {
+      let key = pos2key(pos);
+      let g = ground(key);
+      if (!g.trail && g.empty) {
+        beginNewPop(key);
       }
     }
   };
@@ -159,6 +193,7 @@ export default function Candy() {
   this.update = (delta) => {
     frame++;
     updateFxs(delta);
+    updateNewPops(delta);
     updateFalls(delta);
   };
   
