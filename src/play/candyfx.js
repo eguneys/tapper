@@ -1,7 +1,7 @@
 import Pool from 'poolf';
 import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
-import { animHandler } from './util';
+import { fxHandler } from './util';
 
 import { allKeys, key2pos, cols } from '../candyutil';
 
@@ -58,7 +58,7 @@ export default function CandyFx(play, ctx, bs) {
     h: bs.resource.height
   };
   let targetPos;
-  const handleCollects = animHandler({
+  const handleCollects = fxHandler({
     onBegin(collects) {
       let { keys, resource } = collects;
 
@@ -167,18 +167,19 @@ function FallFx(play, ctx, bs) {
     fx = candy.data.fxs[key];
   };
 
-  const handleFalls = animHandler({
-    onBegin({to, resource}) {
+  let fromPos;
+  const handleFalls = fxHandler({
+    onBegin({from, resource}) {
       dFg.visible(true);
       dFg.texture(mall[resource]);
+      fromPos = calculateTilePos(key2pos(from));
       dFg.move(tilePos.x, tilePos.y);
       return true;
     },
     onUpdate({to}, i) {
-      let toPos = calculateTilePos(key2pos(to));
-
-      let newX = tilePos.x + (toPos.x - tilePos.x) * i,
-          newY = tilePos.y + (toPos.y - tilePos.y) * i;
+      let toPos = tilePos;
+      let newX = fromPos.x + (toPos.x - fromPos.x) * i,
+          newY = fromPos.y + (toPos.y - fromPos.y) * i;
       dFg.move(newX, newY);
       
     },

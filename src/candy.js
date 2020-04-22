@@ -9,23 +9,32 @@ export default function Candy() {
     fxs: {}
   };
 
-  let viCollect = new ViewIPol(data, 'collects', 300);
+  let frame;
 
-  let viFalls = {};
+  const onFallEnd = ({ to, resource }) => {
+    let fG = ground(to);
+    fG.trail = false;
+  };
+
+  let fxCollect = new Fx(data, 'collects');
+
+  let fxFalls = {};
   allKeys.forEach(key => {
 
     let fx = {};
-    viFalls[key] = new ViewIPol(fx, 'falls', 300);
+    fxFalls[key] = new Fx(fx, 'falls', onFallEnd);
     data.fxs[key] = fx;
   });
 
   this.init = () => {
+    frame = 0;
     data.ground = {};
 
     allKeys.forEach(key => {
       data.ground[key] = {
         key,
-        resource: randomResource()
+        resource: randomResource(),
+        frame
       };
     });
 
@@ -57,42 +66,44 @@ export default function Candy() {
   this.tap = (key) => {
     let neighbors = sameNeighbors(key);
     if (neighbors.length > 2) {
-      beginConsume({
-        keys: neighbors,
-        resource: resource(key)
-      });
+      doConsume(neighbors, resource(key));
     }
   };
 
-  const beginConsume = (consumes) => {
-    consumes.keys.forEach(key => {
+  const doConsume = (keys, resource) => {
+    keys.forEach(key => {
       let g = ground(key);
       g.trail = true;
     });
-    viCollect.begin(consumes);
+
+    fxCollect.begin({
+      keys,
+      resource
+    });
   };
 
-  const beginFall = (key, toKey) => {
-    let g = ground(key);
-    g.trail = true;
-    viFalls[key].begin({
+  const doFall = (fromKey, toKey) => {
+    let fromG = ground(fromKey);
+    let toG = ground(toKey);
+
+    fromG.trail = true;
+    toG.resource = fromG.resource;
+
+    fxFalls[toKey].begin({
       to: toKey,
-      resource: g.resource
-    }).then(() => {
-      let fG = ground(toKey);
-      fG.trail = false;
-      fG.resource = g.resource;
+      from: fromKey,
+      resource: fromG.resource
     });
   };
 
   const updateFalls = (delta) => {
-    for (let key in viFalls) {
-      viFalls[key].update(delta);
-    }
-
     for (let key in data.ground) {
       let pos = key2pos(key);
       let g = ground(key);
+      if (g.frame === frame) {
+        continue;
+      }
+      g.frame = frame;
       if (g.trail) {
         let fP = fallPoss(pos);
         if (fP) {
@@ -100,7 +111,8 @@ export default function Candy() {
           let fG = ground(fK);
 
           if (!fG.trail) {
-            beginFall(fK, key);
+            fG.frame = frame;
+            doFall(fK, key);
           }
         } else {
 
@@ -108,13 +120,44 @@ export default function Candy() {
       }
     }
   };
+
+  const updateFxs = delta => {
+    fxCollect.update(delta);
+    for (let key in fxFalls) {
+      fxFalls[key].update(delta);
+    }
+  };
   
   this.update = (delta) => {
+    frame++;
+    updateFxs(delta);
     updateFalls(delta);
-    viCollect.update(delta);
   };
   
   
+}
+
+function Fx(data, key, onEnd = () => {}) {
+
+  let state = {};
+
+  this.begin = (value) => {
+    state.value = value;
+    data[key] = state;
+  };
+
+  const end = () => {
+    onEnd(state.value);
+    state.value = undefined;
+    delete data[key];
+  };
+
+  this.update = (delta) => {
+    if (state.end) {
+      state.end = false;
+      end();
+    }
+  };
 }
 
 function ViewIPol(data, key, duration) {

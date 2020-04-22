@@ -1,7 +1,7 @@
 import * as mu from 'mutilz';
 import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
-import { tapHandler, animHandler } from './util';
+import { tapHandler, fxHandler } from './util';
 
 import { allPos, allKeys, pos2key, cols } from '../candyutil';
 
@@ -118,22 +118,25 @@ function CandyTile(play, ctx, bs) {
     candy.tap(key);
   }, events, () => container.getBounds());
 
-  const handleCollects = animHandler({
+  let collectsUpdate = false;
+  const handleCollects = fxHandler({
     onBegin(collects) {
       let { keys } = collects;
-
       if (keys.includes(key)) {
-        return true;
+        collectsUpdate = true;
       }
-      return false;
     },
     onUpdate(collects, i) {
+      if (!collectsUpdate) { return; };
+
       let alpha = bgAlpha + 0.25 + (1.0 - bgAlpha + 0.25) * i;
       dBg.alpha(alpha);
     },
     onEnd() {
-      dBg.alpha(0);
-    }
+      if (!collectsUpdate) { return; };
+      collectsUpdate = false;
+      dBg.alpha(bgAlpha);
+    },
   }, () => candy.data.collects);
 
   this.update = delta => {
@@ -145,7 +148,11 @@ function CandyTile(play, ctx, bs) {
 
 
   this.render = () => {
-    dFg.visible(!ground.trail);
+
+    let fxs = candy.data.fxs[key];
+
+    let visible = !ground.trail && !fxs.falls;
+    dFg.visible(visible);
     components.forEach(_ => _.render());
   };
 

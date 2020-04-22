@@ -1,30 +1,43 @@
-export function animHandler({ onBegin,
-                              onUpdate,
-                              onEnd }, animationFn) {
-  let beginAnimation = false;
+import iPol from '../ipol';
+
+export function fxHandler({
+  onUpdate, 
+  onEnd,
+  onBegin,
+  easing,
+  duration = 300
+}, fxFn) {
+  let iFx = new iPol(0, 0, {});
+
+  let running = false;
 
   return delta => {
-    let animData = animationFn();
+    let fx = fxFn();
 
-      if (!beginAnimation) {
-        if (animData) {
-          let { value, i, iPol } = animData;
-          if (onBegin(value, i, iPol)) {
-            beginAnimation = true;
-          }
-        }
-      } else {
-        if (animData) {
-          let { value, i, iPol } = animData;
-
-          onUpdate(value, i, iPol);
-        } else {
-          beginAnimation = false;
-          onEnd();
-        }
+    if (fx) {
+      if (!running) {
+        onBegin(fx.value);
+        running = true;
+        iFx.both(0, 1);
       }
+    } else {
+      if (running) {
+        onEnd();
+        running = false;
+      }
+    }
+
+    if (running) {
+      let vFx = iFx.value(easing);
+      onUpdate(fx.value, vFx);
+      if (iFx.settled()) {
+        fx.end = true;
+      }
+    }
+
+    iFx.update(delta / duration);
   };
-};
+}
 
 
 export function tapHandler(fn, events, boundsFn) {
