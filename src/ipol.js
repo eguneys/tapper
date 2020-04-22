@@ -1,8 +1,9 @@
 export default function interpolator(a, b = a, { 
-  yoyo
+  yoyo = 0,
 }) {
   let v = 0;
   let direction = 1;
+  let repeat = yoyo;
 
   const easing = fn => a + (b - a) * fn(v);
 
@@ -13,6 +14,7 @@ export default function interpolator(a, b = a, {
   const resetIfDifferent = () => {
     if (a !== b) {
       reset();
+      repeat = yoyo;
       direction = 1;
     } else {
       settle();
@@ -24,13 +26,15 @@ export default function interpolator(a, b = a, {
       v += dt * direction;
       if (v > 1) {
         v = 1;
-        if (yoyo) {
+        if (repeat > 0) {
+          repeat--;
           direction *= -1;
         }
       }
       if (v < 0) {
         v = 0;
-        if (yoyo) {
+        if (repeat > 0) {
+          repeat--;
           direction *= -1;
         }
       }
@@ -105,4 +109,23 @@ export const Easings = {
 
 export const Easings2 = {
   easeOutQuad: t => t*(2-t),
+  // elastic bounce effect at the beginning
+  easeInElastic: t => t === 0 ? 0 : (.04 - .04 / t) * Math.sin(25 * t) + 1,
+  // elastic bounce effect at the end
+  easeOutElastic: t => t===1?1:.04 * t / (--t) * Math.sin(25 * t),
+  // elastic bounce effect at the beginning and end
+  easeInOutElastic: t => (t -= .5) < 0 ? (.02 + .01 / t) * Math.sin(50 * t) : (.02 - .01 / t) * Math.sin(50 * t) + 1,
+  easeInSin: function (t) {
+    return 1 + Math.sin(Math.PI / 2 * t - Math.PI / 2);
+  },
+  easeOutSin : function (t) {
+    return Math.sin(Math.PI / 2 * t);
+  },
+  easeInOutSin: function (t) {
+    return (1 + Math.sin(Math.PI * t - Math.PI / 2)) / 2;
+  }
 };
+
+// private easeCubicBezier(t, p1X, p1Y, p2X, p2Y) {
+//     return 3 * t * Math.pow(1 - t, 2) * p1X + 3 * t * t * (1 - t) * p2X + t * t * t;
+// }

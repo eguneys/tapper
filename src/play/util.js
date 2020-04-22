@@ -34,7 +34,6 @@ export function fxHandler({
         fx.end = true;
       }
     }
-
     iFx.update(delta / duration);
   };
 }

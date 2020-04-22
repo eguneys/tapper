@@ -1,10 +1,11 @@
-import { fallPoss, allKeys, key2pos, pos2key, randomResource, neighborPoss } from './candyutil';
+import { fallPoss, allKeys, key2pos, pos2key, allResources, randomResource, neighborPoss } from './candyutil';
 
 import PMaker from './pmaker';
 import ipol from './ipol';
 
 export default function Candy() {
   const data = this.data = {
+    resources: {},
     ground: {},
     fxs: {}
   };
@@ -16,7 +17,31 @@ export default function Candy() {
     fG.trail = false;
   };
 
-  let fxCollect = new Fx(data, 'collects');
+  const onScoresEnd = ({value, resource}) => {
+    data.resources[resource].value += value;
+  };
+
+  let fxScores = {};
+  for (let key of allResources) {
+
+    let fx = {};
+    fxScores[key] = new Fx(fx, 'scores', onScoresEnd);
+
+    data.resources[key] = {
+      value: 0,
+      fx
+    };
+  }
+
+  const onCollectEnd = ({ keys, resource }) => {
+    let value = keys.length;
+    fxScores[resource].begin({
+      value,
+      resource
+    });
+  };
+
+  let fxCollect = new Fx(data, 'collects', onCollectEnd);
 
   let fxFalls = {};
   allKeys.forEach(key => {
@@ -123,6 +148,9 @@ export default function Candy() {
 
   const updateFxs = delta => {
     fxCollect.update(delta);
+    for (let key in fxScores) {
+      fxScores[key].update(delta);
+    }
     for (let key in fxFalls) {
       fxFalls[key].update(delta);
     }

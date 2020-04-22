@@ -33,15 +33,19 @@ export default function TapSprite(play, ctx, bs) {
   this.bounds = () => dBody.getBounds();
 
   this.move = (_x, _y) => {
-    x = _x;
-    y = _y;
-    setPosition();
+    if (x !== _x || y !== _y) {
+      x = _x;
+      y = _y;
+      setPosition();
+    }
   };
 
   this.size = (w, h) => {
-    width = w;
-    height = h;
-    setSize();
+    if (width !== w || height !== h) {
+      width = w;
+      height = h;
+      setSize();
+    }
   };
 
   this.visible = (visible) => {

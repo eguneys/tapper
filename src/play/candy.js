@@ -39,7 +39,7 @@ export default function CandyView(play, ctx, bs) {
     candy.init();
 
     dBackground.init({});
-    dResources.init({});
+    dResources.init({candy});
     dGame.init({candy});
     dFx.init({candy});
   };
