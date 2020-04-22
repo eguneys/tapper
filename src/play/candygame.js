@@ -99,17 +99,19 @@ function CandyTile(play, ctx, bs) {
       key;
 
   let resource;
+  let ground;
 
   this.init = data => {
     key = data.key;
     candy = data.candy;
-
-    updateTexture();
+    ground = candy.data.ground[key];
   };
 
   const updateTexture = () => {
-    let ground = candy.data.ground[key];
-    dFg.texture(mall[ground.resource]);    
+    if (resource !== ground.resource) {
+      resource = ground.resource;
+      dFg.texture(mall[resource]);
+    }
   };
 
   const handleTap = tapHandler(() => {
@@ -121,7 +123,6 @@ function CandyTile(play, ctx, bs) {
       let { keys } = collects;
 
       if (keys.includes(key)) {
-        dFg.visible(false);
         return true;
       }
       return false;
@@ -136,6 +137,7 @@ function CandyTile(play, ctx, bs) {
   }, () => candy.data.collects);
 
   this.update = delta => {
+    updateTexture();
     handleCollects(delta);
     handleTap(delta);
     components.forEach(_ => _.update(delta));
@@ -143,6 +145,7 @@ function CandyTile(play, ctx, bs) {
 
 
   this.render = () => {
+    dFg.visible(!ground.trail);
     components.forEach(_ => _.render());
   };
 

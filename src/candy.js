@@ -1,4 +1,4 @@
-import { allKeys, key2pos, pos2key, randomResource, neighborPoss } from './candyutil';
+import { fallPoss, allKeys, key2pos, pos2key, randomResource, neighborPoss } from './candyutil';
 
 import PMaker from './pmaker';
 import ipol from './ipol';
@@ -6,7 +6,7 @@ import ipol from './ipol';
 export default function Candy() {
   const data = this.data = {
     ground: {},
-    anims: {}
+    fxs: {}
   };
 
   let viCollect = new ViewIPol(data, 'collects', 300);
@@ -14,9 +14,9 @@ export default function Candy() {
   let viFalls = {};
   allKeys.forEach(key => {
 
-    let anim = {};
-    viFalls[key] = new ViewIPol(anim, 'falls', 300);
-    data.anims[key] = anim;
+    let fx = {};
+    viFalls[key] = new ViewIPol(fx, 'falls', 300);
+    data.fxs[key] = fx;
   });
 
   this.init = () => {
@@ -65,7 +65,24 @@ export default function Candy() {
   };
 
   const beginConsume = (consumes) => {
+    consumes.keys.forEach(key => {
+      let g = ground(key);
+      g.trail = true;
+    });
     viCollect.begin(consumes);
+  };
+
+  const beginFall = (key, toKey) => {
+    let g = ground(key);
+    g.trail = true;
+    viFalls[key].begin({
+      to: toKey,
+      resource: g.resource
+    }).then(() => {
+      let fG = ground(toKey);
+      fG.trail = false;
+      fG.resource = g.resource;
+    });
   };
 
   const updateFalls = (delta) => {
@@ -73,7 +90,23 @@ export default function Candy() {
       viFalls[key].update(delta);
     }
 
-    
+    for (let key in data.ground) {
+      let pos = key2pos(key);
+      let g = ground(key);
+      if (g.trail) {
+        let fP = fallPoss(pos);
+        if (fP) {
+          let fK = pos2key(fP);
+          let fG = ground(fK);
+
+          if (!fG.trail) {
+            beginFall(fK, key);
+          }
+        } else {
+
+        }
+      }
+    }
   };
   
   this.update = (delta) => {

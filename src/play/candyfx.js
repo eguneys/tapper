@@ -3,34 +3,39 @@ import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
 import { animHandler } from './util';
 
-import { key2pos, cols } from '../candyutil';
+import { allKeys, key2pos, cols } from '../candyutil';
 
 export default function CandyFx(play, ctx, bs) {
 
   const { textures: { mall } } = ctx;
 
-  let gameW = bs.game.width,
-      tileW = Math.floor(gameW / cols);
-
-  let bgMargin = bs.margin;
-  let fgMargin = bgMargin * 2.0;
-  let bgW = tileW - bgMargin;
-  let fgW = tileW - fgMargin;
+  let { tileW, bgMargin, fgMargin, bgW, fgW } = bs.tile;
 
   let pCollects = new Pool(() => new TapSprite(this, ctx, {
     width: bgW,
     height: bgW
   }));
 
+  let dFalls = allKeys.map(key => new FallFx(this, ctx, {
+    ...bs,
+    key
+  }));
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+    dFalls.forEach(_ => {
+      _.add(container);
+      components.push(_);
+    });
   };
   initContainer();
 
   let candy;
   this.init = data => {
     candy = data.candy;
+
+    dFalls.forEach(_ => _.init({candy}));
   };
 
   let targetPoss = {
@@ -102,6 +107,88 @@ export default function CandyFx(play, ctx, bs) {
 
   this.update = delta => {
     handleCollects(delta);
+    components.forEach(_ => _.update(delta));
+  };
+
+  this.render = () => {
+    components.forEach(_ => _.render());
+  };
+
+  this.add = (parent) => {
+    parent.addChild(container);
+  };
+
+  this.remove = () => {
+    container.parent.removeChild(container);
+  };
+
+  this.move = (x, y) => container.position.set(x, y);
+}
+
+function FallFx(play, ctx, bs) {
+
+  const { textures: { mall } } = ctx;
+
+  let { key } = bs;
+
+  let { tileW, bgMargin, fgMargin, bgW, fgW } = bs.tile;
+
+  let pos = key2pos(key);
+
+  const calculateTilePos = (pos) => {
+    let x = pos[0] * tileW,
+        y = pos[1] * tileW;
+
+    x += bs.game.x,
+    y += bs.game.y;
+
+    return {x,y};    
+  };
+
+  let tilePos = calculateTilePos(key2pos(key));
+
+  let dFg = new TapSprite(this, ctx, {
+    width: fgW,
+    height: fgW
+  });
+
+  let components = [];
+  const container = dContainer();
+  const initContainer = () => {
+    dFg.add(container);
+    components.push(dFg);
+  };
+  initContainer();
+
+  let fx;
+  let candy;
+  this.init = data => {
+    candy = data.candy;
+    fx = candy.data.fxs[key];
+  };
+
+  const handleFalls = animHandler({
+    onBegin({to, resource}) {
+      dFg.visible(true);
+      dFg.texture(mall[resource]);
+      dFg.move(tilePos.x, tilePos.y);
+      return true;
+    },
+    onUpdate({to}, i) {
+      let toPos = calculateTilePos(key2pos(to));
+
+      let newX = tilePos.x + (toPos.x - tilePos.x) * i,
+          newY = tilePos.y + (toPos.y - tilePos.y) * i;
+      dFg.move(newX, newY);
+      
+    },
+    onEnd() {
+      dFg.visible(false);
+    }
+  }, () => fx.falls);
+
+  this.update = delta => {
+    handleFalls(delta);
     components.forEach(_ => _.update(delta));
   };
 
