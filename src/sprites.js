@@ -35,6 +35,7 @@ const all = (mall) => {
     'gold': mall(0, 32, 32),
     'food': mall(0, 64, 32),
     'tilebg': mall(0, 96, 32),
+    'tileselect': mall(32, 96, 32),
     'resourcebg3': slice3(mall, 0, 144, 16, 32)
   };
 };

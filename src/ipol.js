@@ -5,6 +5,8 @@ export default function interpolator(a, b = a, {
   let direction = 1;
   let repeat = yoyo;
 
+  let stopOnSettled = false;
+
   const easing = fn => a + (b - a) * fn(v);
 
   const value = () => a + (b - a) * v;
@@ -16,6 +18,7 @@ export default function interpolator(a, b = a, {
       reset();
       repeat = yoyo;
       direction = 1;
+      stopOnSettled = false;
     } else {
       settle();
     }
@@ -26,6 +29,9 @@ export default function interpolator(a, b = a, {
       v += dt * direction;
       if (v > 1) {
         v = 1;
+        if (stopOnSettled) {
+          return;
+        }
         if (repeat > 0) {
           repeat--;
           direction *= -1;
@@ -38,6 +44,9 @@ export default function interpolator(a, b = a, {
           direction *= -1;
         }
       }
+    },
+    smoothstop() {
+      stopOnSettled = true;
     },
     settled(threshold = 1) {
       return v >= threshold;

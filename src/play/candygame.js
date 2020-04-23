@@ -1,11 +1,14 @@
 import * as mu from 'mutilz';
 import { dContainer } from '../asprite';
+import iPol from '../ipol';
 import TapSprite from './tapsprite';
-import { tapHandler, fxHandler } from './util';
+import { moveHandler, tapHandler, fxHandler, fxHandler2, hitTest } from './util';
 
 import { allPos, allKeys, pos2key, cols } from '../candyutil';
 
 export default function CandyGame(play, ctx, bs) {
+
+  const { events } = ctx;
 
   let gameW = bs.game.width,
       tileW = Math.floor(gameW / cols);
@@ -40,6 +43,41 @@ export default function CandyGame(play, ctx, bs) {
     });
   };
 
+  const tileByEPos = epos => {
+    for (let key in dTiles) {
+      let tile = dTiles[key];
+      if (hitTest(epos[0], epos[1], tile.bounds())) {
+        return key;
+      }
+    }
+    return null;
+  };
+
+  const handleMove = moveHandler({
+    onBegin(epos) {},
+    onUpdate(epos) {
+      let key = tileByEPos(epos);
+
+      if (key) {
+        candy.updateTap(key);
+      }
+    },
+    onEnd() {
+      candy.endTap();
+    }
+  }, events);
+
+  this.update = delta => {
+    handleMove(delta);
+    components.forEach(_ => _.update(delta));
+  };
+
+  this.render = () => {
+    components.forEach(_ => _.render());
+  };
+
+  this.bounds = () => container.getBounds();
+
   this.add = (parent) => {
     parent.addChild(container);
   };
@@ -49,15 +87,6 @@ export default function CandyGame(play, ctx, bs) {
   };
 
   this.move = (x, y) => container.position.set(x, y);
-
-  this.update = delta => {
-    components.forEach(_ => _.update(delta));
-  };
-
-  this.render = () => {
-    components.forEach(_ => _.render());
-  };
-
 }
 
 function CandyTile(play, ctx, bs) {
@@ -65,10 +94,7 @@ function CandyTile(play, ctx, bs) {
   const { events, textures: { mall } } = ctx;
 
   let bgAlpha = 0.5;
-  let bgMargin = bs.margin;
-  let fgMargin = bgMargin * 2.0;
-  let bgW = bs.tileW - bgMargin;
-  let fgW = bs.tileW - fgMargin;
+  let { bgMargin, fgMargin, bgW, fgW } = bs.tile;
 
   let dBg = new TapSprite(this, ctx, {
     width: bgW,
@@ -81,6 +107,14 @@ function CandyTile(play, ctx, bs) {
     height: fgW
   });
 
+  let dSelect = new TapSprite(this, ctx, {
+    width: bgW,
+    height: bgW,
+    texture: mall['tileselect']
+  });
+
+  let iScale = new iPol(0, 0, { yoyo: 100000 });
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -92,6 +126,11 @@ function CandyTile(play, ctx, bs) {
     dFg.add(container);
     dFg.move(fgMargin * 0.5, fgMargin * 0.5);
     components.push(dFg);
+
+    dSelect.add(container);
+    dSelect.move(bgMargin * 0.5, bgMargin * 0.5);
+    components.push(dSelect);
+    dSelect.visible(false);
   };
   initContainer();
 
@@ -100,11 +139,14 @@ function CandyTile(play, ctx, bs) {
 
   let resource;
   let ground;
+  let fxs;
 
   this.init = data => {
     key = data.key;
     candy = data.candy;
     ground = candy.data.ground[key];
+
+    fxs = candy.data.fxs[key];
   };
 
   const updateTexture = () => {
@@ -139,7 +181,27 @@ function CandyTile(play, ctx, bs) {
     },
   }, () => candy.data.collects);
 
+  const handleSelected = fxHandler2({
+    onBegin() {
+      dSelect.visible(true);
+      iScale.both(0, 1);
+    },
+    onUpdate() {
+    },
+    onEnd() {
+      dSelect.visible(false);
+      iScale.target(0);
+      iScale.smoothstop();
+    }
+  }, () => fxs.selects);
+
+  const updateScale = (delta) => {
+    iScale.update(delta / 200);
+  };
+
   this.update = delta => {
+    handleSelected(delta);
+    updateScale(delta);
     updateTexture();
     handleCollects(delta);
     handleTap(delta);
@@ -147,14 +209,54 @@ function CandyTile(play, ctx, bs) {
   };
 
 
-  this.render = () => {
-
+  const renderVisible = () => {
     let fxs = candy.data.fxs[key];
 
     let visible = !ground.trail && !ground.empty && !fxs.falls;
     dFg.visible(visible);
+  };
+
+  const renderScale = () => {
+    let vScale = iScale.value();
+
+    let extendFactor = bs.margin * 2.0;
+
+    let extendW = -extendFactor * vScale,
+        extendH = extendW;
+
+
+    selectScaleD(dFg,
+                 fgMargin * 0.5,
+                 fgMargin * 0.5,
+                 fgW,
+                 fgW,
+                 extendW);
+
+    selectScaleD(dSelect,
+                 bgMargin * 0.5,
+                 bgMargin * 0.5,
+                 bgW,
+                 bgW,
+                 extendW);
+                 
+
+  };
+
+  const selectScaleD = (dD, x, y, w, h, extend) => {
+    dD.size(w + extend,
+            h + extend);
+
+    dD.move(x - extend * 0.5,
+             y - extend * 0.5);
+  };
+
+  this.render = () => {
+    renderVisible();
+    renderScale();
     components.forEach(_ => _.render());
   };
+
+  this.bounds = () => container.getBounds();
 
   this.add = (parent) => {
     parent.addChild(container);

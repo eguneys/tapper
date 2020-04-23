@@ -11,7 +11,7 @@ export default function Candy() {
   const data = this.data = {
     resources: {},
     ground: {},
-    fxs: {}
+    fxs: {},
   };
 
   let frame;
@@ -50,11 +50,13 @@ export default function Candy() {
 
   let fxCollect = new Fx(data, 'collects', onCollectEnd);
 
+  let fxSelects = {};
   let fxFalls = {};
   allKeys.forEach(key => {
 
     let fx = {};
     fxFalls[key] = new Fx(fx, 'falls', onFallEnd);
+    fxSelects[key] = new Fx(fx, 'selects');
     data.fxs[key] = fx;
   });
 
@@ -89,7 +91,7 @@ export default function Candy() {
     let neighbors = neighborPoss(pos);
     let _resource = resource(key);
     visited.push(key);
-    if (_resource === seekResource) {
+    if (_resource === seekResource && !result.includes(key)) {
       result.push(key);
       let unseens = neighbors.filter(pos => !visited.includes(pos2key(pos)));
       unseens.forEach(_ => 
@@ -98,10 +100,38 @@ export default function Candy() {
   };
 
   this.tap = (key) => {
-    let neighbors = sameNeighbors(key);
-    if (neighbors.length > 2) {
-      beginConsume(neighbors, resource(key));
+    // let neighbors = sameNeighbors(key);
+    // if (neighbors.length > 2) {
+    //   beginConsume(neighbors, resource(key));
+    // }
+  };
+
+  this.updateTap = key => {
+    if (!data.taps) {
+      data.taps = {
+        keys: {},
+        first: key,
+      };
     }
+    data.taps.keys[key] = true;
+
+    fxSelects[key].begin();
+  };
+
+  this.endTap = () => {
+    let { keys, first } = data.taps;
+    let selected = [];
+    for (let key in keys) {
+      fxSelects[key].end();
+      selected.push(key);
+    }
+
+    let neighbors = sameNeighbors(first);
+    if (arrayEqual(neighbors, selected)) {
+      beginConsume(neighbors, resource(first));
+    }
+
+    delete data.taps;
   };
 
   const beginConsume = (keys, resource) => {
@@ -215,6 +245,10 @@ function Fx(data, key, onEnd = () => {}) {
     delete data[key];
   };
 
+  this.end = () => {
+    end();
+  };
+
   this.update = (delta) => {
     if (state.end) {
       state.end = false;
@@ -223,30 +257,6 @@ function Fx(data, key, onEnd = () => {}) {
   };
 }
 
-function ViewIPol(data, key, duration) {
-  let pRes = new PMaker({ name: `View IPol ` + key });
-  let iPol = new ipol(0, 0, {});
-
-  this.begin = (value) => {
-    data[key] = {
-      value,
-      iPol
-    };
-    iPol.both(0, 1);
-    return pRes.begin();
-  };
-
-  this.update = (delta) => {
-    iPol.update(delta / duration);
-
-    if (data[key]) {
-      let vPol = iPol.value();
-      data[key].i = vPol;
-
-      if (iPol.settled()) {
-        delete data[key];
-        pRes.resolve();
-      }
-    }
-  };
+function arrayEqual(arr1, arr2) {
+  return arr1.length === arr2.length && arr1.every(_ => arr2.includes(_));
 }

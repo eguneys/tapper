@@ -1,5 +1,34 @@
 import iPol from '../ipol';
 
+export function fxHandler2({
+  onBegin,
+  onUpdate,
+  onEnd
+}, fxFn) {
+
+  let running = false;
+
+  return delta => {
+    let fx = fxFn();
+
+    if (fx) {
+      if (!running) {
+        onBegin(fx.value);
+        running = true;
+      }
+    } else {
+      if (running) {
+        onEnd();
+        running = false;
+      }
+    }
+
+    if (running) {
+      onUpdate(fx.value);
+    }
+  };
+}
+
 export function fxHandler({
   onUpdate, 
   onEnd,
@@ -38,19 +67,33 @@ export function fxHandler({
   };
 }
 
+export function moveHandler({ onBegin,
+                              onUpdate,
+                              onEnd }, events) {
+
+  let running;
+
+  return () => {
+    const { current } = events.data;
+    if (current) {
+      let { epos } = current;
+      if (!running) {
+        onBegin(epos);
+        running = true;
+      } else {
+        onUpdate(epos);
+      }
+    } else {
+      if (running) {
+        onEnd();
+        running = false;
+      }
+    }
+  };
+  
+}
 
 export function tapHandler(fn, events, boundsFn) {
-  const hitTest = (posX, posY) => {
-    let bounds = boundsFn();
-    let left = bounds.x,
-        right = bounds.x + bounds.width,
-        top = bounds.y,
-        bottom = top + bounds.height;
-
-    return left <= posX && right > posX &&
-      top <= posY && bottom > posY;
-  };
-
   return () => {
     const { current } = events.data;
 
@@ -60,12 +103,22 @@ export function tapHandler(fn, events, boundsFn) {
       if (ending) {
         let { swipe: { swiped } } = ending;
 
-        if (!swiped & hitTest(...epos)) {
+        if (!swiped & hitTest(...epos, boundsFn())) {
             fn(...epos);
         }
       }
     }
   };
+};
+
+export const hitTest = (posX, posY, bounds) => {
+  let left = bounds.x,
+      right = bounds.x + bounds.width,
+      top = bounds.y,
+      bottom = top + bounds.height;
+
+  return left <= posX && right > posX &&
+    top <= posY && bottom > posY;
 };
 
 export function withinRect(bounds, test) {
