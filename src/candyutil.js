@@ -1,8 +1,8 @@
 import * as v from './vec2';
 import * as mu from 'mutilz';
 
-export const cols = 6;
-export const rows = 8;
+export const cols = 8;
+export const rows = 10;
 
 export const allPos = (function() {
   const res = [];

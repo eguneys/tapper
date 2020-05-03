@@ -1,7 +1,10 @@
 import Pool from 'poolf';
 import { dContainer } from '../asprite';
+import { Easings } from '../ipol';
+
 import TapSprite from './tapsprite';
 import { fxHandler } from './util';
+
 
 import { allKeys, key2pos, cols } from '../candyutil';
 
@@ -59,6 +62,9 @@ export default function CandyFx(play, ctx, bs) {
   };
   let targetPos;
   const handleCollects = fxHandler({
+    easing: Easings.easeInQuad,
+    duration: 500,
+    allowEnd: true,
     onBegin(collects) {
       let { keys, resource } = collects;
 
@@ -83,7 +89,7 @@ export default function CandyFx(play, ctx, bs) {
 
       return true;
      },
-    onUpdate(collects, i) {
+    onUpdate(collects, i, ix) {
       pCollects.each(_ => {
         let { x, y } = _.data();
 
@@ -169,6 +175,7 @@ function FallFx(play, ctx, bs) {
 
   let fromPos;
   const handleFalls = fxHandler({
+    allowEnd: true,
     onBegin({from, resource}) {
       dFg.visible(true);
       dFg.texture(mall[resource]);

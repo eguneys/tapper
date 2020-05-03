@@ -33,6 +33,7 @@ export function fxHandler({
   onUpdate, 
   onEnd,
   onBegin,
+  allowEnd,
   easing,
   duration = 300
 }, fxFn) {
@@ -57,9 +58,9 @@ export function fxHandler({
     }
 
     if (running) {
-      let vFx = iFx.value(easing);
-      onUpdate(fx.value, vFx);
-      if (iFx.settled()) {
+      let vFx = easing?iFx.easing(easing):iFx.value();
+      onUpdate(fx.value, vFx, iFx);
+      if (allowEnd && iFx.settled()) {
         fx.end = true;
       }
     }
@@ -83,7 +84,7 @@ export function moveHandler({ onBegin,
       } else {
         onUpdate(epos);
       }
-    } else {
+     } else {
       if (running) {
         onEnd();
         running = false;

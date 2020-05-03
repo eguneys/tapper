@@ -14,8 +14,8 @@ export default function Play(ctx) {
 
     let margin = width * 0.01;
 
-    let resourceW = width * 0.6,
-        resourceH = height * 0.05;
+    let resourceH = height * 0.025,
+        resourceW = resourceH * 6;
 
     let resource = rect(margin, margin,
                         resourceW,
