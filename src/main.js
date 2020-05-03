@@ -9,11 +9,11 @@ import Play from './play';
 
 export function app(element, options) {
 
-  const config = Config();
+  const config = Config(options);
 
   let play;
 
-  let assetsBase = 'assets/images/';
+  let assetsBase = config.assetsBase;
   const aBase = (url) => assetsBase + url;
 
   // https://pixijs.download/dev/docs/PIXI.settings.html

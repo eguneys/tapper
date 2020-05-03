@@ -119,6 +119,10 @@ export default function Candy() {
   };
 
   this.endTap = () => {
+    if (!data.taps) {
+      return;
+    }
+
     let { keys, first } = data.taps;
     let selected = [];
     for (let key in keys) {
