@@ -239,6 +239,7 @@ function Fx(data, key, onEnd = () => {}) {
   let state = {};
 
   this.begin = (value) => {
+    state.end = false;
     state.value = value;
     data[key] = state;
   };
@@ -250,12 +251,11 @@ function Fx(data, key, onEnd = () => {}) {
   };
 
   this.end = () => {
-    end();
+    state.end = true;
   };
 
   this.update = (delta) => {
     if (state.end) {
-      state.end = false;
       end();
     }
   };

@@ -13,6 +13,8 @@ export default function sprites(resources) {
   const mhud = fT('mhud');
   const mtapper = fT('mtapper');
 
+  const mcards = fT('mcards');
+
   return {
     'menubg9': slice9(texture('mhud'), 0, 16, 16, 16),
     'upgradebg9': slice9(texture('mhud'), 48, 16, 16, 32 / 3),
@@ -22,12 +24,24 @@ export default function sprites(resources) {
     'mbg': texture('mbg'),
     'coin': mtapper(0, 0, 32),
     'mall': all(mall),
+    'mcards': cards(mcards),
     'menuclose': mhud(32, 0, 16),
     'toggleOn': mhud(0, 0, 32, 16),
     'toggleOff': mhud(64, 0, 32, 16),
     'costButton': mhud(96, 0, 16 * 3, 32)
   };
 }
+
+const cards = (mcards) => {
+  return {
+    'front': mcards(0, 0, 64, 89),
+    'spades': mcards(0, 96, 32),
+    'hearts': mcards(0, 128, 32),
+    'clubs': mcards(0, 160, 32),
+    'diamonds': mcards(0, 192, 32),
+    'back': mcards(0, 224, 64, 89)
+  };
+};
 
 const all = (mall) => {
   return {

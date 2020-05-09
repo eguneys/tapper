@@ -14,17 +14,18 @@ export function fxHandler2({
     if (fx) {
       if (!running) {
         onBegin(fx.value);
-        running = true;
+        running = fx.value;
       }
     } else {
       if (running) {
-        onEnd();
+        onEnd(running);
         running = false;
       }
     }
 
     if (running) {
       onUpdate(fx.value);
+      running = fx.value;
     }
   };
 }
@@ -80,14 +81,14 @@ export function moveHandler({ onBegin,
       let { epos } = current;
       if (!running) {
         onBegin(epos);
-        running = true;
       } else {
         onUpdate(epos);
       }
+      running = epos;
      } else {
       if (running) {
-        onEnd();
-        running = false;
+        onEnd(running);
+        running = undefined;
       }
     }
   };

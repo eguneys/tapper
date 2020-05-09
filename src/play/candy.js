@@ -1,4 +1,8 @@
+import { rect } from '../dquad/geometry';
+
 import { dContainer } from '../asprite';
+
+import { cols } from '../candyutil';
 
 import Candy from '../candy';
 
@@ -7,7 +11,49 @@ import CandyBackground from './candybackground';
 import CandyGame from './candygame';
 import CandyFx from './candyfx';
 
-export default function CandyView(play, ctx, bs) {
+export default function CandyView(play, ctx, pbs) {
+
+  let bs = (() => {
+    let { width, height } = pbs;
+
+    let margin = width * 0.01;
+
+    let resourceH = height * 0.025,
+        resourceW = resourceH * 6;
+
+    let resource = rect(margin, margin,
+                        resourceW,
+                        resourceH);
+
+    let gameW = (width - margin * 2);
+    let gameX = (width - gameW) * 0.5,
+        gameY = (resourceH + margin) * 3 + margin * 3;
+    let game = rect(gameX, gameY,
+                    gameW,gameW);
+                    
+    let tileW = Math.floor(gameW / cols);
+
+    let bgMargin = margin;
+    let fgMargin = bgMargin * 2.0;
+    let bgW = tileW - bgMargin;
+    let fgW = tileW - fgMargin;
+    let tile = {
+      tileW,
+      bgMargin,
+      fgMargin,
+      bgW,
+      fgW
+    };
+
+    return {
+      margin,
+      game,
+      resource,
+      tile,
+      width,
+      height
+    };
+  })();
 
   let candy = new Candy();
 

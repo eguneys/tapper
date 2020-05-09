@@ -48,12 +48,20 @@ export default function TapSprite(play, ctx, bs) {
     }
   };
 
+  this.anchor = (anchor) => {
+    dBody.anchor.set(anchor, anchor);
+  };
+
   this.visible = (visible) => {
     dBody.visible = visible;
   };
 
   this.alpha = (alpha) => {
     dBody.alpha = alpha;
+  };
+
+  this.tint = tint => {
+    dBody.tint = tint;
   };
 
   this.texture = (texture) => {
