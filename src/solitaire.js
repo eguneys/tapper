@@ -6,13 +6,20 @@ export default function Solitaire() {
   let data = this.data = {
   };
 
-  const onSelectedEnd = ({
-    draw,
-    stackN,
-    cardN,
-    stack,
-    dstStackN
+  const onSettleEnd = ({
+    selected
   }) => {
+
+    let {
+      draw,
+      stackN,
+      cardN,
+      stack,
+      dstStackN
+    } = selected;
+
+    
+
     if (draw) {
       console.log(stack);
     } else {
@@ -20,7 +27,16 @@ export default function Solitaire() {
     }
   };
 
+  let fxSettle = new Fx(data, 'settle', onSettleEnd);
+
+  const onSelectedEnd = (selectedData) => {
+    fxSettle.begin({
+      selected: selectedData
+    });
+  };
+
   let fxSelected = new Fx(data, 'selected', onSelectedEnd);
+
 
   this.stack = n => data.stacks[n];
   this.drawStack = () => data.drawStack;
@@ -35,18 +51,22 @@ export default function Solitaire() {
     data.showStack.push(card);
   };
 
-  this.selectDraw = () => {
+  this.selectDraw = (epos, decay) => {
     let card = data.showStack[0];
     fxSelected.begin({
+      epos,
+      decay,
       draw: true,
       stack: [card]
     });
   };
 
-  this.select = (stackN, cardN) => {
+  this.select = (stackN, cardN, epos, decay) => {
     let stack = data.stacks[stackN];
     let cards = stack.front.splice(cardN, stack.front.length - cardN);
     fxSelected.begin({
+      epos,
+      decay,
       dstStackN: stackN,
       stackN,
       cardN,
@@ -76,6 +96,7 @@ export default function Solitaire() {
       sValue.dstStackN = dstStackN;
     }
   };
+
 
   this.endTap = () => {
     fxSelected.end();
@@ -114,7 +135,12 @@ export default function Solitaire() {
   };
 
 
-  this.update = (delta) => {
+  const updateFxs = (delta) => {
     fxSelected.update(delta);
+    fxSettle.update(delta);
+  };
+
+  this.update = (delta) => {
+    updateFxs(delta);
   };
 }

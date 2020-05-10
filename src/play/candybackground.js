@@ -9,7 +9,7 @@ export default function CandyBackground(play, ctx, bs) {
   let dBg = new TapSprite(this, ctx, {
     width: bs.width,
     height: bs.height,
-    texture: textures['mbg']
+    texture: textures['greenbg']
   });
 
   let components = [];

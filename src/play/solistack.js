@@ -17,8 +17,8 @@ export default function Solistack(play, ctx, bs) {
     ...bs
   });
   let dFronts = new CandyStack(this, ctx, {
-    onBeginCard: (nCard) => {
-      solitaire.select(stack.n, nCard);
+    onBeginCard: (nCard, epos, decay) => {
+      solitaire.select(stack.n, nCard, epos, decay);
     },
     onEndCard: (nCard) => {
       solitaire.endSelect(stack.n);
@@ -47,6 +47,12 @@ export default function Solistack(play, ctx, bs) {
     dFronts.init({ stack: stack.front });
   };
 
+  this.globalPositionNextCard = () => {
+    let gPos = dFronts.globalPosition();
+    let nextCardY = dFronts.nextCardY();
+    return [gPos.x, gPos.y + nextCardY];
+  };
+
   const handleSelected = fxHandler2({
     onBegin({ stackN }) {
       if (stackN === stack.n) {
@@ -56,14 +62,27 @@ export default function Solistack(play, ctx, bs) {
     onUpdate() {
     },
     onEnd({ stackN, dstStackN }) {
+    }
+  }, () => solitaire.data.selected);
+
+  const handleSettled = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd({selected}) {
+
+      let { dstStackN } = selected;
+
       if (dstStackN === stack.n) {
         dFronts.init({ stack: solitaire.stack(dstStackN).front });
       }
     }
-  }, () => solitaire.data.selected);
+  }, () => solitaire.data.settle);
 
   this.update = delta => {
     handleSelected(delta);
+    handleSettled(delta);
     components.forEach(_ => _.update(delta));
   };
 
@@ -84,6 +103,10 @@ export default function Solistack(play, ctx, bs) {
   this.remove = () => {
     container.parent.removeChild(container);
   };
+
+  this.bounds = () => container.getBounds();
+
+  this.globalPosition = () => container.getGlobalPosition();
 
   this.move = (x, y) => container.position.set(x, y);
 }

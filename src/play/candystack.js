@@ -58,6 +58,10 @@ export default function CandyStack(play, ctx, bs) {
     iExtend.both(cardExtend, cardExtend);
   };
 
+  this.highlight = (value) => {
+    dCards.forEach(_ => _.highlight(value));
+  };
+
   const handleMove = moveHandler({
     onBegin(epos) {
       let iCardExtend = iExtend.value();
@@ -77,8 +81,12 @@ export default function CandyStack(play, ctx, bs) {
       });
 
       if (hitCard) {
+        let b = hitCard.bounds();
+        let decay = [-epos[0] + b.x,
+                     -epos[1] + b.y];
+
         if (onBeginCard) {
-          onBeginCard(hitCard.n());
+          onBeginCard(hitCard.n(), epos, decay);
         }
       }
 
@@ -108,11 +116,22 @@ export default function CandyStack(play, ctx, bs) {
     components.forEach(_ => _.update(delta));
   };
 
+  this.nextCardY = () => {
+    let iCardExtend = iExtend.value();
+
+    return cardY(dCards.length, iCardExtend);
+  };
+
+  const cardY = (i, iCardExtend) => {
+    return i * iCardExtend;
+  };
+
   const renderCards = () => {
     let iCardExtend = iExtend.value();
 
     dCards.forEach((dCard, i) => {
-      dCard.move(0, i * iCardExtend);
+      let posY = cardY(i, iCardExtend);
+      dCard.move(0, posY);
     });
   };
 
@@ -128,6 +147,8 @@ export default function CandyStack(play, ctx, bs) {
   this.remove = () => {
     container.parent.removeChild(container);
   };
+
+  this.globalPosition = () => container.getGlobalPosition();
 
   this.move = (x, y) => container.position.set(x, y);
 }

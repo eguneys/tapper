@@ -52,6 +52,12 @@ export default function CandyCards(play, ctx, bs) {
     size: tWidth,
   });
 
+  let dHighlight = new TapSprite(this, ctx, {
+    width: cWidth + 2,
+    height: cHeight + 2,
+    texture: mcards['highlight']
+  });
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -71,13 +77,22 @@ export default function CandyCards(play, ctx, bs) {
     dRank.move(cWidth - tWidth - tMargin,  tMargin);
     dRank.add(container);
     components.push(dRank);
+
+    dHighlight.move(-1, -1);
+    dHighlight.add(container);
+    components.push(dHighlight);
   };
   initContainer();
 
   let n;
 
+  let highlight;
+
   this.init = data => {
     n = data.n;
+
+    highlight = data.highlight;
+    this.highlight(highlight);
 
     dBg.texture(data.back ? mcards.back : mcards.front);
 
@@ -91,6 +106,16 @@ export default function CandyCards(play, ctx, bs) {
       dRank.move(cWidth - tWidth - tMargin * 4.0,  tMargin);
     } else {
       dRank.move(cWidth - tWidth - tMargin,  tMargin);
+    }
+  };
+
+  this.highlight = (value) => {
+    highlight = value;
+
+    if (highlight) {
+      dHighlight.visible(true);
+    } else {
+      dHighlight.visible(false);
     }
   };
 

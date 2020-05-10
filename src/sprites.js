@@ -21,6 +21,7 @@ export default function sprites(resources) {
     'letters': letters(texture('mletters')),
     'fletters': fletters(texture('fletters'), json('flettersjson')),
     'fkerning': json('flettersjson'),
+    'greenbg': texture('greenbg'),
     'mbg': texture('mbg'),
     'coin': mtapper(0, 0, 32),
     'mall': all(mall),
@@ -39,7 +40,8 @@ const cards = (mcards) => {
     'hearts': mcards(0, 128, 32),
     'clubs': mcards(0, 160, 32),
     'diamonds': mcards(0, 192, 32),
-    'back': mcards(0, 224, 64, 89)
+    'back': mcards(0, 224, 64, 89),
+    'highlight': mcards(0, 320, 64, 89)
   };
 };
 

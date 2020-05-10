@@ -22,6 +22,7 @@ export function app(element, options) {
 
   PIXI.Loader.shared
     .add('mall', aBase('all.png'))
+    .add('greenbg', aBase('greenbg.png'))
     .add('mcards', aBase('cards.png'))
     .add('mbg', aBase('bg.png'))
     .add('mhud', aBase('mhud.png'))

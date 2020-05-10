@@ -2,10 +2,12 @@ import { rect } from '../dquad/geometry';
 
 import { dContainer } from '../asprite';
 
+import CandyBackground from './candybackground';
 import CandyCards from './candycards';
 import CandyStack from './candystack';
 import CandyDeck from './candydeck';
 import SoliStack from './solistack';
+import DragStack from './dragstack';
 
 import Solitaire from '../solitaire';
 
@@ -57,11 +59,13 @@ export default function SolitaireView(play, ctx, pbs) {
     ...bs
   });
   let dDrawStack = new CandyStack(this, ctx, {
-    onBeginCard: () => {
-      solitaire.selectDraw();
+    onBeginCard: (n, epos, decay) => {
+      solitaire.selectDraw(epos, decay);
     },
     ...bs
   });
+
+  let dBg = new CandyBackground(this, ctx, bs);
 
   let dStacksContainer = dContainer();
   let dStacks = [
@@ -74,9 +78,16 @@ export default function SolitaireView(play, ctx, pbs) {
     new SoliStack(this, ctx, bs)
   ];
 
+
+  let dDragStack = new DragStack(this, ctx, bs);
+  
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+
+    dBg.add(container);
+    components.push(dBg);
 
     dDrawContainer.position.set(bs.draws.x, bs.draws.y);
     container.addChild(dDrawContainer);
@@ -94,6 +105,9 @@ export default function SolitaireView(play, ctx, pbs) {
       dStack.add(dStacksContainer);
       components.push(dStack);
     });
+
+    dDragStack.add(container);
+    components.push(dDragStack);
   };
   initContainer();
 
@@ -101,8 +115,9 @@ export default function SolitaireView(play, ctx, pbs) {
 
     solitaire.init();
 
-    dDrawStack.init({stack: solitaire.showStack() });
+    dDragStack.init({ solitaire });
 
+    dDrawStack.init({stack: solitaire.showStack() });
     dDrawDeck.init({nbStack: 3});
 
     dStacks.forEach((dStack, i) => {
@@ -112,6 +127,8 @@ export default function SolitaireView(play, ctx, pbs) {
       });
     });
   };
+
+  this.soliStackN = n => dStacks[n];
 
   const tapDeal = () => {
     solitaire.deal();
