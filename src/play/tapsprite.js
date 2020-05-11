@@ -48,6 +48,10 @@ export default function TapSprite(play, ctx, bs) {
     }
   };
 
+  this.scale = (x, y) => {
+    dBody.scale.set(x, y);
+  };
+
   this.anchor = (anchor) => {
     dBody.anchor.set(anchor, anchor);
   };

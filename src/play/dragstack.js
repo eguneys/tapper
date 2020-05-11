@@ -43,10 +43,17 @@ export default function Play(play, ctx, bs) {
   const handleSettle = fxHandler({
     allowEnd: true,
     onBegin({ selected }) {
-      let { draw, dstStackN } = selected;
+      let { draw, dstHole, dstStackN } = selected;
 
       settleSource = dDragStack.globalPosition();
-      if (dstStackN || dstStackN === 0) {
+
+      if (dstHole || dstHole === 0) {
+        let dDstHole = play.soliHoleN(dstHole);
+        let settleTarget = dDstHole.globalPosition();
+
+        settleTargetDiff = [settleTarget.x - settleSource.x,
+                            settleTarget.y - settleSource.y];        
+      } else if (dstStackN || dstStackN === 0) {
         let dDstStack = play.soliStackN(dstStackN);
         let settleTarget = dDstStack.globalPositionNextCard();
 

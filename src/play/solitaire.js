@@ -8,6 +8,7 @@ import SoliStack from './solistack';
 import SoliDraw from './solidraw';
 import DragStack from './dragstack';
 import SoliReveal from './solireveal';
+import SoliHole from './solihole';
 
 import Solitaire from '../solitaire';
 
@@ -38,6 +39,10 @@ export default function SolitaireView(play, ctx, pbs) {
                       (cWidth + stackMargin),
                       height - stackMargin);
 
+    let holes = rect(stacks.x + stacks.width * 7 + stackMargin * 2.0,
+                     stacks.y,
+                     0, (cHeight + stackMargin));
+
     let deck = rect(0, 0, cWidth, cHeight * 0.2);
     
     return {
@@ -45,6 +50,7 @@ export default function SolitaireView(play, ctx, pbs) {
       cMargin,
       card,
       stacks,
+      holes,
       draws,
       width,
       height
@@ -68,6 +74,14 @@ export default function SolitaireView(play, ctx, pbs) {
     new SoliStack(this, ctx, bs)
   ];
 
+  let dHolesContainer = dContainer();
+  let dHoles = [
+    new SoliHole(this, ctx, bs),
+    new SoliHole(this, ctx, bs),
+    new SoliHole(this, ctx, bs),
+    new SoliHole(this, ctx, bs)
+    
+  ];
 
   let dDragStack = new DragStack(this, ctx, bs);
   
@@ -83,6 +97,14 @@ export default function SolitaireView(play, ctx, pbs) {
     dDraw.move(bs.draws.x, bs.draws.y);
     dDraw.add(container);
     components.push(dDraw);
+
+    dHolesContainer.position.set(bs.holes.x, bs.holes.y);
+    container.addChild(dHolesContainer);
+    dHoles.forEach((dHole, i) => {
+      dHole.move(0, i * bs.holes.height);
+      dHole.add(dHolesContainer);
+      components.push(dHole);
+    });
 
     dStacksContainer.position.set(bs.stacks.x, bs.stacks.y);
     container.addChild(dStacksContainer);
@@ -114,10 +136,18 @@ export default function SolitaireView(play, ctx, pbs) {
         i
       });
     });
+
+    dHoles.forEach((dHole, i) => {
+      dHole.init({
+        solitaire,
+        i
+      });
+    });
   };
 
   this.soliStackN = n => dStacks[n];
   this.drawStack = dDraw.drawStack;
+  this.soliHoleN = n => dHoles[n];
 
   const tapEnd = () => {
     solitaire.endTap();
