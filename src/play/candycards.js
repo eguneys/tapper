@@ -23,7 +23,7 @@ export default function CandyCards(play, ctx, bs) {
   const { textures } = ctx;
 
   let mcards = textures['mcards'];
-
+  
   let cWidth = bs.card.width,
       cHeight = bs.card.height,
       mWidth = cWidth * 0.8,
@@ -139,5 +139,11 @@ export default function CandyCards(play, ctx, bs) {
 
   this.bounds = () => container.getBounds();
 
+  this.globalPosition = () => container.getGlobalPosition();
+
   this.move = (x, y) => container.position.set(x, y);
+
+  this.scale = (x, y) => container.scale.set(x, y);
+
+  this.pivot = (x, y) => container.pivot.set(x, y);
 }

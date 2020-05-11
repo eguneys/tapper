@@ -21,7 +21,7 @@ export default function Solitaire() {
     
 
     if (draw) {
-      console.log(stack);
+      endSelectDraw(stackN, dstStackN, stack);
     } else {
       endSelect(stackN, dstStackN, stack);
     }
@@ -36,6 +36,13 @@ export default function Solitaire() {
   };
 
   let fxSelected = new Fx(data, 'selected', onSelectedEnd);
+
+  const onRevealEnd = ({ n, card }) => {
+    let stack = data.stacks[n];
+    stack.front.push(card);
+  };
+
+  let fxReveal = new Fx(data, 'reveal', onRevealEnd);
 
 
   this.stack = n => data.stacks[n];
@@ -52,7 +59,13 @@ export default function Solitaire() {
   };
 
   this.selectDraw = (epos, decay) => {
-    let card = data.showStack[0];
+
+    if (fxSelected.value() || fxSettle.value()) {
+      return;
+    }
+
+    let card = data.showStack.pop();
+
     fxSelected.begin({
       epos,
       decay,
@@ -62,6 +75,11 @@ export default function Solitaire() {
   };
 
   this.select = (stackN, cardN, epos, decay) => {
+
+    if (fxSelected.value() || fxSettle.value()) {
+      return;
+    }
+
     let stack = data.stacks[stackN];
     let cards = stack.front.splice(cardN, stack.front.length - cardN);
     fxSelected.begin({
@@ -81,7 +99,20 @@ export default function Solitaire() {
     srcStackView.forEach(_ => {
       dstStack.front.push(_);
     });
+
+    revealStack(srcStack);
   };
+
+  const endSelectDraw = (srcStackN, dstStackN, srcStackView) => {
+    if (dstStackN || dstStackN === 0) {
+      endSelect(srcStackN, dstStackN, srcStackView);
+    } else {
+      srcStackView.forEach(_ => {
+        data.showStack.push(_);
+      });
+    }
+  };
+
 
   this.moveSelect = (epos) => {
     let sValue = fxSelected.value();
@@ -134,13 +165,29 @@ export default function Solitaire() {
     data.showStack = [];
   };
 
+  const revealStack = stack => {
+    if (stack.front.length !== 0 ||
+        stack.hidden.length === 0) {
+      return;
+    }
+
+    let last = stack.hidden.pop();
+    fxReveal.begin({ n: stack.n,
+                     card: last });
+  };
+
 
   const updateFxs = (delta) => {
     fxSelected.update(delta);
     fxSettle.update(delta);
+    fxReveal.update(delta);
+  };
+
+  const updateStacks = delta => {
   };
 
   this.update = (delta) => {
+    updateStacks(delta);
     updateFxs(delta);
   };
 }

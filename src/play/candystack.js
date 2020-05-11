@@ -29,12 +29,12 @@ export default function CandyStack(play, ctx, bs) {
   this.init = data => {
     let stack = data.stack;
 
-    pCards.releaseAll();
     dCards.forEach(_ => {
       _.remove();
       components.splice(components.indexOf(_), 1);
     });
     dCards = [];
+    pCards.releaseAll();
 
     stack.forEach((card, i) => {
       let dCard = pCards.acquire(_ => {
@@ -55,7 +55,8 @@ export default function CandyStack(play, ctx, bs) {
     let cardExtend = bs.stacks.height / (nbCards + 1);
     cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
 
-    iExtend.both(cardExtend, cardExtend);
+    iExtend.value(iExtend.value());
+    iExtend.target(cardExtend);
   };
 
   this.highlight = (value) => {
@@ -114,6 +115,15 @@ export default function CandyStack(play, ctx, bs) {
     iExtend.update(delta / 500);
 
     components.forEach(_ => _.update(delta));
+  };
+
+  this.globalPositionNextCard = (noNextCard) => {
+    let gPos = this.globalPosition();
+    let nextCardY = this.nextCardY();
+    if (noNextCard) {
+      nextCardY = 0;
+    }
+    return [gPos.x, gPos.y + nextCardY];
   };
 
   this.nextCardY = () => {

@@ -3,7 +3,7 @@ import { dContainer } from '../asprite';
 import CandyDeck from './candydeck';
 import CandyStack from './candystack';
 
-import { fxHandler2 } from './util';
+import { fxHandler, fxHandler2 } from './util';
 
 export default function Solistack(play, ctx, bs) {
 
@@ -47,11 +47,8 @@ export default function Solistack(play, ctx, bs) {
     dFronts.init({ stack: stack.front });
   };
 
-  this.globalPositionNextCard = () => {
-    let gPos = dFronts.globalPosition();
-    let nextCardY = dFronts.nextCardY();
-    return [gPos.x, gPos.y + nextCardY];
-  };
+  this.globalPositionNextCard = dFronts.globalPositionNextCard;
+  this.globalPositionLastCard = dBacks.globalPositionLastCard;
 
   const handleSelected = fxHandler2({
     onBegin({ stackN }) {
@@ -80,6 +77,11 @@ export default function Solistack(play, ctx, bs) {
     }
   }, () => solitaire.data.settle);
 
+  this.refresh = () => {
+    dFronts.init({ stack: stack.front });
+    dBacks.init({ nbStack: stack.hidden.length });
+  };
+
   this.update = delta => {
     handleSelected(delta);
     handleSettled(delta);
@@ -87,7 +89,7 @@ export default function Solistack(play, ctx, bs) {
   };
 
   const renderFront = () => {
-    let lb = dBacks.lastBounds();
+    let lb = dBacks.nextBounds();
     dFronts.move(lb[0], lb[1]);
   };
 

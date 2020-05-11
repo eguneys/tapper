@@ -48,12 +48,12 @@ export function fxHandler({
     if (fx) {
       if (!running) {
         onBegin(fx.value);
-        running = true;
+        running = fx.value;
         iFx.both(0, 1);
       }
     } else {
       if (running) {
-        onEnd();
+        onEnd(running);
         running = false;
       }
     }

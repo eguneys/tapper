@@ -46,11 +46,16 @@ export default function Play(play, ctx, bs) {
       let { draw, dstStackN } = selected;
 
       settleSource = dDragStack.globalPosition();
-
-      if (draw) {
-      } else {
+      if (dstStackN || dstStackN === 0) {
         let dDstStack = play.soliStackN(dstStackN);
         let settleTarget = dDstStack.globalPositionNextCard();
+
+        settleTargetDiff = [settleTarget[0] - settleSource.x,
+                            settleTarget[1] - settleSource.y];
+      } else {
+        // draw
+        let dDstStack = play.drawStack();
+        let settleTarget = dDstStack.globalPositionNextCard(true);
 
         settleTargetDiff = [settleTarget[0] - settleSource.x,
                             settleTarget[1] - settleSource.y];

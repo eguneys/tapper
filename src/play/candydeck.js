@@ -26,6 +26,13 @@ export default function CandyDeck(play, ctx, bs) {
   this.init = data => {
     let nbStack = data.nbStack;
 
+    dCards.forEach(_ => {
+      _.remove();
+      components.splice(components.indexOf(_), 1);
+    });
+    dCards = [];
+    pCards.releaseAll();
+
     for (let i = 0; i < nbStack; i++) {
       let dCard = pCards.acquire(_ => {
         _.init(backCard);
@@ -41,11 +48,27 @@ export default function CandyDeck(play, ctx, bs) {
     if (extendLimit) {
       cardExtend = Math.max(deckHeight, cardExtend);
     }
-    iExtend.both(0, cardExtend);
+    iExtend.value(iExtend.value());
+    iExtend.target(cardExtend);
   };
 
-  let lastBounds;
-  this.lastBounds = () => lastBounds;
+  this.nextBounds = () => {
+    let iCardExtend = iExtend.value();
+
+    let nextI = dCards.length;
+
+    return [0, cardY(nextI, iCardExtend)];
+  };
+
+  this.globalPositionLastCard = () => {
+    let card = dCards[dCards.length - 1];
+
+    return card.globalPosition();
+  };
+
+  const cardY = (i, iCardExtend) => {
+    return i * iCardExtend;
+  };
 
   this.update = delta => {
     iExtend.update(delta / 200);
@@ -55,12 +78,9 @@ export default function CandyDeck(play, ctx, bs) {
   const renderCards = () => {
     let iCardExtend = iExtend.value();
 
-    let lastI = -1;
     dCards.forEach((dCard, i) => {
-      dCard.move(0, i * iCardExtend);
-      lastI = i;
+      dCard.move(0, cardY(i, iCardExtend));
     });
-    lastBounds = [0, (lastI + 1) * iCardExtend];
   };
 
   this.render = () => {

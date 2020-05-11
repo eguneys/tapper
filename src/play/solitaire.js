@@ -4,10 +4,10 @@ import { dContainer } from '../asprite';
 
 import CandyBackground from './candybackground';
 import CandyCards from './candycards';
-import CandyStack from './candystack';
-import CandyDeck from './candydeck';
 import SoliStack from './solistack';
+import SoliDraw from './solidraw';
 import DragStack from './dragstack';
+import SoliReveal from './solireveal';
 
 import Solitaire from '../solitaire';
 
@@ -53,20 +53,10 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let solitaire = new Solitaire();
 
-  let dDrawContainer = dContainer();
-  let dDrawDeck = new CandyDeck(this, ctx, {
-    deckHeight: bs.deck.height,
-    ...bs
-  });
-  let dDrawStack = new CandyStack(this, ctx, {
-    onBeginCard: (n, epos, decay) => {
-      solitaire.selectDraw(epos, decay);
-    },
-    ...bs
-  });
-
   let dBg = new CandyBackground(this, ctx, bs);
 
+  let dDraw = new SoliDraw(this, ctx, bs);
+  
   let dStacksContainer = dContainer();
   let dStacks = [
     new SoliStack(this, ctx, bs),
@@ -81,6 +71,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let dDragStack = new DragStack(this, ctx, bs);
   
+  let dSoliReveal = new SoliReveal(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
@@ -89,14 +80,9 @@ export default function SolitaireView(play, ctx, pbs) {
     dBg.add(container);
     components.push(dBg);
 
-    dDrawContainer.position.set(bs.draws.x, bs.draws.y);
-    container.addChild(dDrawContainer);
-    dDrawDeck.add(dDrawContainer);
-    components.push(dDrawDeck);
-
-    dDrawStack.move(0, bs.card.height + bs.deck.height);
-    dDrawStack.add(dDrawContainer);
-    components.push(dDrawStack);
+    dDraw.move(bs.draws.x, bs.draws.y);
+    dDraw.add(container);
+    components.push(dDraw);
 
     dStacksContainer.position.set(bs.stacks.x, bs.stacks.y);
     container.addChild(dStacksContainer);
@@ -105,6 +91,9 @@ export default function SolitaireView(play, ctx, pbs) {
       dStack.add(dStacksContainer);
       components.push(dStack);
     });
+
+    dSoliReveal.add(container);
+    components.push(dSoliReveal);
 
     dDragStack.add(container);
     components.push(dDragStack);
@@ -115,10 +104,9 @@ export default function SolitaireView(play, ctx, pbs) {
 
     solitaire.init();
 
+    dSoliReveal.init({ solitaire });
     dDragStack.init({ solitaire });
-
-    dDrawStack.init({stack: solitaire.showStack() });
-    dDrawDeck.init({nbStack: 3});
+    dDraw.init({ solitaire });
 
     dStacks.forEach((dStack, i) => {
       dStack.init({
@@ -129,11 +117,7 @@ export default function SolitaireView(play, ctx, pbs) {
   };
 
   this.soliStackN = n => dStacks[n];
-
-  const tapDeal = () => {
-    solitaire.deal();
-    dDrawStack.init({ stack: solitaire.showStack() });
-  };
+  this.drawStack = dDraw.drawStack;
 
   const tapEnd = () => {
     solitaire.endTap();
@@ -141,11 +125,6 @@ export default function SolitaireView(play, ctx, pbs) {
 
   const handleTap = moveHandler({
     onBegin(epos) {
-      let drawBounds = dDrawDeck.bounds();
-
-      if (hitTest(epos[0], epos[1], drawBounds)) {
-        tapDeal();
-      }
     },
     onUpdate(epos) {
       solitaire.moveSelect(epos);
