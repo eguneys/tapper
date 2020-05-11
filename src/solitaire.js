@@ -61,9 +61,7 @@ export default function Solitaire() {
           delete selectedData.dstStackN;
         }
       }
-    }
-
-    if (isIndex(dstStackN)) {
+    } else if (isIndex(dstStackN)) {
       let dstStack = data.stacks[dstStackN];
       if (!dstStack.canAdd(stack)) {
         if (isIndex(holeN)) {
@@ -106,6 +104,10 @@ export default function Solitaire() {
   this.hole = n => data.holes[n];
 
   this.deal = () => {
+    if (busyFxs()) {
+      return;
+    }
+
     data.showStack.forEach(_ => data.drawStack.unshift(_));
 
     let card = data.drawStack.pop();
@@ -366,6 +368,14 @@ function SoliStack(n, hidden, front) {
 
 }
 
+function canStackHoleAce(c1) {
+  return c1.rank === 'ace';
+}
+
+function canStackHole(c1, c2) {
+  return c1.suit === c2.suit && c1.sRank === c2.sRank - 1;
+}
+
 function SoliHole(cards) {
 
   this.top = () => cards[cards.length - 1];
@@ -379,7 +389,19 @@ function SoliHole(cards) {
   this.canRemove = () => cards.length > 0;
 
   this.canAdd = cards => {
-    return cards.length === 1;
+    if (cards.length !== 1) {
+      return false;
+    }
+
+    let t = this.top(),
+        t2 = cards[0];
+
+
+    if (!t) {
+      return canStackHoleAce(t2);
+    } else {
+      return canStackHole(t, t2);
+    }
   };
 
   this.isDone = () => {
