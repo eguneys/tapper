@@ -105,7 +105,12 @@ export default function Solitaire() {
 
   const endSelectDraw = (srcStackN, dstStackN, srcStackView) => {
     if (dstStackN || dstStackN === 0) {
-      endSelect(srcStackN, dstStackN, srcStackView);
+      let dstStack = data.stacks[dstStackN];
+      let srcStack = data.stacks[srcStackN];
+      
+      srcStackView.forEach(_ => {
+        dstStack.front.push(_);
+      });
     } else {
       srcStackView.forEach(_ => {
         data.showStack.push(_);

@@ -1,7 +1,9 @@
 import { dContainer } from '../asprite';
 
+import CandyCard from './candycards';
 import CandyDeck from './candydeck';
 import CandyStack from './candystack';
+import CandyCardPlace from './candycardplace';
 
 import { fxHandler, fxHandler2 } from './util';
 
@@ -26,10 +28,19 @@ export default function Solistack(play, ctx, bs) {
     ...bs
   });
 
+  let dCardPlace = new CandyCardPlace(this, ctx, {
+    onEndCard: () => {
+      solitaire.endSelect(stack.n);
+    },
+    ...bs
+  });
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
-
+    dCardPlace.add(container);
+    components.push(dCardPlace);
+    
     dBacks.add(container);
     components.push(dBacks);
 
@@ -45,6 +56,8 @@ export default function Solistack(play, ctx, bs) {
 
     dBacks.init({ nbStack: stack.hidden.length });
     dFronts.init({ stack: stack.front });
+    
+    dCardPlace.init({});
   };
 
   this.globalPositionNextCard = dFronts.globalPositionNextCard;

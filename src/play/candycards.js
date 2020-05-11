@@ -141,6 +141,8 @@ export default function CandyCards(play, ctx, bs) {
 
   this.globalPosition = () => container.getGlobalPosition();
 
+  this.visible = visible => container.visible = visible;
+
   this.move = (x, y) => container.position.set(x, y);
 
   this.scale = (x, y) => container.scale.set(x, y);
