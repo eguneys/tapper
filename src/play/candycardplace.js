@@ -6,7 +6,7 @@ export default function CandyCardPlace(play, ctx, bs) {
 
   const { events } = ctx;
 
-  let { onEndCard } = bs;
+  let { onBeginCard, onEndCard } = bs;
 
   let cardBounds = {
     width: bs.card.width,
@@ -34,6 +34,16 @@ export default function CandyCardPlace(play, ctx, bs) {
 
   let handleMove = moveHandler({
     onBegin(epos) {
+      if (hitTest(...epos, hitBounds)) {
+        
+        let decay = [-epos[0] + hitBounds.x,
+                     -epos[1] + hitBounds.y];
+
+        if (onBeginCard) {
+          onBeginCard(epos, decay);
+        }
+
+      }
     },
     onUpdate() {
     },

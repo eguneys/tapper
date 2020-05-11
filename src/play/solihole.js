@@ -25,6 +25,9 @@ export default function SoliHole(play, ctx, bs) {
   });
 
   let dPlaceholder = new CandyCardPlace(this, ctx, {
+    onBeginCard(epos, decay) {
+      solitaire.selectHole(n, epos, decay);
+    },
     onEndCard() {
       solitaire.endSelectHole(n);
     },
