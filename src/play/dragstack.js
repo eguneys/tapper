@@ -2,6 +2,7 @@ import { dContainer } from '../asprite';
 
 import CandyStack from './candystack';
 
+import { isIndex } from '../solitaire';
 import { fxHandler, fxHandler2 } from './util';
 import * as v from '../vec2';
 
@@ -43,12 +44,12 @@ export default function Play(play, ctx, bs) {
   const handleSettle = fxHandler({
     allowEnd: true,
     onBegin({ selected }) {
-      let { draw, dstHole, dstStackN } = selected;
+      let { draw, dstHoleN, dstStackN } = selected;
 
       settleSource = dDragStack.globalPosition();
 
-      if (dstHole || dstHole === 0) {
-        let dDstHole = play.soliHoleN(dstHole);
+      if (isIndex(dstHoleN)) {
+        let dDstHole = play.soliHoleN(dstHoleN);
         let settleTarget = dDstHole.globalPosition();
 
         settleTargetDiff = [settleTarget.x - settleSource.x,

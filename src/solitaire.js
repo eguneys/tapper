@@ -1,6 +1,8 @@
 import { makeOneDeck } from './deck';
 import Fx from './fxs';
 
+export function isIndex(n) { return n || n === 0; };
+
 export default function Solitaire() {
 
   let data = this.data = {
@@ -11,22 +13,22 @@ export default function Solitaire() {
   }) => {
 
     let {
-      hole,
+      holeN,
       draw,
       stackN,
       cardN,
       stack,
       dstStackN,
-      dstHole
+      dstHoleN
     } = selected;
 
-    if (hole) {
-      endSelectHoleHole(dstHole, stack);
-    } else if (dstHole || dstHole === 0) {
+    if (isIndex(holeN)) {
+      endSelectHoleHole(dstHoleN, stack);
+    } else if (isIndex(dstHoleN)) {
       if (draw) {
-        endSelectHoleDraw(dstHole, stack);
+        endSelectHoleDraw(dstHoleN, stack);
       } else {
-        endSelectHole(stackN, dstHole, stack);
+        endSelectHole(stackN, dstHoleN, stack);
       }
     } else if (draw) {
       endSelectDraw(dstStackN, stack);
@@ -39,23 +41,37 @@ export default function Solitaire() {
 
   const onSelectedEnd = (selectedData) => {
     let {
-      hole,
+      holeN,
       draw,
       stackN,
       cardN,
       stack,
       dstStackN,
-      dstHole
+      dstHoleN
     } = selectedData;
 
-    if (dstHole || dstHole === 0) {
-      if (hole) {
-        selectedData.dstHole = hole;
+    if (isIndex(dstHoleN)) {
+      if (isIndex(holeN)) {
+        selectedData.dstHoleN = holeN;
+      } else {
+        let dHole = data.holes[dstHoleN];
+        let card = stack[0];
+        if (!dHole.canAdd(card)) {
+          delete selectedData.dstHoleN;
+        }
       }
-      let dHole = data.holes[dstHole];
-      let card = stack[0];
-      if (!dHole.canAdd(card)) {
-        delete selectedData.dstHole;
+    }
+
+    if (isIndex(dstStackN)) {
+      let dstStack = data.stacks[dstStackN];
+      if (!dstStack.canAdd(stack)) {
+        if (isIndex(holeN)) {
+          selectedData.dstHoleN = holeN;
+        } else if (draw) {
+          selectedData.dstStackN = undefined;
+        } else {
+          selectedData.dstStackN = selectedData.stackN;
+        }
       }
     }
 
@@ -74,8 +90,8 @@ export default function Solitaire() {
   let fxReveal = new Fx(data, 'reveal', onRevealEnd);
 
 
-  const onAddHoleEnd = ({ dstHole, card }) => {
-    let hole = data.holes[dstHole];
+  const onAddHoleEnd = ({ dstHoleN, card }) => {
+    let hole = data.holes[dstHoleN];
 
     hole.add(card);
   };
@@ -97,7 +113,7 @@ export default function Solitaire() {
   };
 
   this.selectHole = (n, epos, decay) => {
-    if (fxSelected.value() || fxSettle.value()) {
+    if (busyFxs()) {
       return;
     }
 
@@ -112,15 +128,15 @@ export default function Solitaire() {
     fxSelected.begin({
       epos,
       decay,
-      hole: n,
-      dstHole: n,
+      holeN: n,
+      dstHoleN: n,
       stack: [card]
     });
   };
 
   this.selectDraw = (epos, decay) => {
 
-    if (fxSelected.value() || fxSettle.value()) {
+    if (busyFxs()) {
       return;
     }
 
@@ -136,7 +152,7 @@ export default function Solitaire() {
 
   this.select = (stackN, cardN, epos, decay) => {
 
-    if (fxSelected.value() || fxSettle.value()) {
+    if (busyFxs()) {
       return;
     }
 
@@ -173,32 +189,32 @@ export default function Solitaire() {
     }
   };
 
-  const endSelectHole = (srcStackN, dstHole, stack) => {
+  const endSelectHole = (srcStackN, dstHoleN, stack) => {
     let srcStack = data.stacks[srcStackN];
 
     revealStack(srcStack);
 
-    endSelectHoleBase(dstHole, stack);
+    endSelectHoleBase(dstHoleN, stack);
   };
 
-  const endSelectHoleDraw = (dstHole, stack) => {
-    endSelectHoleBase(dstHole, stack);
+  const endSelectHoleDraw = (dstHoleN, stack) => {
+    endSelectHoleBase(dstHoleN, stack);
   };
 
-  const endSelectHoleHole = (dstHole, stack) => {
-    let hole = data.holes[dstHole];
+  const endSelectHoleHole = (dstHoleN, stack) => {
+    let hole = data.holes[dstHoleN];
     let card = stack[0];
 
     hole.add(card);
   };
 
-  const endSelectHoleBase = (dstHole, stack) => {
+  const endSelectHoleBase = (dstHoleN, stack) => {
     let card = stack[0];
 
-    let hole = data.holes[dstHole];
+    let hole = data.holes[dstHoleN];
 
     fxAddHole.begin({
-      dstHole,
+      dstHoleN,
       card
     });
   };
@@ -225,7 +241,7 @@ export default function Solitaire() {
   this.endSelectHole = (n) => {
     let sValue = fxSelected.value();
     if (sValue) {
-      sValue.dstHole = n;
+      sValue.dstHoleN = n;
     }
   };
 
@@ -288,6 +304,13 @@ export default function Solitaire() {
     fxAddHole.update(delta);
   };
 
+  const busyFxs = () => {
+    return fxSelected.value() ||
+      fxSettle.value() ||
+      fxReveal.value() ||
+      fxAddHole.value();
+  };
+
   const updateStacks = delta => {
   };
 
@@ -315,7 +338,7 @@ function SoliStack(n, hidden, front) {
   };
 
   this.canAdd = cards => {
-    return true;
+    return false;
   };
 
   this.canReveal = () => front.length === 0 && hidden.length > 0;

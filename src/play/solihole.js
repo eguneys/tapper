@@ -4,7 +4,7 @@ import TapSprite from './tapsprite';
 import CandyCardPlace from './candycardplace';
 import CandyCards from './candycards';
 
-import { fxHandler } from './util';
+import { fxHandler, fxHandler2 } from './util';
 
 export default function SoliHole(play, ctx, bs) {
 
@@ -78,8 +78,8 @@ export default function SoliHole(play, ctx, bs) {
   const handleAdd = fxHandler({
     allowEnd: true,
     duration: 500,
-    onBegin({ dstHole, card }) {
-      shouldHandleAdd = dstHole === n;
+    onBegin({ dstHoleN, card }) {
+      shouldHandleAdd = dstHoleN === n;
 
       if (!shouldHandleAdd) {
         return;
@@ -104,8 +104,35 @@ export default function SoliHole(play, ctx, bs) {
     }
   }, () => solitaire.data.addhole);
 
+  const handleSelected = fxHandler2({
+    onBegin({ holeN }) {
+      if (holeN === n) {
+        refresh();
+      }
+    },
+    onUpdate() {
+    },
+    onEnd() {
+    }
+  }, () => solitaire.data.selected);
+
+  const handleSettled = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd({ selected }) {
+      let { holeN } = selected;
+      if (holeN === n) {
+        refresh();
+      }
+    }
+  }, () => solitaire.data.settle);
+
   this.update = delta => {
     handleAdd(delta);
+    handleSelected(delta);
+    handleSettled(delta);
     components.forEach(_ => _.update(delta));
   };
 
