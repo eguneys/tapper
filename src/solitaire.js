@@ -23,7 +23,7 @@ export default function Solitaire() {
     } = selected;
 
     if (isIndex(holeN)) {
-      endSelectHoleHole(dstHoleN, stack);
+      endSelectSrcHole(holeN, dstStackN, stack);
     } else if (isIndex(dstHoleN)) {
       if (draw) {
         endSelectHoleDraw(dstHoleN, stack);
@@ -55,9 +55,10 @@ export default function Solitaire() {
         selectedData.dstHoleN = holeN;
       } else {
         let dHole = data.holes[dstHoleN];
-        let card = stack[0];
-        if (!dHole.canAdd(card)) {
+        if (!dHole.canAdd(stack)) {
           delete selectedData.dstHoleN;
+        } else {
+          delete selectedData.dstStackN;
         }
       }
     }
@@ -67,6 +68,7 @@ export default function Solitaire() {
       if (!dstStack.canAdd(stack)) {
         if (isIndex(holeN)) {
           selectedData.dstHoleN = holeN;
+          delete selectedData.dstStackN;
         } else if (draw) {
           selectedData.dstStackN = undefined;
         } else {
@@ -177,7 +179,7 @@ export default function Solitaire() {
   };
 
   const endSelectDraw = (dstStackN, srcStackView) => {
-    if (dstStackN || dstStackN === 0) {
+    if (isIndex(dstStackN)) {
       let dstStack = data.stacks[dstStackN];
       
       dstStack.add1(srcStackView);
@@ -201,11 +203,15 @@ export default function Solitaire() {
     endSelectHoleBase(dstHoleN, stack);
   };
 
-  const endSelectHoleHole = (dstHoleN, stack) => {
-    let hole = data.holes[dstHoleN];
-    let card = stack[0];
+  const endSelectSrcHole = (srcHoleN, dstStackN, stackView) => {
+    if (isIndex(dstStackN)) {
+      let dstStack = data.stacks[dstStackN];
 
-    hole.add(card);
+      dstStack.add1(stackView);
+    } else {
+      let hole = data.holes[srcHoleN];
+      hole.add(stackView[0]);
+    }
   };
 
   const endSelectHoleBase = (dstHoleN, stack) => {
@@ -338,7 +344,7 @@ function SoliStack(n, hidden, front) {
   };
 
   this.canAdd = cards => {
-    return false;
+    return true;
   };
 
   this.canReveal = () => front.length === 0 && hidden.length > 0;
@@ -357,8 +363,8 @@ function SoliHole(cards) {
 
   this.canRemove = () => cards.length > 0;
 
-  this.canAdd = (card) => {
-    return true;
+  this.canAdd = cards => {
+    return cards.length === 1;
   };
 
   this.isDone = () => {
