@@ -13,10 +13,37 @@ export const ranks = ['ace',
                       'queen',
                       'king'];
 
-export const allRanks = suit => ranks.map(_ => ({
+const solitaireIndexByRank = {
+  'ace': 0,
+  'two': 1,
+  'three': 2,
+  'four': 3,
+  'five': 4,
+  'six': 5,
+  'seven': 6,
+  'eight': 7,
+  'nine': 8,
+  'ten': 9,
+  'jack': 10,
+  'queen': 11,
+  'king': 12
+};
+
+const colorsBySuit = {
+  'spades': 'black',
+  'diamonds': 'red',
+  'hearts': 'red',
+  'clubs': 'black'
+};
+
+const makeCard = (suit, rank) => ({
+  sRank: solitaireIndexByRank[rank],
+  color: colorsBySuit[suit],
   suit,
-  rank: _
-}));
+  rank
+});
+
+export const allRanks = suit => ranks.map(_ => makeCard(suit, _));
 
 export const oneDeck = suits.flatMap(allRanks);
 
@@ -35,6 +62,11 @@ function shuffle(a) {
 }
 
 export default function Deck(deck) {
+
+  this.test = () => {
+    deck = deck.slice(0);
+  };
+
   this.shuffle = () => {
     deck = shuffle(deck.slice(0));
   };

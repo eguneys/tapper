@@ -326,6 +326,12 @@ export default function Solitaire() {
   };
 }
 
+const canStack = (c1, c2) => 
+      c1.color !== c2.color && c1.sRank === c2.sRank + 1;
+
+const canTop = c1 =>
+      c1.rank === 'king';
+
 function SoliStack(n, hidden, front) {
   
   this.n = n;
@@ -343,8 +349,17 @@ function SoliStack(n, hidden, front) {
     return hidden.pop();
   };
 
+  const top = () => front[front.length - 1];
+
   this.canAdd = cards => {
-    return true;
+    let t = top(),
+        t2 = cards[0];
+
+    if (!t) {
+      return canTop(t2);
+    }
+
+    return canStack(t, t2);
   };
 
   this.canReveal = () => front.length === 0 && hidden.length > 0;
