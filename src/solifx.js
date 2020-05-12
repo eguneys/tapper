@@ -43,11 +43,20 @@ export function SoliFxSelectedStack(solitaire) {
   };
 
   this.endStack = (dstStackN) => {
+    if (!fxSettleStackStack.canSettle(data.stackN, dstStackN, data.stack)) {
+      this.endCancel();
+      return;
+    }
     fxSettleStackStack.doBegin(data.stackN, dstStackN, data.stack);
     settleFx = fxSettleStackStack;
   };
 
   this.endHole = (dstHoleN) => {
+    if (!fxSettleStackHole.canSettle(data.stackN, dstHoleN, data.stack)) {
+      this.endCancel();
+      return;
+    }
+
     fxSettleStackHole.doBegin(data.stackN, dstHoleN, data.stack);
     settleFx = fxSettleStackHole;
   };
@@ -92,11 +101,22 @@ export function SoliFxSelectedDraw(solitaire) {
   };
 
   this.endStack = (dstStackN) => {
+    if (!fxSettleDrawStack.canSettle(dstStackN, data.stack)) {
+      this.endCancel();
+      return;
+    }
+    
     fxSettleDrawStack.doBegin(dstStackN, data.stack);
     settleFx = fxSettleDrawStack;
   };
 
   this.endHole = (dstHoleN) => {
+
+    if (!fxSettleDrawHole.canSettle(dstHoleN, data.stack)) {
+      this.endCancel();
+      return;
+    }
+
     fxSettleDrawHole.doBegin(dstHoleN, data.stack);
     settleFx = fxSettleDrawHole;
   };
@@ -146,6 +166,12 @@ export function SoliFxSelectedHole(solitaire) {
   };
 
   this.endStack = (dstStackN) => {
+
+    if (!fxSettleHoleStack.canSettle(data.srcHoleN, dstStackN, data.stack)) {
+      this.endCancel();
+      return;
+    }
+
     fxSettleHoleStack.doBegin(data.srcHoleN, dstStackN, data.stack);
     settleFx = fxSettleHoleStack;
   };
@@ -181,6 +207,11 @@ export function SoliFxSettleDrawStack(solitaire, baseFx) {
     draw: true,
     dststack: true,
   };
+
+  this.canSettle = (dstStackN, stack) => {
+    let dstStack = sData.stacks[dstStackN];
+    return dstStack.canAdd(stack);
+  };
   
   this.doBegin = (dstStackN, stack) => {
     data.dstStackN = dstStackN;
@@ -201,6 +232,11 @@ export function SoliFxSettleDrawHole(solitaire, baseFx) {
   let data = this.data = {
     draw: true,
     dsthole: true,
+  };
+
+  this.canSettle = (dstHoleN, stack) => {
+    let hole = sData.holes[dstHoleN];
+    return hole.canAdd(stack);
   };
   
   this.doBegin = (dstHoleN, stack) => {
@@ -243,6 +279,11 @@ export function SoliFxSettleStackStack(solitaire, baseFx) {
     dststack: true
   };
 
+  this.canSettle = (srcStackN, dstStackN, stack) => {
+    let dstStack = sData.stacks[dstStackN];
+    return dstStack.canAdd(stack);
+  };
+
   this.doBegin = (srcStackN, dstStackN, stack) => {
     data.srcStackN = srcStackN;
     data.dstStackN = dstStackN;
@@ -268,6 +309,11 @@ export function SoliFxSettleStackHole(solitaire, baseFx) {
   let data = this.data = {
     stack: true,
     dsthole: true
+  };
+
+  this.canSettle = (srcStackN, dstHoleN, stack) => {
+    let hole = sData.holes[dstHoleN];
+    return hole.canAdd(stack);    
   };
 
   this.doBegin = (srcStackN, dstHoleN, stack) => {
@@ -318,6 +364,11 @@ export function SoliFxSettleHoleStack(solitaire, baseFx) {
   let data = this.data = {
     hole: true,
     dststack: true
+  };
+
+  this.canSettle = (srcHoleN, dstStackN, stack) => {
+    let dstStack = sData.stacks[dstStackN];
+    return dstStack.canAdd(stack);
   };
 
   this.doBegin = (srcHoleN, dstStackN, stack) => {

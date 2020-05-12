@@ -48,8 +48,6 @@ export default function Play(play, ctx, bs) {
     allowEnd: true,
     onBegin(fxDataSettle) {
 
-      // let { draw, holeN, dstHoleN, dstStackN } = selected;
-
       let { dststack,
             dsthole,
             dstHoleN,
@@ -57,20 +55,6 @@ export default function Play(play, ctx, bs) {
 
       settleSource = dDragStack.globalPosition();
 
-      // if (isIndex(dstStackN)) {
-      //   let dDstStack = play.soliStackN(dstStackN);
-      //   let settleTarget = dDstStack.globalPositionNextCard();
-
-      //   settleTargetDiff = [settleTarget[0] - settleSource.x,
-      //                       settleTarget[1] - settleSource.y];
-      // } else if (isIndex(dstHoleN)) {
-      //   let dDstHole = play.soliHoleN(dstHoleN);
-      //   let settleTarget = dDstHole.globalPosition();
-
-      //   settleTargetDiff = [settleTarget.x - settleSource.x,
-      //                       settleTarget.y - settleSource.y];        
-      // } else {
-        // draw
       if (dsthole) {
         let dDstHole = play.soliHoleN(dstHoleN);
         let settleTarget = dDstHole.globalPosition();

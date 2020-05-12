@@ -11,32 +11,7 @@ export default function Solitaire() {
   };
 
   const onSettleEnd = (fxDataSettle) => {
-
     fxDataSettle.doEnd();
-
-    // let {
-    //   holeN,
-    //   draw,
-    //   stackN,
-    //   cardN,
-    //   stack,
-    //   dstStackN,
-    //   dstHoleN
-    // } = selected;
-
-    // if (isIndex(holeN)) {
-    //   endSelectSrcHole(holeN, dstStackN, stack);
-    // } else if (isIndex(dstHoleN)) {
-    //   if (draw) {
-    //     endSelectHoleDraw(dstHoleN, stack);
-    //   } else {
-    //     endSelectHole(stackN, dstHoleN, stack);
-    //   }
-    // } else if (draw) {
-    //   endSelectDraw(dstStackN, stack);
-    // } else {
-    //   endSelect(stackN, dstStackN, stack);
-    // }
   };
 
   let fxSettle = new Fx(data, 'settle', onSettleEnd);
@@ -51,47 +26,6 @@ export default function Solitaire() {
     let fxDataSettle = fxDataSelected.settleFx();
 
     fxSettle.begin(fxDataSettle);
-
-    // let {
-    //   holeN,
-    //   draw,
-    //   stackN,
-    //   cardN,
-    //   stack,
-    //   dstStackN,
-    //   dstHoleN
-    // } = selectedData;
-
-    
-
-    // if (isIndex(dstHoleN)) {
-    //   if (isIndex(holeN)) {
-    //     selectedData.dstHoleN = holeN;
-    //   } else {
-    //     let dHole = data.holes[dstHoleN];
-    //     if (!dHole.canAdd(stack)) {
-    //       delete selectedData.dstHoleN;
-    //     } else {
-    //       delete selectedData.dstStackN;
-    //     }
-    //   }
-    // } else if (isIndex(dstStackN)) {
-    //   let dstStack = data.stacks[dstStackN];
-    //   if (!dstStack.canAdd(stack)) {
-    //     if (isIndex(holeN)) {
-    //       selectedData.dstHoleN = holeN;
-    //       delete selectedData.dstStackN;
-    //     } else if (draw) {
-    //       selectedData.dstStackN = undefined;
-    //     } else {
-    //       selectedData.dstStackN = selectedData.stackN;
-    //     }
-    //   }
-    // }
-
-    // fxSettle.begin({
-    //   selected: selectedData
-    // });
   };
 
   let fxSelected = new Fx(data, 'selected', onSelectedEnd);
@@ -140,24 +74,14 @@ export default function Solitaire() {
     }
 
 
+    let hole = data.holes[srcHoleN];
+
+    if (!hole.canRemove()) {
+      return;
+    }
+
     fxDataSelectedHole.doBegin(srcHoleN, epos, decay);
     fxSelected.begin(fxDataSelectedHole);
-
-    // let hole = data.holes[n];
-
-    // if (!hole.canRemove()) {
-    //   return;
-    // }
-
-    // let card = hole.remove();
-
-    // fxSelected.begin({
-    //   epos,
-    //   decay,
-    //   holeN: n,
-    //   dstHoleN: n,
-    //   stack: [card]
-    // });
   };
 
   this.selectDraw = (epos, decay) => {
@@ -168,15 +92,6 @@ export default function Solitaire() {
 
     fxDataSelectedDraw.doBegin(epos, decay);
     fxSelected.begin(fxDataSelectedDraw);
-
-    // let card = data.showStack.pop();
-
-    // fxSelected.begin({
-    //   epos,
-    //   decay,
-    //   draw: true,
-    //   stack: [card]
-    // });
   };
 
   this.select = (stackN, cardN, epos, decay) => {
@@ -187,74 +102,7 @@ export default function Solitaire() {
 
     fxDataSelectedStack.doBegin(stackN, cardN, epos, decay);
     fxSelected.begin(fxDataSelectedStack);
-
-    // let stack = data.stacks[stackN];
-    // let cards = stack.cut1(cardN);
-    // fxSelected.begin({
-    //   epos,
-    //   decay,
-    //   dstStackN: stackN,
-    //   stackN,
-    //   cardN,
-    //   stack: cards
-    // });
   };
-
-  // const endSelect = (srcStackN, dstStackN, srcStackView) => {
-  //   let dstStack = data.stacks[dstStackN];
-  //   let srcStack = data.stacks[srcStackN];
-    
-  //   dstStack.add1(srcStackView);
-  //   revealStack(srcStack);
-  // };
-
-  // const endSelectDraw = (dstStackN, srcStackView) => {
-  //   if (isIndex(dstStackN)) {
-  //     let dstStack = data.stacks[dstStackN];
-      
-  //     dstStack.add1(srcStackView);
-
-  //   } else {
-  //     srcStackView.forEach(_ => {
-  //       data.showStack.push(_);
-  //     });
-  //   }
-  // };
-
-  // const endSelectHole = (srcStackN, dstHoleN, stack) => {
-  //   let srcStack = data.stacks[srcStackN];
-
-  //   revealStack(srcStack);
-
-  //   endSelectHoleBase(dstHoleN, stack);
-  // };
-
-  // const endSelectHoleDraw = (dstHoleN, stack) => {
-  //   endSelectHoleBase(dstHoleN, stack);
-  // };
-
-  // const endSelectSrcHole = (srcHoleN, dstStackN, stackView) => {
-  //   if (isIndex(dstStackN)) {
-  //     let dstStack = data.stacks[dstStackN];
-
-  //     dstStack.add1(stackView);
-  //   } else {
-  //     let hole = data.holes[srcHoleN];
-  //     hole.add(stackView[0]);
-  //   }
-  // };
-
-  // const endSelectHoleBase = (dstHoleN, stack) => {
-  //   let card = stack[0];
-
-  //   let hole = data.holes[dstHoleN];
-
-  //   fxAddHole.begin({
-  //     dstHoleN,
-  //     card
-  //   });
-  // };
-
 
   this.moveSelect = (epos) => {
     let fxData = fxSelected.value();
