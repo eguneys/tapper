@@ -105,8 +105,11 @@ export default function SoliHole(play, ctx, bs) {
   }, () => solitaire.data.addhole);
 
   const handleSelected = fxHandler2({
-    onBegin({ holeN }) {
-      if (holeN === n) {
+    onBegin(fxDataSelected) {
+
+      let { srcHoleN } = fxDataSelected.data;
+
+      if (srcHoleN === n) {
         refresh();
       }
     },
@@ -121,9 +124,11 @@ export default function SoliHole(play, ctx, bs) {
     },
     onUpdate() {
     },
-    onEnd({ selected }) {
-      let { holeN } = selected;
-      if (holeN === n) {
+    onEnd(fxDataSettle) {
+
+      let { srcHoleN } = fxDataSettle.data;
+
+      if (srcHoleN === n) {
         refresh();
       }
     }

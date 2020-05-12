@@ -26,12 +26,15 @@ export default function Play(play, ctx, bs) {
   };
 
   const handleDrag = fxHandler2({
-    onBegin({ epos, stack, decay }) {
+    onBegin(fxDataSelected) {
+      let { epos, stack, decay } = fxDataSelected.data;
+
       dDragStack.move(epos[0] + decay[0], epos[1] + decay[1]);
       dDragStack.init({ stack });
       dDragStack.highlight(true);
     },
-    onUpdate({ epos, decay }) {
+    onUpdate(fxDataSelected) {
+      let { epos, decay } = fxDataSelected.data;
       dDragStack.move(epos[0] + decay[0], epos[1] + decay[1]);
     },
     onEnd() {
@@ -43,25 +46,44 @@ export default function Play(play, ctx, bs) {
   let settleTargetDiff;
   const handleSettle = fxHandler({
     allowEnd: true,
-    onBegin({ selected }) {
-      let { draw, holeN, dstHoleN, dstStackN } = selected;
+    onBegin(fxDataSettle) {
+
+      // let { draw, holeN, dstHoleN, dstStackN } = selected;
+
+      let { dststack,
+            dsthole,
+            dstHoleN,
+            dstStackN } = fxDataSettle.data;
 
       settleSource = dDragStack.globalPosition();
 
-      if (isIndex(dstStackN)) {
-        let dDstStack = play.soliStackN(dstStackN);
-        let settleTarget = dDstStack.globalPositionNextCard();
+      // if (isIndex(dstStackN)) {
+      //   let dDstStack = play.soliStackN(dstStackN);
+      //   let settleTarget = dDstStack.globalPositionNextCard();
 
-        settleTargetDiff = [settleTarget[0] - settleSource.x,
-                            settleTarget[1] - settleSource.y];
-      } else if (isIndex(dstHoleN)) {
+      //   settleTargetDiff = [settleTarget[0] - settleSource.x,
+      //                       settleTarget[1] - settleSource.y];
+      // } else if (isIndex(dstHoleN)) {
+      //   let dDstHole = play.soliHoleN(dstHoleN);
+      //   let settleTarget = dDstHole.globalPosition();
+
+      //   settleTargetDiff = [settleTarget.x - settleSource.x,
+      //                       settleTarget.y - settleSource.y];        
+      // } else {
+        // draw
+      if (dsthole) {
         let dDstHole = play.soliHoleN(dstHoleN);
         let settleTarget = dDstHole.globalPosition();
 
         settleTargetDiff = [settleTarget.x - settleSource.x,
                             settleTarget.y - settleSource.y];        
+      } else if (dststack) {
+        let dDstStack = play.soliStackN(dstStackN);
+        let settleTarget = dDstStack.globalPositionNextCard();
+
+        settleTargetDiff = [settleTarget[0] - settleSource.x,
+                            settleTarget[1] - settleSource.y];        
       } else {
-        // draw
         let dDstStack = play.drawStack();
         let settleTarget = dDstStack.globalPositionNextCard(true);
 

@@ -64,14 +64,16 @@ export default function Solistack(play, ctx, bs) {
   this.globalPositionLastCard = dBacks.globalPositionLastCard;
 
   const handleSelected = fxHandler2({
-    onBegin({ stackN }) {
+    onBegin(fxDataSelected) {
+      let { stackN } = fxDataSelected.data;
+
       if (stackN === stack.n) {
         dFronts.init({ stack: solitaire.stack(stackN).front });
       }
     },
     onUpdate() {
     },
-    onEnd({ stackN, dstStackN }) {
+    onEnd() {
     }
   }, () => solitaire.data.selected);
 
@@ -80,9 +82,9 @@ export default function Solistack(play, ctx, bs) {
     },
     onUpdate() {
     },
-    onEnd({selected}) {
+    onEnd(fxDataSettle) {
 
-      let { dstStackN } = selected;
+      let { dstStackN } = fxDataSettle.data;
 
       if (dstStackN === stack.n) {
         dFronts.init({ stack: solitaire.stack(dstStackN).front });

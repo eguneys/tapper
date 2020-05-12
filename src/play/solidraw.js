@@ -64,7 +64,8 @@ export default function SoliDraw(play, ctx, bs) {
   }, events);
 
   const handleSelected = fxHandler2({
-    onBegin({ draw }) {
+    onBegin(fxDataSelected) {
+      let { draw } = fxDataSelected.data;
       if (draw) {
         dDrawStack.init({stack: solitaire.showStack() });
       }
@@ -80,10 +81,8 @@ export default function SoliDraw(play, ctx, bs) {
     },
     onUpdate() {
     },
-    onEnd({selected}) {
-
-      let { draw } = selected;
-
+    onEnd(fxDataSettle) {
+      let { draw } = fxDataSettle.data;
       if (draw) {
         dDrawStack.init({stack: solitaire.showStack() });
       }
