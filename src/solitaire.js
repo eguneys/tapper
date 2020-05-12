@@ -146,6 +146,11 @@ export default function Solitaire() {
     return new SoliHole(cards);
   };
 
+  this.undo = () => {
+    data.undoUsed = true;
+    data.nbMoves++;
+  };
+
   this.init = () => {
     deck.shuffle();
 
@@ -168,6 +173,9 @@ export default function Solitaire() {
       makeHole([]),
       makeHole([])
     ];
+
+    data.nbMoves = 0;
+    data.undoUsed = false;
   };
 
   this.revealStack = stack => {

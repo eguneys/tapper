@@ -3,6 +3,7 @@ import { rect } from '../dquad/geometry';
 import { dContainer } from '../asprite';
 
 import CandyIconText from './candyicontext';
+import CandyLabelText from './candylabeltext';
 
 export default function SoliHud(play, ctx, pbs) {
 
@@ -19,14 +20,21 @@ export default function SoliHud(play, ctx, pbs) {
 
     let undo = rect(hudMargin, height - iconHeight - hudMargin, iconWidth, iconHeight);
 
+    let moves = rect(width - hudMargin - pbs.card.width * 1.4, 
+                     hudMargin,
+                     0, 0);
+
     return {
+      moves,
       undo
     };
   })();
 
 
+  let solitaire;
+
   const onUndoTap = () => {
-    console.log('here');
+    solitaire.undo();
   };
 
   let dUndo = new CandyIconText(this, ctx, {
@@ -36,9 +44,18 @@ export default function SoliHud(play, ctx, pbs) {
     onTap: onUndoTap
   });
 
+  let dMovesLabel = new CandyLabelText(this, ctx, {
+    size: bs.undo.height * 0.4,
+    label: 'MOVES'
+  });
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+    dMovesLabel.add(container);
+    components.push(dMovesLabel);
+    dMovesLabel.move(bs.moves.x, bs.moves.y);
+
     dUndo.add(container);
     components.push(dUndo);
 
@@ -47,6 +64,7 @@ export default function SoliHud(play, ctx, pbs) {
   initContainer();
 
   this.init = data => {
+    solitaire = data.solitaire;
   };
 
   this.update = delta => {
@@ -54,6 +72,9 @@ export default function SoliHud(play, ctx, pbs) {
   };
 
   this.render = () => {
+    let moves = solitaire.data.nbMoves;
+    let undoUsed = solitaire.data.undoUsed;
+    dMovesLabel.setText(moves + (undoUsed?"*":""));
     components.forEach(_ => _.render());
   };
 
