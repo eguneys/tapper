@@ -16,22 +16,21 @@ export default function sprites(resources) {
   const mcards = fT('mcards');
 
   return {
-    'menubg9': slice9(texture('mhud'), 0, 16, 16, 16),
-    'upgradebg9': slice9(texture('mhud'), 48, 16, 16, 32 / 3),
-    'letters': letters(texture('mletters')),
     'fletters': fletters(texture('fletters'), json('flettersjson')),
     'fkerning': json('flettersjson'),
     'greenbg': texture('greenbg'),
     'mbg': texture('mbg'),
-    'coin': mtapper(0, 0, 32),
     'mall': all(mall),
     'mcards': cards(mcards),
-    'menuclose': mhud(32, 0, 16),
-    'toggleOn': mhud(0, 0, 32, 16),
-    'toggleOff': mhud(64, 0, 32, 16),
-    'costButton': mhud(96, 0, 16 * 3, 32)
+    'mhud': hud(mhud)
   };
 }
+
+const hud = (mhud) => {
+  return {
+    'undo': mhud(0, 0, 32)
+  };
+};
 
 const cards = (mcards) => {
   return {

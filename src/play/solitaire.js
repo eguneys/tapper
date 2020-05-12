@@ -9,6 +9,7 @@ import SoliDraw from './solidraw';
 import DragStack from './dragstack';
 import SoliReveal from './solireveal';
 import SoliHole from './solihole';
+import SoliHud from './solihud';
 
 import Solitaire from '../solitaire';
 
@@ -87,6 +88,8 @@ export default function SolitaireView(play, ctx, pbs) {
   
   let dSoliReveal = new SoliReveal(this, ctx, bs);
 
+  let dSoliHud = new SoliHud(this, ctx, bs);
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -119,6 +122,9 @@ export default function SolitaireView(play, ctx, pbs) {
 
     dDragStack.add(container);
     components.push(dDragStack);
+
+    dSoliHud.add(container);
+    components.push(dSoliHud);
   };
   initContainer();
 
@@ -126,6 +132,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
     solitaire.init();
 
+    dSoliHud.init({solitaire});
     dSoliReveal.init({ solitaire });
     dDragStack.init({ solitaire });
     dDraw.init({ solitaire });
