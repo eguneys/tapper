@@ -61,14 +61,16 @@ function shuffle(a) {
     return a;
 }
 
-export default function Deck(deck) {
+export default function Deck(baseDeck) {
+
+  let deck;
 
   this.test = () => {
-    deck = deck.slice(0);
+    deck = baseDeck.slice(0);
   };
 
   this.shuffle = () => {
-    deck = shuffle(deck.slice(0));
+    deck = shuffle(baseDeck.slice(0));
   };
 
   this.remaining = () => deck.length;

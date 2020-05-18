@@ -29,6 +29,8 @@ export function app(element, options) {
     .add('mletters', aBase('letters.png'))
     .add('fletters', aBase('fletters.png'))
     .add('flettersjson', aBase('fletters.json'))
+    .add('pletters', aBase('pletters.png'))
+    .add('plettersjson', aBase('pletters.json'))
     .add('mtapper', aBase('tapper.png'))
     .load((loader, resources) => {
 

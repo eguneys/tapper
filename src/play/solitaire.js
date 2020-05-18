@@ -30,12 +30,12 @@ export default function SolitaireView(play, ctx, pbs) {
         cWidth = cRatio * cHeight;
     let card = rect(0, 0, cWidth, cHeight);
 
-    let stackMargin = 8;
+    let stackMargin = height * 0.1 / 4;
 
     let draws = rect(stackMargin, stackMargin,
                      cWidth, cHeight);
 
-    let stacks = rect(draws.x1 + stackMargin * 2.0,
+    let stacks = rect(draws.x1 + stackMargin * 3.0,
                       stackMargin,
                       (cWidth + stackMargin),
                       height - stackMargin);

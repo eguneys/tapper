@@ -3,11 +3,23 @@ import Fx from './fxs';
 
 import * as solifx from './solifx';
 
+import SoliDrawDeck from './solidrawdeck';
+
 export function isIndex(n) { return n || n === 0; };
 
 export default function Solitaire() {
 
   let data = this.data = {
+    drawStack: new SoliDrawDeck(),
+    stacks: [
+      new SoliStack(0),
+      new SoliStack(1),
+      new SoliStack(2),
+      new SoliStack(3),
+      new SoliStack(4),
+      new SoliStack(5),
+      new SoliStack(6)
+    ]
   };
 
   const onSettleEnd = (fxDataSettle) => {
@@ -60,9 +72,9 @@ export default function Solitaire() {
       return;
     }
 
-    data.showStack.forEach(_ => data.drawStack.unshift(_));
+    data.drawStack.append(data.showStack);
 
-    let card = data.drawStack.pop();
+    let card = data.drawStack.draw1();
 
     data.showStack = [];
     data.showStack.push(card);
@@ -151,20 +163,26 @@ export default function Solitaire() {
     data.nbMoves++;
   };
 
+  this.newGame = () => {
+    this.init();
+  };
+
   this.init = () => {
+
+    reset();
+    beginDeal();
+  };
+
+  const beginDeal = () => {
     deck.shuffle();
 
-    data.stacks = [
-      makeStack(0, 0),
-      makeStack(1, 1),
-      makeStack(2, 2),
-      makeStack(3, 3),
-      makeStack(4, 4),
-      makeStack(5, 5),
-      makeStack(6, 6)
-    ];
+    data.drawStack.init(deck.drawRest());
+  };
 
-    data.drawStack = deck.drawRest();
+
+  const reset = () => {
+    data.stacks.forEach(_ => _.clear());
+
     data.showStack = [];
 
     data.holes = [
@@ -220,7 +238,7 @@ const canStack = (c1, c2) =>
 const canTop = c1 =>
       c1.rank === 'king';
 
-function SoliStack(n, hidden, front) {
+function SoliStack(n, hidden = [], front = []) {
   
   this.n = n;
   this.front = front;
@@ -228,9 +246,17 @@ function SoliStack(n, hidden, front) {
 
   this.cut1 = n => front.splice(n, front.length - n);
 
+  this.hide1 = card => {
+    hidden.push(card);
+  };
 
   this.add1 = cards => {
     cards.forEach(_ => front.push(_));
+  };
+
+  this.clear = () => {
+    front = [];
+    hidden = [];
   };
 
   this.reveal1 = () => {

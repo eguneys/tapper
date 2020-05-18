@@ -18,6 +18,8 @@ export default function sprites(resources) {
   return {
     'fletters': fletters(texture('fletters'), json('flettersjson')),
     'fkerning': json('flettersjson'),
+    'pletters': fletters(texture('pletters'), json('plettersjson')),
+    'pkerning': json('plettersjson'),
     'greenbg': texture('greenbg'),
     'mbg': texture('mbg'),
     'mall': all(mall),

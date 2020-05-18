@@ -14,17 +14,22 @@ export default function SoliHud(play, ctx, pbs) {
   let bs = (() => {
     let { width, height } = pbs;
 
-    let hudMargin = 8;
-    let iconWidth = 32,
-        iconHeight = 32;
+    let hudMargin = height * 0.1 / 4;
+    let iconWidth = height * 0.1,
+        iconHeight = iconWidth;
 
     let undo = rect(hudMargin, height - iconHeight - hudMargin, iconWidth, iconHeight);
 
-    let moves = rect(width - hudMargin - pbs.card.width * 1.4, 
-                     hudMargin,
-                     0, 0);
+    let moves = rect(width - hudMargin - pbs.card.width * 1.4,
+                     hudMargin * iconHeight,
+                     0, iconHeight);
+
+    let newGame = rect(moves.x,
+                       hudMargin,
+                       0, iconHeight);
 
     return {
+      newGame,
       moves,
       undo
     };
@@ -35,6 +40,10 @@ export default function SoliHud(play, ctx, pbs) {
 
   const onUndoTap = () => {
     solitaire.undo();
+  };
+
+  const onNewGameTap = () => {
+    solitaire.newGame();
   };
 
   let dUndo = new CandyIconText(this, ctx, {
@@ -49,9 +58,19 @@ export default function SoliHud(play, ctx, pbs) {
     label: 'MOVES'
   });
 
+  let dNewGame = new CandyLabelText(this, ctx, {
+    label: " NEW\nGAME",
+    size: bs.undo.height * 0.4,
+    onTap: onNewGameTap
+  });
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+    dNewGame.add(container);
+    components.push(dNewGame);
+    dNewGame.move(bs.newGame.x, bs.newGame.y);
+
     dMovesLabel.add(container);
     components.push(dMovesLabel);
     dMovesLabel.move(bs.moves.x, bs.moves.y);
