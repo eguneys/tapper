@@ -10,6 +10,7 @@ import DragStack from './dragstack';
 import SoliReveal from './solireveal';
 import SoliHole from './solihole';
 import SoliHud from './solihud';
+import SoliDeal from './solideal';
 
 import Solitaire from '../solitaire';
 
@@ -88,7 +89,14 @@ export default function SolitaireView(play, ctx, pbs) {
   
   let dSoliReveal = new SoliReveal(this, ctx, bs);
 
+  let dSoliDeal = new SoliDeal(this, ctx, bs);
+
   let dSoliHud = new SoliHud(this, ctx, bs);
+
+  this.soliStackN = n => dStacks[n];
+  this.drawStack = dDraw.drawStack;
+  this.soliHoleN = n => dHoles[n];
+  this.dDraw = dDraw;
 
   let components = [];
   const container = dContainer();
@@ -123,6 +131,9 @@ export default function SolitaireView(play, ctx, pbs) {
     dDragStack.add(container);
     components.push(dDragStack);
 
+    dSoliDeal.add(container);
+    components.push(dSoliDeal);
+
     dSoliHud.add(container);
     components.push(dSoliHud);
   };
@@ -136,6 +147,7 @@ export default function SolitaireView(play, ctx, pbs) {
     dSoliReveal.init({ solitaire });
     dDragStack.init({ solitaire });
     dDraw.init({ solitaire });
+    dSoliDeal.init({ solitaire });
 
     dStacks.forEach((dStack, i) => {
       dStack.init({
@@ -151,10 +163,6 @@ export default function SolitaireView(play, ctx, pbs) {
       });
     });
   };
-
-  this.soliStackN = n => dStacks[n];
-  this.drawStack = dDraw.drawStack;
-  this.soliHoleN = n => dHoles[n];
 
   const tapEnd = () => {
     solitaire.endTap();

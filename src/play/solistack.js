@@ -68,7 +68,8 @@ export default function Solistack(play, ctx, bs) {
       let { stackN } = fxDataSelected.data;
 
       if (stackN === stack.n) {
-        dFronts.init({ stack: solitaire.stack(stackN).front });
+        // dFronts.init({ stack: solitaire.stack(stackN).front });
+        refresh();
       }
     },
     onUpdate() {
@@ -87,12 +88,28 @@ export default function Solistack(play, ctx, bs) {
       let { dstStackN } = fxDataSettle.data;
 
       if (dstStackN === stack.n) {
-        dFronts.init({ stack: solitaire.stack(dstStackN).front });
+        // dFronts.init({ stack: solitaire.stack(dstStackN).front });
+        refresh();
       }
     }
   }, () => solitaire.data.settle);
 
-  this.refresh = () => {
+  const handleDeal = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd(fxDataEnd) {
+      let { stackN } = fxDataEnd.data;
+
+      if (stackN === stack.n) {
+        refresh();
+      }
+    }
+  }, () => solitaire.data.deal);
+
+  const refresh = this.refresh = () => {
+    stack = solitaire.stack(stack.n);
     dFronts.init({ stack: stack.front });
     dBacks.init({ nbStack: stack.hidden.length });
   };
@@ -100,6 +117,7 @@ export default function Solistack(play, ctx, bs) {
   this.update = delta => {
     handleSelected(delta);
     handleSettled(delta);
+    handleDeal(delta);
     components.forEach(_ => _.update(delta));
   };
 

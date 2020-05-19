@@ -38,6 +38,8 @@ export default function CandyCards(play, ctx, bs) {
     height: cHeight
   });
 
+  let dFrontContainer = dContainer();
+
   let dMiddle = new TapSprite(this, ctx, {
     width: mWidth,
     height: mHeight
@@ -66,17 +68,19 @@ export default function CandyCards(play, ctx, bs) {
 
     dTop.anchor(0.5);
     dTop.move(tWidth * 0.5 + tMargin, tHeight * 0.5 + tMargin);
-    dTop.add(container);
+    dTop.add(dFrontContainer);
     components.push(dTop);
 
     dMiddle.anchor(0.5);
     dMiddle.move(cWidth - mWidth * 0.5 - tMargin, cHeight - mHeight * 0.5 - tMargin);
-    dMiddle.add(container);
+    dMiddle.add(dFrontContainer);
     components.push(dMiddle);
 
     dRank.move(cWidth - tWidth - tMargin,  tMargin);
-    dRank.add(container);
+    dRank.add(dFrontContainer);
     components.push(dRank);
+
+    container.addChild(dFrontContainer);
 
     dHighlight.move(-1, -1);
     dHighlight.add(container);
@@ -96,16 +100,21 @@ export default function CandyCards(play, ctx, bs) {
 
     dBg.texture(data.back ? mcards.back : mcards.front);
 
-    dMiddle.texture(mcards[data.suit]);
-    dTop.texture(mcards[data.suit]);
-    dTop.texture(mcards[data.suit]);
-
-    dRank.setText(ranks[data.rank]);
-
-    if (data.rank === 'ten') {
-      dRank.move(cWidth - tWidth - tMargin * 4.0,  tMargin);
+    if (data.back) {
+      dFrontContainer.visible = false;
     } else {
-      dRank.move(cWidth - tWidth - tMargin,  tMargin);
+      dFrontContainer.visible = true;
+      dMiddle.texture(mcards[data.suit]);
+      dTop.texture(mcards[data.suit]);
+      dTop.texture(mcards[data.suit]);
+
+      dRank.setText(ranks[data.rank]);
+
+      if (data.rank === 'ten') {
+        dRank.move(cWidth - tWidth - tMargin * 4.0,  tMargin);
+      } else {
+        dRank.move(cWidth - tWidth - tMargin,  tMargin);
+      }
     }
   };
 

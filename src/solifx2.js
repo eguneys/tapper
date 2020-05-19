@@ -9,15 +9,15 @@ export function SoliFxDealDeck(solitaire) {
     data.stackN = stackN;
     data.isHidden = isHidden;
 
-    data.card = sData.drawStack.draw1();
+    data.cards = [sData.drawStack.draw1()];
   };
 
   this.doEnd = () => {
     let stack = sData.stacks[data.stackN];
     if (data.isHidden) {
-      stack.hide1(data.card);
+      stack.hide1(data.cards);
     } else {
-      stack.add1(data.card);
+      stack.add1(data.cards);
     }
   };
 

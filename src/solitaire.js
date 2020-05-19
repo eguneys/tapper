@@ -1,9 +1,13 @@
+import { withDelay } from './util';
+
 import { makeOneDeck } from './deck';
 import Fx from './fxs';
 
 import * as solifx from './solifx';
+import SoliDealsFx from './dealsfx';
 
 import SoliDrawDeck from './solidrawdeck';
+
 
 export function isIndex(n) { return n || n === 0; };
 
@@ -58,14 +62,25 @@ export default function Solitaire() {
 
   let fxAddHole = new Fx(data, 'addhole', onAddHoleEnd);
 
-  this.stack = n => data.stacks[n];
-  this.drawStack = () => data.drawStack;
-  this.showStack = () => data.showStack;
-  this.hole = n => data.holes[n];
+
+  const onDealEnd = (fxDataEnd) => {
+    fxDataEnd.doEnd();
+  };
+
+  let fxDeal = new Fx(data, 'deal', onDealEnd);
 
   let fxDataSelectedDraw = new solifx.SoliFxSelectedDraw(this),
       fxDataSelectedStack = new solifx.SoliFxSelectedStack(this),
       fxDataSelectedHole = new solifx.SoliFxSelectedHole(this);
+
+
+  let dealsFxer = new SoliDealsFx(this);
+
+
+  this.stack = n => data.stacks[n];
+  this.drawStack = () => data.drawStack;
+  this.showStack = () => data.showStack;
+  this.hole = n => data.holes[n];
 
   this.deal = () => {
     if (busyFxs()) {
@@ -177,10 +192,13 @@ export default function Solitaire() {
     deck.shuffle();
 
     data.drawStack.init(deck.drawRest());
+
+    dealsFxer.init();
   };
 
 
   const reset = () => {
+
     data.stacks.forEach(_ => _.clear());
 
     data.showStack = [];
@@ -213,21 +231,29 @@ export default function Solitaire() {
     });
   };
 
+  let allFxs = [fxSelected, fxSettle, fxReveal, fxAddHole, fxDeal];
+
   const busyFxs = () => {
-    return fxSelected.value() ||
-      fxSettle.value() ||
-      fxReveal.value() ||
-      fxAddHole.value();
+    return allFxs.some(_ => _.value());
   };
 
   const updateFxs = (delta) => {
-    fxSelected.update(delta);
-    fxSettle.update(delta);
-    fxReveal.update(delta);
-    fxAddHole.update(delta);
+    allFxs.forEach(_ => _.update(delta));
+  };
+
+  const updateDeals = delta => {
+    if (fxDeal.value()) {
+      return;
+    }
+
+    let fxData = dealsFxer.acquireDeal();
+    if (fxData) {
+      fxDeal.begin(fxData);
+    }
   };
 
   this.update = (delta) => {
+    updateDeals(delta);
     updateFxs(delta);
   };
 }
@@ -246,8 +272,8 @@ function SoliStack(n, hidden = [], front = []) {
 
   this.cut1 = n => front.splice(n, front.length - n);
 
-  this.hide1 = card => {
-    hidden.push(card);
+  this.hide1 = cards => {
+    cards.forEach(_ => hidden.push(_));
   };
 
   this.add1 = cards => {
@@ -255,8 +281,8 @@ function SoliStack(n, hidden = [], front = []) {
   };
 
   this.clear = () => {
-    front = [];
-    hidden = [];
+    front = this.front = [];
+    hidden = this.hidden = [];
   };
 
   this.reveal1 = () => {

@@ -22,6 +22,11 @@ export default function SoliDraw(play, ctx, bs) {
     ...bs
   });
 
+
+  this.drawDeckGlobalPosition = () => {
+    return dDrawDeck.globalPositionLastCard();
+  };
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
