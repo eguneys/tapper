@@ -49,6 +49,7 @@ export default function SolitaireView(play, ctx, pbs) {
     
     return {
       deck,
+      stackMargin,
       cMargin,
       card,
       stacks,
