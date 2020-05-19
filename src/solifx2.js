@@ -9,7 +9,7 @@ export function SoliFxDealDeck(solitaire) {
     data.stackN = stackN;
     data.isHidden = isHidden;
 
-    data.cards = [sData.drawStack.draw1()];
+    data.cards = [sData.drawStack.dealDraw1()];
   };
 
   this.doEnd = () => {

@@ -81,7 +81,7 @@ export function SoliFxSelectedDraw(solitaire) {
   this.doBegin = (epos, decay) => {
     data.epos = epos;
     data.decay = decay;
-    data.stack = [sData.showStack.pop()];
+    data.stack = [sData.drawStack.draw1()];
     settleFx = undefined;
   };
 
@@ -195,7 +195,7 @@ export function SoliFxSettleDrawCancel(solitaire, baseFx) {
   };
 
   this.doEnd = () => {
-    sData.showStack.push(data.stack[0]);
+    sData.drawStack.drawCancel1(data.stack[0]);
   };
 }
 

@@ -46,6 +46,7 @@ export default function Play(play, ctx, bs) {
   let settleTargetDiff;
   const handleSettle = fxHandler({
     allowEnd: true,
+    duration: 100,
     onBegin(fxDataSettle) {
 
       let { dststack,
@@ -69,7 +70,7 @@ export default function Play(play, ctx, bs) {
                             settleTarget[1] - settleSource.y];        
       } else {
         let dDstStack = play.drawStack();
-        let settleTarget = dDstStack.globalPositionNextCard(true);
+        let settleTarget = dDstStack.globalPositionNextCard(false);
 
         settleTargetDiff = [settleTarget[0] - settleSource.x,
                             settleTarget[1] - settleSource.y];
