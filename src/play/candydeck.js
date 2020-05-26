@@ -23,8 +23,10 @@ export default function CandyDeck(play, ctx, bs) {
   };
   initContainer();
 
+  let nbStack;
+
   this.init = data => {
-    let nbStack = data.nbStack;
+    nbStack = data.nbStack;
 
     dCards.forEach(_ => {
       _.remove();
@@ -52,6 +54,12 @@ export default function CandyDeck(play, ctx, bs) {
     iExtend.target(cardExtend);
   };
 
+  this.extend = (height) => {
+    height = Math.min(deckHeight, height);
+    let cardExtend = nbStack === 0 ? 0 : height / nbStack;
+    iExtend.target(cardExtend);
+  };
+
   this.nextBounds = () => {
     let iCardExtend = iExtend.value();
 
@@ -74,7 +82,7 @@ export default function CandyDeck(play, ctx, bs) {
     iExtend.update(delta / 200);
     components.forEach(_ => _.update(delta));
   };
-
+  
   const renderCards = () => {
     let iCardExtend = iExtend.value();
 

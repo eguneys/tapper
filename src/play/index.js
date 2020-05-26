@@ -1,7 +1,6 @@
 import { dContainer, sprite } from '../asprite';
 
-import CandyView from './candy';
-import SolitaireView from './solitaire';
+import CardGame from './cardgame';
 
 export default function Play(ctx) {
 
@@ -16,22 +15,21 @@ export default function Play(ctx) {
     };
   })();
 
-  let dCandy = new CandyView(this, ctx, bs);
-  let dSolitaire = new SolitaireView(this, ctx, bs);
+  let dCardGame = new CardGame(this, ctx, bs);
 
   let components = [];
   let container = dContainer();
   const initContainer = () => {
 
-    dSolitaire.add(container);
-    components.push(dSolitaire);
+    dCardGame.add(container);
+    components.push(dCardGame);
 
   };
   initContainer();
 
   this.init = data => {
 
-    dSolitaire.init({});
+    dCardGame.init({});
 
   };
 

@@ -11,6 +11,8 @@ export default function CandyIconText(play, ctx, bs) {
 
   const { events } = ctx;
 
+  let { vertical } = bs;
+
   let dIcon = new TapSprite(this, ctx, {
     width: bs.size,
     height: bs.size,
@@ -34,7 +36,11 @@ export default function CandyIconText(play, ctx, bs) {
 
     dText.setText(bs.text);
 
-    dText.move(bs.size, bs.size * 0.25);
+    if (vertical) {
+      dText.move(0, bs.size);
+    } else {
+      dText.move(bs.size, bs.size * 0.25);
+    }
   };
   initContainer();
 

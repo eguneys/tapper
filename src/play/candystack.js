@@ -52,7 +52,16 @@ export default function CandyStack(play, ctx, bs) {
     });
 
     let nbCards = dCards.length;
-    let cardExtend = bs.stacks.height / (nbCards + 1);
+    let cardExtend = bs.stacks.height / (nbCards + 3);
+    cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
+
+    iExtend.value(iExtend.value());
+    iExtend.target(cardExtend);
+  };
+
+  this.extend = (eHeight) => {
+    let nbCards = dCards.length;
+    let cardExtend = eHeight / (nbCards + 3);
     cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
 
     iExtend.value(iExtend.value());
@@ -130,6 +139,11 @@ export default function CandyStack(play, ctx, bs) {
     let iCardExtend = iExtend.value();
 
     return cardY(dCards.length, iCardExtend);
+  };
+
+  this.cardsHeight = () => {
+    let extendTarget = iExtend.target();
+    return cardY(dCards.length + 3, extendTarget);
   };
 
   const cardY = (i, iCardExtend) => {

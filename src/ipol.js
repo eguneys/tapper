@@ -60,14 +60,14 @@ export default function interpolator(a, b = a, {
       resetIfDifferent();
     },
     target(x) {
-      if (x) {
+      if (x || x === 0) {
         b = x;
         resetIfDifferent();
       }
       return b;
     },
     value(x) {
-      if (x) {
+      if (x || x === 0) {
         a = x;
         resetIfDifferent();
       }

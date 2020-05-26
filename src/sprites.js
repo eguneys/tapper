@@ -31,7 +31,9 @@ export default function sprites(resources) {
 const hud = (mhud) => {
   return {
     'undo': mhud(0, 0, 32),
-    'over': mhud(0, 32, 32)
+    'over': mhud(0, 32, 32),
+    'menu': mhud(0, 32 * 2, 32),
+    'back': mhud(0, 32 * 3, 32)
   };
 };
 

@@ -161,15 +161,15 @@ export default function Solitaire() {
     }
   };
 
-  this.endTap = () => {
-    fxSelected.end();
-  };
-
   this.endSelectHole = (dstHoleN) => {
     let fxData = fxSelected.value();
     if (fxData) {
       fxData.endHole(dstHoleN);
     }
+  };
+
+  this.endTap = () => {
+    fxSelected.end();
   };
 
   let deck = makeOneDeck();

@@ -29,9 +29,11 @@ export default function SolitaireView(play, ctx, pbs) {
     let cMargin = 10,
         cHeight = height / 4 - cMargin,
         cWidth = cRatio * cHeight;
+    cHeight = Math.round(cHeight);
+    cWidth = Math.round(cWidth);
     let card = rect(0, 0, cWidth, cHeight);
 
-    let stackMargin = height * 0.1 / 4;
+    let stackMargin = Math.round(height * 0.1 / 4);
 
     let draws = rect(stackMargin, stackMargin,
                      cWidth, cHeight);
