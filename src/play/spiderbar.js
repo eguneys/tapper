@@ -33,7 +33,7 @@ export default function SpiderBar(play, ctx, pbs) {
                      iconHeight * 0.2);
 
     let undo = rect(0,
-                    bar.height - iconHeight - vGap,
+                    bar.height - iconHeight,
                     iconWidth * 0.5,
                     iconHeight * 0.5);
 

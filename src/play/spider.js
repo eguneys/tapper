@@ -40,7 +40,11 @@ export default function Spider(play, ctx, pbs) {
 
     let barWidth = cWidth * 1.1;
 
-    let bar = rect(width - barWidth, cHeight * 1.5, barWidth, height - cHeight - boundsMargin * 2.0);
+    let barHeight = cHeight * 2.0;
+
+    let bar = rect(width - barWidth, barHeight,
+                   barWidth,
+                   height - barHeight - boundsMargin * 2.0);
 
     return {
       bar,

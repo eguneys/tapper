@@ -5,6 +5,7 @@ import { dContainer } from '../asprite';
 import SolitaireView from './solitaire';
 import SpiderView from './spider';
 
+import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
 
 export default function CardGame(play, ctx, pbs) {
@@ -19,6 +20,9 @@ export default function CardGame(play, ctx, pbs) {
   })();
 
   let dBar = new CardGameBar(this, ctx, bs);
+
+  let dMenu = new CardGameMenu(this, ctx, bs);
+
   let dSolitaire = new SolitaireView(this, ctx, bs);
   let dSpider = new SpiderView(this, ctx, bs);
 
@@ -32,6 +36,9 @@ export default function CardGame(play, ctx, pbs) {
     dSpider.add(container);
     components.push(dSpider);
 
+    dMenu.add(container);
+    components.push(dMenu);
+
     dBar.add(container);
     components.push(dBar);
 
@@ -39,6 +46,15 @@ export default function CardGame(play, ctx, pbs) {
   initContainer();
 
   this.init = data => {
+
+    let gameName = 'solitaire';
+    let names = {
+      'spider': 'SPIDER',
+      'solitaire': 'SOLI\nTAIRE',
+      'freecell': 'FREE\nCELL'
+    };
+
+    dBar.setGame(names[gameName]);
 
     dSolitaire.init({});
 
