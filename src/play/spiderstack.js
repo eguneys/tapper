@@ -2,10 +2,14 @@ import { dContainer } from '../asprite';
 
 import CandyDeck from './candydeck';
 import CandyStack from './candystack';
+import CandyCardPlace from './candycardplace';
 
 import { nStack } from '../cards';
 
 export default function SpiderStack(play, ctx, bs) {
+
+  let n;
+  let spider;
 
   let dBacks = new CandyDeck(this, ctx, {
     extendLimit: true,
@@ -14,10 +18,17 @@ export default function SpiderStack(play, ctx, bs) {
   });
   let dFronts = new CandyStack(this, ctx, {
     onBeginCard: (nCard, epos, decay) => {
-
+      spider.beginSelect(n, nCard, epos, decay);
     },
     onEndCard: (nCard) => {
+      spider.endSelect(n);
+    },
+    ...bs
+  });
 
+  let dCardPlace = new CandyCardPlace(this, ctx, {
+    onEndCard: () => {
+      spider.endSelect(n);
     },
     ...bs
   });
@@ -25,6 +36,9 @@ export default function SpiderStack(play, ctx, bs) {
   let components = [];
   const container = dContainer();
   const initContainer = () => {
+
+    dCardPlace.add(container);
+    components.push(dCardPlace);
 
     dBacks.add(container);
     components.push(dBacks);
@@ -35,26 +49,23 @@ export default function SpiderStack(play, ctx, bs) {
   };
   initContainer();
 
-  let n;
-
   this.globalPositionNextCard = dFronts.globalPositionNextCard;
   this.globalPositionLastCard = dBacks.globalPositionLastCard;
-
-  let spider;
 
   this.init = data => {
     n = data.i;
     spider = data.spider;
 
-    this.refresh(spider.stack(n));
+    this.refresh();
   };
 
-  this.refresh = (stack) => {
-    let { hidden, front } = stack;
+  this.refresh = () => {
+    let { hidden, front } = spider.stack(n);
 
     let nbBacks = hidden.length;
     let frontStack = front;
 
+    dCardPlace.init({});
     dBacks.init({ nbStack: nbBacks });
     dFronts.init({ stack: frontStack });
 
@@ -66,7 +77,7 @@ export default function SpiderStack(play, ctx, bs) {
     let extend = bs.stacks.height / (nbCards + 3);
 
     let extendBacks = extend * backs,
-        extendFronts = extend * fronts + 3;
+        extendFronts = extend * (fronts + 3);
 
     dBacks.extend(extendBacks);
     dFronts.extend(extendFronts);

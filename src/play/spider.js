@@ -7,6 +7,8 @@ import CandyBackground from './candybackground';
 import CandyDeck from './candydeck';
 
 import SpiderDeal from './spiderdeal';
+import SpiderDrag from './spiderdrag';
+import SpiderReveal from './spiderreveal';
 
 import SpiderStack from './spiderstack';
 import SpiderHoles from './spiderholes';
@@ -102,6 +104,10 @@ export default function SpiderView(play, ctx, pbs) {
 
   let dDeal = new SpiderDeal(this, ctx, bs);
 
+  let dDrag = new SpiderDrag(this, ctx, bs);
+
+  let dReveal = new SpiderReveal(this, ctx, bs);
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -131,6 +137,12 @@ export default function SpiderView(play, ctx, pbs) {
 
     dDeal.add(container);
     components.push(dDeal);
+
+    dDrag.add(container);
+    components.push(dDrag);
+
+    dReveal.add(container);
+    components.push(dReveal);
   };
   initContainer();
 
@@ -144,11 +156,15 @@ export default function SpiderView(play, ctx, pbs) {
     return dStack.globalPositionNextCard();
   };
 
+  this.stackN = n => dStacks[n];    
+
   this.init = data => {
 
     spider.init({});
 
     dDeal.init({spider});
+    dDrag.init({spider});
+    dReveal.init({spider});
 
     dBar.init({});
 
@@ -174,7 +190,6 @@ export default function SpiderView(play, ctx, pbs) {
   const refreshStack = (stackN) => {
     let dStack = dStacks[stackN];
     let stack = spider.stack(stackN);
-
     dStack.refresh(stack);
   };
 
@@ -183,7 +198,7 @@ export default function SpiderView(play, ctx, pbs) {
       let { stackN } = fxDataSelected.data;
       refreshStack(stackN);
     },
-    onUpdate() {
+    onUpdate(fxDataSelected) {
     },
     onEnd() {
     }
@@ -195,8 +210,8 @@ export default function SpiderView(play, ctx, pbs) {
     onUpdate() {
     },
     onEnd(fxDataSettle) {
-      let { stackN } = fxDataSettle.data;
-      refreshStack(stackN);
+      let { dstStackN } = fxDataSettle.data;
+      refreshStack(dstStackN);
     }
   }, () => spider.data.settle);
 
@@ -229,18 +244,19 @@ export default function SpiderView(play, ctx, pbs) {
   }, events, () => dDrawDeck.bounds());
 
   const handleMove = moveHandler2({
+    threshold: 10,
     onBegin() {
-      console.log('begin');
     },
-    onMove() {
-      console.log('move');
+    onMove(epos) {
+      spider.moveSelect(epos);
     },
     onEnd() {
-      console.log('end');
+      spider.endTap();
     }
   }, events);
 
   this.update = delta => {
+    components.forEach(_ => _.update(delta));
     handleSelected(delta);
     handleSettled(delta);
     handleDeal(delta);
@@ -248,7 +264,6 @@ export default function SpiderView(play, ctx, pbs) {
     handleTap(delta);
     handleMove(delta);
     spider.update(delta);
-    components.forEach(_ => _.update(delta));
   };
 
   this.render = () => {

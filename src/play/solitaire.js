@@ -192,10 +192,6 @@ export default function SolitaireView(play, ctx, pbs) {
     });
   };
 
-  const tapEnd = () => {
-    solitaire.endTap();
-  };
-
   const handleTap = moveHandler({
     onBegin(epos) {
     },
@@ -203,7 +199,7 @@ export default function SolitaireView(play, ctx, pbs) {
       solitaire.moveSelect(epos);
     },
     onEnd() {
-      tapEnd();
+      solitaire.endTap();
     }
   }, events);
 

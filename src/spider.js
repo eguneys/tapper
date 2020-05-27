@@ -2,6 +2,8 @@ import { makeOneDeck } from './deck';
 
 import Fx from './fxs';
 
+import * as spiderfx from './spiderfx';
+
 import SpiderDealsFx from './spiderdealsfx';
 import SpiderDrawDeck from './spiderdrawdeck';
 import Undos from './undos';
@@ -40,7 +42,37 @@ export default function Spider() {
   
   let fxUndoDeal = new Fx(data, 'undodeal', onFxDataEnd);
 
-  let allFxs = [fxDeal, fxUndoDeal];
+
+  const onSettleEnd = (fxData) => {
+    fxData.doEnd();
+  };
+
+  let fxSettle = new Fx(data, 'settle', onSettleEnd);
+
+  const onSelectedEnd = (fxDataSelected) => {
+
+    fxDataSelected.doEnd();
+
+    if (!fxDataSelected.settleFx()) {
+      fxDataSelected.endCancel();
+    }
+    let fxDataSettle = fxDataSelected.settleFx();
+
+    fxSettle.begin(fxDataSettle);
+  };
+
+  let fxSelected = new Fx(data, 'selected', onSelectedEnd);
+
+  let fxDataSelectedStack = new spiderfx.SpiderFxSelectedStack(this);
+
+  const onRevealEnd = ({ n, card }) => {
+    let stack = data.stacks[n];
+    stack.add1([card]);
+  };
+
+  let fxReveal = new Fx(data, 'reveal', onRevealEnd);
+
+  let allFxs = [fxDeal, fxUndoDeal, fxSelected, fxSettle, fxReveal];
 
   this.stack = n => data.stacks[n];
   this.drawStack = data.drawStack;
@@ -93,6 +125,16 @@ export default function Spider() {
 
   };
 
+  this.revealStack = stack => {
+    if (!stack.canReveal()) {
+      return;
+    }
+
+    let last = stack.reveal1();
+    fxReveal.begin({ n: stack.n,
+                     card: last });
+  };
+
   this.beginDraw = () => {
     if (busyFxs() || dealsFxer.busy()) {
       return;
@@ -101,6 +143,33 @@ export default function Spider() {
     dealsFxer.beginDeal1();
 
     undos.push(undoDeal);
+  };
+
+  this.beginSelect = (stackN, cardN, epos, decay) => {
+    if (busyFxs()) {
+      return;
+    }
+
+    fxDataSelectedStack.doBegin(stackN, cardN, epos, decay);
+    fxSelected.begin(fxDataSelectedStack);
+  };
+
+  this.moveSelect = (epos) => {
+    let fxData = fxSelected.value();
+    if (fxData) {
+      fxData.doUpdate(epos);
+    }
+  };
+
+  this.endSelect = (dstStackN) => {
+    let fxData = fxSelected.value();
+    if (fxData) {
+      fxData.endStack(dstStackN);
+    }
+  };
+
+  this.endTap = () => {
+    fxSelected.end();
   };
 
   const busyFxs = () => {
@@ -140,6 +209,9 @@ export default function Spider() {
   };
 }
 
+const canStack = (c1, c2) => c1.sRank === c2.sRank + 1;
+
+const canTop = c1 => true;
 
 function SpiderStack(n, hidden = [], front = []) {
   
@@ -168,6 +240,17 @@ function SpiderStack(n, hidden = [], front = []) {
 
   this.reveal1 = () => {
     return hidden.pop();
+  };
+
+  this.canAdd = cards => {
+    let t = top(),
+        t2 = cards[0];
+
+    if (!t) {
+      return canTop(t2);
+    }
+
+    return canStack(t, t2);
   };
 
   const top = () => front[front.length - 1];

@@ -2,11 +2,10 @@ import { dContainer } from '../asprite';
 
 import CandyStack from './candystack';
 
-import { isIndex } from '../solitaire';
 import { fxHandler, fxHandler2 } from './util';
 import * as v from '../vec2';
 
-export default function DragStack(play, ctx, bs) {
+export default function Play(play, ctx, bs) {
 
   const { events } = ctx;
 
@@ -20,9 +19,9 @@ export default function DragStack(play, ctx, bs) {
   };
   initContainer();
 
-  let solitaire;
+  let spider;
   this.init = data => {
-    solitaire = data.solitaire;
+    spider = data.spider;
   };
 
   const handleDrag = fxHandler2({
@@ -36,11 +35,9 @@ export default function DragStack(play, ctx, bs) {
     onUpdate(fxDataSelected) {
       let { epos, decay } = fxDataSelected.data;
       dDragStack.move(epos[0] + decay[0], epos[1] + decay[1]);
-    },
-    onEnd() {
     }
-  }, () => solitaire.data.selected);
-  
+  }, () => spider.data.selected);
+
 
   let settleSource;
   let settleTargetDiff;
@@ -49,32 +46,13 @@ export default function DragStack(play, ctx, bs) {
     duration: 100,
     onBegin(fxDataSettle) {
 
-      let { dststack,
-            dsthole,
-            dstHoleN,
-            dstStackN } = fxDataSettle.data;
+      let { dstStackN } = fxDataSettle.data;
 
       settleSource = dDragStack.globalPosition();
+      let settleTarget = play.stackNextCardGlobalPosition(dstStackN);
 
-      if (dsthole) {
-        let dDstHole = play.soliHoleN(dstHoleN);
-        let settleTarget = dDstHole.globalPosition();
-
-        settleTargetDiff = [settleTarget.x - settleSource.x,
-                            settleTarget.y - settleSource.y];        
-      } else if (dststack) {
-        let dDstStack = play.soliStackN(dstStackN);
-        let settleTarget = dDstStack.globalPositionNextCard();
-
-        settleTargetDiff = [settleTarget[0] - settleSource.x,
-                            settleTarget[1] - settleSource.y];
-      } else {
-        let dDstStack = play.drawStack();
-        let settleTarget = dDstStack.globalPositionNextCard(false);
-
-        settleTargetDiff = [settleTarget[0] - settleSource.x,
-                            settleTarget[1] - settleSource.y];
-      }
+      settleTargetDiff = [settleTarget[0] - settleSource.x,
+                          settleTarget[1] - settleSource.y];
     },
     onUpdate(_, i) {
       let vSettleTarget = v.cscale(settleTargetDiff, i);
@@ -84,7 +62,7 @@ export default function DragStack(play, ctx, bs) {
     onEnd() {
       dDragStack.init({ stack: [] });
     }
-  }, () => solitaire.data.settle);
+  }, () => spider.data.settle);
 
   this.update = delta => {
     handleDrag(delta);

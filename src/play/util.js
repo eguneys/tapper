@@ -19,18 +19,18 @@ export function fxHandler2({
 
     if (fx) {
       if (!running) {
-        onBegin(fx.value);
+        callMaybe(onBegin, fx.value);
         running = fx.value;
       }
     } else {
       if (running) {
-        onEnd(running);
+        callMaybe(onEnd, running);
         running = false;
       }
     }
 
     if (running) {
-      onUpdate(fx.value);
+      callMaybe(onUpdate, fx.value);
       running = fx.value;
     }
   };
@@ -53,20 +53,20 @@ export function fxHandler({
 
     if (fx) {
       if (!running) {
-        onBegin(fx.value);
+        callMaybe(onBegin, fx.value);
         running = fx.value;
         iFx.both(0, 1);
       }
     } else {
       if (running) {
-        onEnd(running);
+        callMaybe(onEnd, running);
         running = false;
       }
     }
 
     if (running) {
       let vFx = easing?iFx.easing(easing):iFx.value();
-      onUpdate(fx.value, vFx, iFx);
+      callMaybe(onUpdate, fx.value, vFx, iFx);
       if (allowEnd && iFx.settled()) {
         fx.end = true;
       }
