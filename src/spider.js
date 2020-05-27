@@ -89,7 +89,7 @@ export default function Spider() {
   let fxMove = new Fx(data, 'move', onMoveEnd);
 
   const onPersistSelectEnd = ({stackN, cardN}) => {
-    data.stacks[stackN].highlight1(false);
+    data.stacks[stackN].highlightCards([]);
   };
 
   let fxPersistSelect = new Fx(data, 'persistselect', onPersistSelectEnd);
@@ -201,15 +201,14 @@ export default function Spider() {
 
     let persistSelectData = fxPersistSelect.value();
     if (persistSelectData) {
-      let { stackN: srcStackN, cardN } = persistSelectData;
+      let { stackN: srcStackN, cardN, cards } = persistSelectData;
 
 
       let dstStack = data.stacks[stackN],
           srcStack = data.stacks[srcStackN];
 
-      let srcCard = srcStack.frontCard(cardN);
-
-      if (dstStack.canAdd([srcCard])) {
+      if (srcStack === dstStack) {
+      } else if (dstStack.canAdd(cards)) {
 
         this.moveCards(srcStackN, stackN, cardN);
 
@@ -246,10 +245,12 @@ export default function Spider() {
   };
 
 
-  this.persistSelect = (stackN, cardN) => {
+  this.persistSelect = (stackN, cards) => {
     let stack = data.stacks[stackN];
-    stack.highlight1(cardN);
-    fxPersistSelect.begin({ stackN, cardN });
+    let cardN = stack.indexOf(cards[0]);
+    //stack.highlight1(cardN);
+    stack.highlightCards(cards);
+    fxPersistSelect.begin({ stackN, cards, cardN });
   };
 
   this.persistSelectEnd = () => {
@@ -310,10 +311,12 @@ function SpiderStack(n, hidden = [], front = []) {
 
   this.frontCard = (n) => front[n];
 
+  this.indexOf = (card) => front.indexOf(card);
+
   this.highlight = () => highlight;
 
-  this.highlight1 = (cardN) => {
-    highlight = cardN;
+  this.highlightCards = (cards) => {
+    highlight = cards.map(_ => this.indexOf(_));
   };
 
   this.cut1 = n => front.splice(n, front.length - n);
@@ -333,6 +336,7 @@ function SpiderStack(n, hidden = [], front = []) {
   this.clear = () => {
     front = this.front = [];
     hidden = this.hidden = [];
+    highlight = undefined;
   };
 
   this.reveal1 = () => {

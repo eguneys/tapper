@@ -65,6 +65,8 @@ export default function SpiderStack(play, ctx, bs) {
     let { hidden, front } = stack;
     let highlight = stack.highlight();
 
+    console.log(front.map(_ => _.rank));
+
     let nbBacks = hidden.length;
     let frontStack = front;
 
@@ -89,7 +91,7 @@ export default function SpiderStack(play, ctx, bs) {
 
   const handlePersistSelect = fxHandler2({
     onBegin(fxData) {
-      let { stackN, cardN } = fxData;
+      let { stackN } = fxData;
       if (stackN === n) {
         refresh();
       }

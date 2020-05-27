@@ -56,10 +56,9 @@ export default function CandyStack(play, ctx, bs) {
 
     this.extend(bs.stacks.height);
 
-    if (isIndex(highlight)) {
-      this.highlightCards(highlight);
-    } else {
-      this.highlight(false);
+    this.highlight(false);
+    if (highlight) {
+      highlight.forEach(n => this.highlightCard(n));
     }
 
     // let nbCards = dCards.length;
@@ -83,8 +82,8 @@ export default function CandyStack(play, ctx, bs) {
     dCards.forEach(_ => _.highlight(value));
   };
 
-  this.highlightCards = (n) => {
-    dCards[dCards.length - 1 - n].highlight(true);
+  this.highlightCard = (n) => {
+    dCards[n].highlight(true);
   };
 
   const handleMove = moveHandler({

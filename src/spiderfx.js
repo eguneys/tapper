@@ -75,7 +75,7 @@ export function SpiderFxSettleStackCancel(spider, baseFx) {
     stack.add1(data.stack);
 
     if (!data.hasMoved) {
-      spider.persistSelect(data.dstStackN, data.stack.length - 1);
+      spider.persistSelect(data.dstStackN, data.stack);
     } else {
       spider.persistSelectEnd();
     }
@@ -111,7 +111,7 @@ export function SpiderFxSettleStackStack(spider, baseFx) {
     spider.revealStack(srcStack);
 
     if (data.srcStackN === data.dstStackN) {
-      spider.persistSelect(data.dstStackN, data.stack.length - 1);
+      spider.persistSelect(data.dstStackN, data.stack);
     }
   };
 }
