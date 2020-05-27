@@ -27,6 +27,13 @@ export default function Fx(data, key, onEnd = () => {}) {
     delete data[key];
   };
 
+  this.endNow = () => {
+    if (state.value) {
+      state.end = false;
+      end();
+    }
+  };
+
   this.update = (delta) => {
     if (state.end) {
       state.end = false;

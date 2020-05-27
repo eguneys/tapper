@@ -4,7 +4,7 @@ import iPol from '../ipol';
 import { dContainer } from '../asprite';
 import CandyCards from './candycards';
 
-import { hitTest, moveHandler } from './util';
+import { isIndex, hitTest, moveHandler } from './util';
 
 export default function CandyStack(play, ctx, bs) {
 
@@ -29,6 +29,8 @@ export default function CandyStack(play, ctx, bs) {
   this.init = data => {
     let stack = data.stack;
 
+    let highlight = data.highlight;
+
     dCards.forEach(_ => {
       _.remove();
       components.splice(components.indexOf(_), 1);
@@ -51,12 +53,21 @@ export default function CandyStack(play, ctx, bs) {
 
     });
 
-    let nbCards = dCards.length;
-    let cardExtend = bs.stacks.height / (nbCards + 3);
-    cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
 
-    iExtend.value(iExtend.value());
-    iExtend.target(cardExtend);
+    this.extend(bs.stacks.height);
+
+    if (isIndex(highlight)) {
+      this.highlightCards(highlight);
+    } else {
+      this.highlight(false);
+    }
+
+    // let nbCards = dCards.length;
+    // let cardExtend = bs.stacks.height / (nbCards + 3);
+    // cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
+
+    // iExtend.value(iExtend.value());
+    // iExtend.target(cardExtend);
   };
 
   this.extend = (eHeight) => {
@@ -70,6 +81,10 @@ export default function CandyStack(play, ctx, bs) {
 
   this.highlight = (value) => {
     dCards.forEach(_ => _.highlight(value));
+  };
+
+  this.highlightCards = (n) => {
+    dCards[dCards.length - 1 - n].highlight(true);
   };
 
   const handleMove = moveHandler({
@@ -155,7 +170,7 @@ export default function CandyStack(play, ctx, bs) {
 
     dCards.forEach((dCard, i) => {
       let posY = cardY(i, iCardExtend);
-      dCard.move(0, posY);
+      dCard.move(0, Math.round(posY));
     });
   };
 

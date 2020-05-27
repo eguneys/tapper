@@ -2,6 +2,10 @@ import iPol from '../ipol';
 
 import * as v from '../vec2';
 
+export function isIndex(n) {
+  return n === 0 || !!n;
+}
+
 export function callMaybe(fn, ...args) {
   if (fn) { fn(...args);  }
 };

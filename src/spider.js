@@ -52,7 +52,6 @@ export default function Spider() {
   const onSelectedEnd = (fxDataSelected) => {
 
     fxDataSelected.doEnd();
-
     if (!fxDataSelected.settleFx()) {
       fxDataSelected.endCancel();
     }
@@ -71,6 +70,12 @@ export default function Spider() {
   };
 
   let fxReveal = new Fx(data, 'reveal', onRevealEnd);
+
+  const onPersistSelectEnd = ({stackN, cardN}) => {
+    data.stacks[stackN].highlight1(false);
+  };
+
+  let fxPersistSelect = new Fx(data, 'persistselect', onPersistSelectEnd);
 
   let allFxs = [fxDeal, fxUndoDeal, fxSelected, fxSettle, fxReveal];
 
@@ -102,7 +107,8 @@ export default function Spider() {
   };
 
   const reset = () => {
-    fxDeal.cancel();
+    allFxs.forEach(_ => _.cancel());
+    fxPersistSelect.cancel();
 
     data.stacks.forEach(_ => _.clear());
 
@@ -169,15 +175,33 @@ export default function Spider() {
   };
 
   this.endTap = () => {
-    fxSelected.end();
+    if (!fxSelected.value()) {
+      this.persistSelectEnd();
+    } else {
+      fxSelected.end();
+    }
   };
 
+
+  this.persistSelect = (stackN, cardN) => {
+    let stack = data.stacks[stackN];
+    stack.highlight1(cardN);
+    fxPersistSelect.begin({ stackN, cardN });
+  };
+
+  this.persistSelectEnd = () => {
+    fxPersistSelect.endNow();
+  };
+  
   const busyFxs = () => {
     return allFxs.some(_ => _.value());
   };
 
   const updateFxs = (delta) => {
     allFxs.forEach(_ => _.update(delta));
+
+    fxPersistSelect.update(delta);
+
   };
 
 
@@ -218,6 +242,14 @@ function SpiderStack(n, hidden = [], front = []) {
   this.n = n;
   this.front = front;
   this.hidden = hidden;
+
+  let highlight;
+
+  this.highlight = () => highlight;
+
+  this.highlight1 = (cardN) => {
+    highlight = cardN;
+  };
 
   this.cut1 = n => front.splice(n, front.length - n);
 

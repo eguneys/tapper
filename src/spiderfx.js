@@ -11,6 +11,8 @@ export function SpiderFxSelectedStack(spider) {
     stack: true
   };
 
+  let hasMoved;
+
   this.settleFx = () => settleFx;
 
   this.doBegin = (stackN, cardN, epos, decay) => {
@@ -23,10 +25,14 @@ export function SpiderFxSelectedStack(spider) {
     data.stack = stack.cut1(data.cardN);
 
     settleFx = undefined;
+    hasMoved = false;
+
+    spider.persistSelectEnd();
   };
 
   this.doUpdate = (epos) => {
     data.epos = epos;
+    hasMoved = true;
   };
 
   this.doEnd = () => {
@@ -35,7 +41,7 @@ export function SpiderFxSelectedStack(spider) {
 
 
   this.endCancel = () => {
-    fxSettleStackCancel.doBegin(data.stackN, data.stack);
+    fxSettleStackCancel.doBegin(data.stackN, data.stack, hasMoved);
     settleFx = fxSettleStackCancel;
   };
 
@@ -58,14 +64,21 @@ export function SpiderFxSettleStackCancel(spider, baseFx) {
     dststack: true
   };
   
-  this.doBegin = (dstStackN, stack) => {
+  this.doBegin = (dstStackN, stack, hasMoved) => {
     data.dstStackN = dstStackN;
     data.stack = stack;
+    data.hasMoved = hasMoved;
   };
 
   this.doEnd = () => {
     let stack = sData.stacks[data.dstStackN];
     stack.add1(data.stack);
+
+    if (!data.hasMoved) {
+      spider.persistSelect(data.dstStackN, data.stack.length - 1);
+    } else {
+      spider.persistSelectEnd();
+    }
   };
 }
 
@@ -96,5 +109,9 @@ export function SpiderFxSettleStackStack(spider, baseFx) {
     let srcStack = sData.stacks[data.srcStackN];
 
     spider.revealStack(srcStack);
+
+    if (data.srcStackN === data.dstStackN) {
+      spider.persistSelect(data.dstStackN, data.stack.length - 1);
+    }
   };
 }

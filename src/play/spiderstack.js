@@ -4,7 +4,7 @@ import CandyDeck from './candydeck';
 import CandyStack from './candystack';
 import CandyCardPlace from './candycardplace';
 
-import { nStack } from '../cards';
+import { isIndex, fxHandler2 } from './util';
 
 export default function SpiderStack(play, ctx, bs) {
 
@@ -59,15 +59,17 @@ export default function SpiderStack(play, ctx, bs) {
     this.refresh();
   };
 
-  this.refresh = () => {
-    let { hidden, front } = spider.stack(n);
+  const refresh = this.refresh = () => {
+    let stack = spider.stack(n);
+    let { hidden, front } = stack;
+    let highlight = stack.highlight();
 
     let nbBacks = hidden.length;
     let frontStack = front;
 
     dCardPlace.init({});
     dBacks.init({ nbStack: nbBacks });
-    dFronts.init({ stack: frontStack });
+    dFronts.init({ stack: frontStack, highlight });
 
     extendCards(nbBacks, frontStack.length);
   };
@@ -84,7 +86,23 @@ export default function SpiderStack(play, ctx, bs) {
 
   };
 
+  const handlePersistSelect = fxHandler2({
+    onBegin(fxData) {
+      let { stackN, cardN } = fxData;
+      if (stackN === n) {
+        refresh();
+      }
+    },
+    onEnd(fxData) {
+      let { stackN } = fxData;
+      if (stackN === n) {
+        refresh();
+      }
+    }
+  }, () => spider.data.persistselect);
+
   this.update = delta => {
+    handlePersistSelect(delta);
     components.forEach(_ => _.update(delta));
   };
 
@@ -92,7 +110,6 @@ export default function SpiderStack(play, ctx, bs) {
     let lb = dBacks.nextBounds();
     dFronts.move(lb[0], lb[1]);
   };
-
 
   this.render = () => {
     components.forEach(_ => _.render());
