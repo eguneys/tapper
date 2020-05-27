@@ -65,8 +65,6 @@ export default function SpiderStack(play, ctx, bs) {
     let { hidden, front } = stack;
     let highlight = stack.highlight();
 
-    console.log(front.map(_ => _.rank));
-
     let nbBacks = hidden.length;
     let frontStack = front;
 

@@ -199,6 +199,13 @@ export default function Spider() {
       return;
     }
 
+    let stack = data.stacks[stackN];
+
+    if (!stack.canSelect(cardN)) {
+      return;
+    }
+
+
     let persistSelectData = fxPersistSelect.value();
     if (persistSelectData) {
       let { stackN: srcStackN, cardN, cards } = persistSelectData;
@@ -341,6 +348,12 @@ function SpiderStack(n, hidden = [], front = []) {
 
   this.reveal1 = () => {
     return hidden.pop();
+  };
+
+  this.canSelect = cardN => {
+    let cards = front.slice(cardN, front.length);
+
+    return cards.every((v, i, a) => !i || a[i - 1].sRank === v.sRank + 1);
   };
 
   this.canAdd = cards => {

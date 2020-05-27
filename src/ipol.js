@@ -48,6 +48,9 @@ export default function interpolator(a, b = a, {
     smoothstop() {
       stopOnSettled = true;
     },
+    settledRepeat() {
+      return v >= 1 && repeat === 0;
+    },
     settled(threshold = 1) {
       return v >= threshold;
     },

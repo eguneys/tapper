@@ -33,6 +33,8 @@ export default function SpiderMove(play, ctx, bs) {
       let srcStack = play.stackN(srcStackN),
           dstStack = play.stackN(dstStackN);
 
+      srcStack.refresh();
+
       moveSource = srcStack.globalPositionNextCard();
       let moveTarget = dstStack.globalPositionNextCard();
 
