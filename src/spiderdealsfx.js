@@ -1,8 +1,10 @@
-import { SoliFxDealDeck } from './solifx2';
+import { SoliFxDealDeck, SoliFxUndoDealDeck } from './solifx2';
 
 export default function SpiderDealsFx(spider) {
 
   let fxData = new SoliFxDealDeck(spider);
+
+  let fxDataUndo = new SoliFxUndoDealDeck(spider);
 
   const dealsData = [6, 6, 6, 6, 5, 5, 5, 5, 5, 5];
 
@@ -11,7 +13,8 @@ export default function SpiderDealsFx(spider) {
 
   let done;
 
-  let done1;
+  let done1,
+      undoDone1;
 
   let sData = spider.data;
 
@@ -21,18 +24,37 @@ export default function SpiderDealsFx(spider) {
     deals = dealsData.slice(0);
 
     done1 = -1;
+
+    undoDone1 = -1;
   };
 
   this.busy = () => {
-    return (!done || done1 >= 0);
+    return (!done || done1 >= 0 || !undoDone1 || undoDone1 >= 0);
   };
 
   this.beginDeal1 = () => {
     done1 = 9;
   };
 
+  this.beginUndoDeal1 = () => {
+    undoDone1 = 9;
+  };
+
+  this.acquireUndoDeal1 = () => {
+    if (undoDone1 < 0) {
+      return null;
+    }
+
+    let dealI = 9 - undoDone1;
+    undoDone1--;
+
+    fxDataUndo.doBegin(dealI, false);
+
+    return fxDataUndo;
+  };
+
   this.acquireDeal1 = () => {
-    if (done1 < 0 || !sData.drawStack.canDraw()) {
+    if (done1 < 0) {
       return null;
     }
 

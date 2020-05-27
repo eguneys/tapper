@@ -34,6 +34,14 @@ export default function Spider() {
 
   let fxDeal = new Fx(data, 'deal', onDealEnd);
 
+  const onFxDataEnd = (fxData) => {
+    fxData.doEnd();
+  };
+  
+  let fxUndoDeal = new Fx(data, 'undodeal', onFxDataEnd);
+
+  let allFxs = [fxDeal, fxUndoDeal];
+
   this.stack = n => data.stacks[n];
   this.drawStack = data.drawStack;
 
@@ -41,10 +49,18 @@ export default function Spider() {
       deck2 = makeOneDeck();
 
   this.newGame = () => {
+    if (busyFxs() || dealsFxer.busy()) {
+      return;
+    }
+
     this.init();
   };
 
   this.undo = () => {
+    if (busyFxs() || dealsFxer.busy()) {
+      return;
+    }
+
     undos.undo();
   };
 
@@ -71,15 +87,21 @@ export default function Spider() {
     dealsFxer.init();
   };
 
+  const undoDeal = () => {
+
+    dealsFxer.beginUndoDeal1();
+
+  };
+
   this.beginDraw = () => {
-    if (dealsFxer.busy()) {
+    if (busyFxs() || dealsFxer.busy()) {
       return;
     }
 
     dealsFxer.beginDeal1();
-  };
 
-  let allFxs = [fxDeal];
+    undos.push(undoDeal);
+  };
 
   const busyFxs = () => {
     return allFxs.some(_ => _.value());
@@ -91,7 +113,7 @@ export default function Spider() {
 
 
   const updateDeals = delta => {
-    if (fxDeal.value()) {
+    if (busyFxs()) {
       return;
     }
 
@@ -103,6 +125,11 @@ export default function Spider() {
     fxData = dealsFxer.acquireDeal1();
     if (fxData) {
       fxDeal.begin(fxData);
+    }
+
+    fxData = dealsFxer.acquireUndoDeal1();
+    if (fxData) {
+      fxUndoDeal.begin(fxData);
     }
 
   };
@@ -128,6 +155,10 @@ function SpiderStack(n, hidden = [], front = []) {
 
   this.add1 = cards => {
     cards.forEach(_ => front.push(_));
+  };
+
+  this.remove1 = () => {
+    return front.pop();
   };
 
   this.clear = () => {

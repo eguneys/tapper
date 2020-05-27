@@ -28,9 +28,37 @@ export default function SpiderDeal(play, ctx, bs) {
     spider = data.spider;
   };
 
-  const handleDeal = fxHandler({
+  const handleUndoDeal = fxHandler({
     allowEnd: true,
     duration: 1000 / 30 / 2,
+    onBegin(fxDataDeal) {
+      let { cards,
+            stackN } = fxDataDeal.data;
+
+      dCards.visible(true);
+
+      dCards.init(cards[0]);
+
+      settleSource = play.stackNextCardGlobalPosition(stackN);
+      let settleTarget = play.drawDeckGlobalPosition();
+
+      settleTargetDiff = [settleTarget.x - settleSource[0],
+                          settleTarget.y - settleSource[1]];
+    },
+    onUpdate(_, i) {
+      let vSettleTarget = v.cscale(settleTargetDiff, i);
+      dCards.move(settleSource[0] + vSettleTarget[0],
+                  settleSource[1] + vSettleTarget[1]);
+    },
+    onEnd() {
+      dCards.visible(false);
+    }
+  }, () => spider.data.undodeal);
+
+
+  const handleDeal = fxHandler({
+    allowEnd: true,
+    duration: 1000 / 30 / 4,
     onBegin(fxDataDeal) {
       let { cards,
             stackN,
@@ -62,6 +90,7 @@ export default function SpiderDeal(play, ctx, bs) {
 
   this.update = delta => {
     handleDeal(delta);
+    handleUndoDeal(delta);
     components.forEach(_ => _.update(delta));
   };
 

@@ -22,3 +22,22 @@ export function SoliFxDealDeck(solitaire) {
   };
 
 }
+
+export function SoliFxUndoDealDeck(solitaire) {
+  
+  let sData = solitaire.data;
+
+  let data = this.data = {
+  };
+
+  this.doBegin = (stackN) => {
+    data.stackN = stackN;
+
+    data.cards = [sData.stacks[stackN].remove1()];
+  };
+
+  this.doEnd = () => {
+    sData.drawStack.undoDraw(data.cards);
+  };
+
+}

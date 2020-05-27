@@ -95,7 +95,7 @@ export default function SpiderView(play, ctx, pbs) {
       spider.newGame();
     },
     onUndo() {
-      
+      spider.undo();
     },
     ...bs
   });
@@ -212,6 +212,18 @@ export default function SpiderView(play, ctx, pbs) {
     }
   }, () => spider.data.deal);
 
+  const handleUndoDeal = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd(fxDataEnd) {
+      let { stackN } = fxDataEnd.data;
+      refreshStack(stackN);
+      refreshDraw();
+    }
+  }, () => spider.data.undodeal);
+
   const handleTap = tapHandler(() => {
     spider.beginDraw();
   }, events, () => dDrawDeck.bounds());
@@ -220,6 +232,7 @@ export default function SpiderView(play, ctx, pbs) {
     handleSelected(delta);
     handleSettled(delta);
     handleDeal(delta);
+    handleUndoDeal(delta);
     handleTap(delta);
     spider.update(delta);
     components.forEach(_ => _.update(delta));

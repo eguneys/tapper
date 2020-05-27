@@ -16,6 +16,10 @@ export default function SpiderDrawDeck(spider) {
 
   this.dealDraw1 = this.drawOne;
 
+  this.undoDraw = (cards) => {
+    cards.forEach(_ => deck.push(_));
+  };
+
   this.drawBatch = () => {
     let res = [];
     for (let i = 0; i < 10; i++) {
