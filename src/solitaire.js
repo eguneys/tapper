@@ -84,6 +84,13 @@ export default function Solitaire() {
 
   let fxDrawShuffle = new Fx(data, 'drawshuffle', onShuffleEnd);
 
+  let allFxs = [fxSelected, 
+                fxSettle,
+                fxReveal,
+                fxAddHole,
+                fxDeal,
+                fxDrawDeal,
+                fxDrawShuffle];
 
   let dealsFxer = new SoliDealsFx(this);
 
@@ -210,8 +217,9 @@ export default function Solitaire() {
     dealsFxer.init();
   };
 
-
   const reset = () => {
+
+    allFxs.forEach(_ => _.cancel());
 
     data.stacks.forEach(_ => _.clear());
 
@@ -243,13 +251,6 @@ export default function Solitaire() {
     });
   };
 
-  let allFxs = [fxSelected, 
-                fxSettle,
-                fxReveal,
-                fxAddHole,
-                fxDeal,
-                fxDrawDeal,
-                fxDrawShuffle];
 
   const busyFxs = () => {
     return allFxs.some(_ => _.value());

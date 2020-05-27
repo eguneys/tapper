@@ -70,6 +70,10 @@ export default function CandyDeck(play, ctx, bs) {
   };
 
   this.globalPositionLastCard = () => {
+    if (dCards.length === 0) {
+      return container.getGlobalPosition();
+    }
+
     let card = dCards[dCards.length - 1];
 
     return card.globalPosition();

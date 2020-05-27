@@ -12,7 +12,7 @@ import SpiderStack from './spiderstack';
 import SpiderHoles from './spiderholes';
 import SpiderBar from './spiderbar';
 
-import { fxHandler2 } from './util';
+import { tapHandler, fxHandler2 } from './util';
 
 export default function SpiderView(play, ctx, pbs) {
 
@@ -90,7 +90,15 @@ export default function SpiderView(play, ctx, pbs) {
 
   let dHoles = new SpiderHoles(this, ctx, bs);
 
-  let dBar = new SpiderBar(this, ctx, bs);
+  let dBar = new SpiderBar(this, ctx, {
+    onNewGame() {
+      spider.newGame();
+    },
+    onUndo() {
+      
+    },
+    ...bs
+  });
 
   let dDeal = new SpiderDeal(this, ctx, bs);
 
@@ -158,7 +166,7 @@ export default function SpiderView(play, ctx, pbs) {
   };
 
   const refreshDraw = () => {
-    let nbDeck = 3;
+    let nbDeck = Math.min(3, spider.drawStack.nbDeck());
 
     dDrawDeck.init({ nbStack: nbDeck });
   };
@@ -200,13 +208,19 @@ export default function SpiderView(play, ctx, pbs) {
     onEnd(fxDataEnd) {
       let { stackN } = fxDataEnd.data;
       refreshStack(stackN);
+      refreshDraw();
     }
   }, () => spider.data.deal);
+
+  const handleTap = tapHandler(() => {
+    spider.beginDraw();
+  }, events, () => dDrawDeck.bounds());
 
   this.update = delta => {
     handleSelected(delta);
     handleSettled(delta);
     handleDeal(delta);
+    handleTap(delta);
     spider.update(delta);
     components.forEach(_ => _.update(delta));
   };

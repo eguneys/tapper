@@ -50,7 +50,8 @@ export default function SpiderBar(play, ctx, pbs) {
     text: 'UNDO',
     icon: mhud['undo'],
     size: bs.undo.height,
-    vertical: true
+    vertical: true,
+    onTap: pbs.onUndo
   });
 
   let dMovesLabel = new CandyLabelText(this, ctx, {
@@ -60,7 +61,8 @@ export default function SpiderBar(play, ctx, pbs) {
 
   let dNewGame = new CandyLabelText(this, ctx, {
     label: " NEW\nGAME",
-    size: bs.newGame.height
+    size: bs.newGame.height,
+    onTap: pbs.onNewGame
   });
 
   let components = [];

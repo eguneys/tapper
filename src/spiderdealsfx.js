@@ -11,10 +11,37 @@ export default function SpiderDealsFx(spider) {
 
   let done;
 
+  let done1;
+
+  let sData = spider.data;
+
   this.init = () => {
     done = false;
     i = 0;
     deals = dealsData.slice(0);
+
+    done1 = -1;
+  };
+
+  this.busy = () => {
+    return (!done || done1 >= 0);
+  };
+
+  this.beginDeal1 = () => {
+    done1 = 9;
+  };
+
+  this.acquireDeal1 = () => {
+    if (done1 < 0 || !sData.drawStack.canDraw()) {
+      return null;
+    }
+
+    let dealI = done1;
+    done1--;
+
+    fxData.doBegin(dealI, false);
+
+    return fxData;
   };
 
   this.acquireDeal = () => {

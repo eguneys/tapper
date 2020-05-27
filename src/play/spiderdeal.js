@@ -30,7 +30,7 @@ export default function SpiderDeal(play, ctx, bs) {
 
   const handleDeal = fxHandler({
     allowEnd: true,
-    duration: 1000 / 30,
+    duration: 1000 / 30 / 2,
     onBegin(fxDataDeal) {
       let { cards,
             stackN,

@@ -45,9 +45,15 @@ const makeCard = (suit, rank) => ({
 
 export const allRanks = suit => ranks.map(_ => makeCard(suit, _));
 
-export const oneDeck = suits.flatMap(allRanks);
+export const oneDeckRaw = suits.flatMap(allRanks);
 
-export const makeOneDeck = () => new Deck(oneDeck);
+export const makeOneDeck = (deck = oneDeckRaw) => new Deck(deck);
+
+export const oneSuitDeckRaw = suit => 
+[suit, suit, suit, suit].flatMap(allRanks);
+
+export const twoSuitDeckRaw = (suit1, suit2) =>
+[suit1, suit1, suit2, suit2].flatMap(allRanks);
 
 /** https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
  * Shuffles array in place. ES6 version

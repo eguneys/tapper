@@ -8,6 +8,8 @@ export default function SpiderDrawDeck(spider) {
 
   this.nbDeck = () => deck.length;
 
+  this.canDraw = () => this.nbDeck() > 0;
+
   this.drawOne = () => {
     return deck.pop();
   };

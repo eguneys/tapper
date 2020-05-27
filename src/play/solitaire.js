@@ -109,7 +109,15 @@ export default function SolitaireView(play, ctx, pbs) {
   let dSoliDeal = new SoliDeal(this, ctx, bs);
 
   // let dSoliHud = new SoliHud(this, ctx, bs);
-  let dSoliHud = new SpiderBar(this, ctx, bs);
+  let dSoliHud = new SpiderBar(this, ctx, {
+    onUndo() {
+      solitaire.undo();
+    },
+    onNewGame() {
+      solitaire.newGame();
+    },
+    ...bs
+  });
 
   this.soliStackN = n => dStacks[n];
   this.drawStack = dDraw.drawStack;

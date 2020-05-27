@@ -4,6 +4,7 @@ import Fx from './fxs';
 
 import SpiderDealsFx from './spiderdealsfx';
 import SpiderDrawDeck from './spiderdrawdeck';
+import Undos from './undos';
 
 export default function Spider() {
 
@@ -23,10 +24,11 @@ export default function Spider() {
     ]
   };
 
+  let undos = this.undos = new Undos();
+
   let dealsFxer = new SpiderDealsFx(this);
 
   const onDealEnd = (fxDataEnd) => {
-    console.log(fxDataEnd.data);
     fxDataEnd.doEnd();
   };
 
@@ -42,13 +44,21 @@ export default function Spider() {
     this.init();
   };
 
+  this.undo = () => {
+    undos.undo();
+  };
+
   this.init = () => {
     reset();
     beginDeal();
   };
 
   const reset = () => {
+    fxDeal.cancel();
+
     data.stacks.forEach(_ => _.clear());
+
+    undos.init();
   };
 
   const beginDeal = () => {
@@ -59,6 +69,14 @@ export default function Spider() {
                          ...deck2.drawRest()]);
 
     dealsFxer.init();
+  };
+
+  this.beginDraw = () => {
+    if (dealsFxer.busy()) {
+      return;
+    }
+
+    dealsFxer.beginDeal1();
   };
 
   let allFxs = [fxDeal];
@@ -81,6 +99,12 @@ export default function Spider() {
     if (fxData) {
       fxDeal.begin(fxData);
     }
+
+    fxData = dealsFxer.acquireDeal1();
+    if (fxData) {
+      fxDeal.begin(fxData);
+    }
+
   };
 
   this.update = (delta) => {
