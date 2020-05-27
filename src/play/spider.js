@@ -12,7 +12,7 @@ import SpiderStack from './spiderstack';
 import SpiderHoles from './spiderholes';
 import SpiderBar from './spiderbar';
 
-import { tapHandler, fxHandler2 } from './util';
+import { tapHandler, fxHandler2, moveHandler2 } from './util';
 
 export default function SpiderView(play, ctx, pbs) {
 
@@ -228,12 +228,25 @@ export default function SpiderView(play, ctx, pbs) {
     spider.beginDraw();
   }, events, () => dDrawDeck.bounds());
 
+  const handleMove = moveHandler2({
+    onBegin() {
+      console.log('begin');
+    },
+    onMove() {
+      console.log('move');
+    },
+    onEnd() {
+      console.log('end');
+    }
+  }, events);
+
   this.update = delta => {
     handleSelected(delta);
     handleSettled(delta);
     handleDeal(delta);
     handleUndoDeal(delta);
     handleTap(delta);
+    handleMove(delta);
     spider.update(delta);
     components.forEach(_ => _.update(delta));
   };

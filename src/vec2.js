@@ -90,6 +90,12 @@ export function length(v0) {
                    v0[1] * v0[1]);
 }
 
+export function distance(v0, v1) {
+  let d0 = v0[0] - v1[0],
+      d1 = v0[1] - v1[1];
+  return Math.sqrt(d0 * d0 + d1 * d1);
+}
+
 export function normalize(v0) {
   scale(v0, 1/length(v0));
   

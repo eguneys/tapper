@@ -1,5 +1,7 @@
 import iPol from '../ipol';
 
+import * as v from '../vec2';
+
 export function callMaybe(fn, ...args) {
   if (fn) { fn(...args);  }
 };
@@ -94,6 +96,46 @@ export function moveHandler({ onBegin,
         onEnd(running);
         running = undefined;
       }
+    }
+  };
+  
+}
+
+export function moveHandler2({ onBegin,
+                               onMove,
+                               onEnd, 
+                               threshold = 20 
+                             }, events) {
+
+  const runBegin = 'begin';
+  const runMoving = 'moving';
+  const runEnd = 'end';
+
+  let running = runEnd;
+
+  let startPos;
+
+  return () => {
+    const { current } = events.data;
+    if (current) {
+      let { epos } = current;
+      if (running === runEnd) {
+        onBegin(epos);
+        startPos = epos;
+        running = runBegin;
+      } else if (running === runBegin) {
+        let dist = v.distance(startPos, epos);
+        if (dist > threshold) {
+          running = runMoving;
+        }
+      } else {
+        onMove(epos);
+      }
+     } else {
+      if (running === runBegin || running === runMoving) {
+        onEnd(running);
+      }
+       running = runEnd;
     }
   };
   
