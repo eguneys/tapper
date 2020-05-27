@@ -12,6 +12,9 @@ import SoliHole from './solihole';
 import SoliHud from './solihud';
 import SoliDeal from './solideal';
 
+import SpiderBar from './spiderbar';
+
+
 import Solitaire from '../solitaire';
 
 import { backCard, queenHearts } from '../cards';
@@ -48,6 +51,16 @@ export default function SolitaireView(play, ctx, pbs) {
                      0, (cHeight + stackMargin));
 
     let deck = rect(0, 0, cWidth, cHeight * 0.2);
+
+    let boundsMargin = stackMargin;
+
+    let barWidth = cWidth * 1.1;
+
+    let barHeight = cHeight * 2.0;
+
+    let bar = rect(width - barWidth, barHeight,
+                   barWidth,
+                   height - barHeight - boundsMargin * 2.0);
     
     return {
       deck,
@@ -57,6 +70,7 @@ export default function SolitaireView(play, ctx, pbs) {
       stacks,
       holes,
       draws,
+      bar,
       width,
       height
     };
@@ -94,7 +108,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let dSoliDeal = new SoliDeal(this, ctx, bs);
 
-  let dSoliHud = new SoliHud(this, ctx, bs);
+  // let dSoliHud = new SoliHud(this, ctx, bs);
+  let dSoliHud = new SpiderBar(this, ctx, bs);
 
   this.soliStackN = n => dStacks[n];
   this.drawStack = dDraw.drawStack;
@@ -137,6 +152,7 @@ export default function SolitaireView(play, ctx, pbs) {
     dSoliDeal.add(container);
     components.push(dSoliDeal);
 
+    dSoliHud.move(bs.bar.x, bs.bar.y);
     dSoliHud.add(container);
     components.push(dSoliHud);
   };
@@ -146,7 +162,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
     solitaire.init();
 
-    dSoliHud.init({solitaire});
+    dSoliHud.init({});
+
     dSoliReveal.init({ solitaire });
     dDragStack.init({ solitaire });
     dDraw.init({ solitaire });
@@ -198,6 +215,10 @@ export default function SolitaireView(play, ctx, pbs) {
 
   this.remove = () => {
     container.parent.removeChild(container);
+  };
+
+  this.visible = (visible) => {
+    container.visible = visible;
   };
 
   this.move = (x, y) => container.position.set(x, y);

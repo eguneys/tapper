@@ -1,6 +1,6 @@
 import { dContainer, sprite } from '../asprite';
 
-import CardGame from './cardgame';
+import CardGameView from './cardgame';
 
 export default function Play(ctx) {
 
@@ -15,7 +15,7 @@ export default function Play(ctx) {
     };
   })();
 
-  let dCardGame = new CardGame(this, ctx, bs);
+  let dCardGame = new CardGameView(this, ctx, bs);
 
   let components = [];
   let container = dContainer();

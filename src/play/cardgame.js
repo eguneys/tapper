@@ -2,13 +2,17 @@ import { rect } from '../dquad/geometry';
 
 import { dContainer } from '../asprite';
 
+import CardGame from '../cardgame';
+
 import SolitaireView from './solitaire';
 import SpiderView from './spider';
 
 import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
 
-export default function CardGame(play, ctx, pbs) {
+export default function CardGameView(play, ctx, pbs) {
+
+  let cardGame;
 
   let bs = (() => {
     let { width, height } = pbs;
@@ -19,35 +23,78 @@ export default function CardGame(play, ctx, pbs) {
     };
   })();
 
-  let dBar = new CardGameBar(this, ctx, bs);
+  const onMenuTap = () => {
+    console.log('menu');
+  };
+
+  const onBackTap = () => {
+    cardGame.view('menu');
+  };
+
+  let dBar = new CardGameBar(this, ctx, {
+    onMenuTap,
+    onBackTap,
+    ...bs
+  });
 
   let dMenu = new CardGameMenu(this, ctx, bs);
-
   let dSolitaire = new SolitaireView(this, ctx, bs);
   let dSpider = new SpiderView(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
+  const addComponent = (component) => {
+    components.push(component);
+  };
+  const removeComponent = (component) => {
+    components.splice(components.indexOf(component), 1);
+  };
   const initContainer = () => {
 
+    dMenu.add(container);
+    dMenu.visible(false);
+
     dSolitaire.add(container);
-    components.push(dSolitaire);
+    dSolitaire.visible(false);
 
     dSpider.add(container);
-    components.push(dSpider);
-
-    dMenu.add(container);
-    components.push(dMenu);
+    dSpider.visible(false);
 
     dBar.add(container);
     components.push(dBar);
-
   };
   initContainer();
 
+  let dViews = {
+    'menu': dMenu,
+    'solitaire': dSolitaire,
+    'spider': dSpider
+  };
+
+  let lastView;
+
   this.init = data => {
 
-    let gameName = 'solitaire';
+    cardGame = new CardGame();
+
+  };
+
+  const setView = (view) => {
+    if (lastView) {
+      let dLastView = dViews[lastView];
+      dLastView.visible(false);
+      removeComponent(dLastView);
+    }
+    lastView = view;
+
+    let dView = dViews[view];
+    addComponent(dView);
+    dView.visible(true);
+    dView.init({
+      cardGame
+    });
+
+    let gameName = view;
     let names = {
       'spider': 'SPIDER',
       'solitaire': 'SOLI\nTAIRE',
@@ -55,14 +102,18 @@ export default function CardGame(play, ctx, pbs) {
     };
 
     dBar.setGame(names[gameName]);
+  };
 
-    dSolitaire.init({});
+  const refreshView = () => {
+    let view = cardGame.data.view;
 
-    dSpider.init({});
-
+    if (view !== lastView) {
+      setView(view);
+    }
   };
 
   this.update = delta => {
+    refreshView();
     components.forEach(_ => _.update(delta));
   };
 

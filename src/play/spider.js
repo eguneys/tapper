@@ -1,14 +1,20 @@
 import { rect } from '../dquad/geometry';
 import { dContainer } from '../asprite';
 
+import Spider from '../spider';
+
 import CandyBackground from './candybackground';
 import CandyDeck from './candydeck';
+
+import SpiderDeal from './spiderdeal';
 
 import SpiderStack from './spiderstack';
 import SpiderHoles from './spiderholes';
 import SpiderBar from './spiderbar';
 
-export default function Spider(play, ctx, pbs) {
+import { fxHandler2 } from './util';
+
+export default function SpiderView(play, ctx, pbs) {
 
   const { events } = ctx;
 
@@ -59,6 +65,8 @@ export default function Spider(play, ctx, pbs) {
     };
   })();
 
+  let spider = new Spider();
+
   let dBg = new CandyBackground(this, ctx, bs);
 
   let dDrawDeck = new CandyDeck(this, ctx, {
@@ -83,6 +91,8 @@ export default function Spider(play, ctx, pbs) {
   let dHoles = new SpiderHoles(this, ctx, bs);
 
   let dBar = new SpiderBar(this, ctx, bs);
+
+  let dDeal = new SpiderDeal(this, ctx, bs);
 
   let components = [];
   const container = dContainer();
@@ -110,16 +120,34 @@ export default function Spider(play, ctx, pbs) {
       dStack.add(dStacksContainer);
       components.push(dStack);
     });
+
+    dDeal.add(container);
+    components.push(dDeal);
   };
   initContainer();
 
+  this.drawDeckGlobalPosition = () => {
+    return dDrawDeck.globalPositionLastCard();
+  };
+
+  this.stackNextCardGlobalPosition = n => {
+    let dStack = dStacks[n];
+
+    return dStack.globalPositionNextCard();
+  };
+
   this.init = data => {
+
+    spider.init({});
+
+    dDeal.init({spider});
 
     dBar.init({});
 
     dStacks.forEach((dStack, i) => {
       dStack.init({
-        i
+        i,
+        spider
       });
     });
 
@@ -135,7 +163,51 @@ export default function Spider(play, ctx, pbs) {
     dDrawDeck.init({ nbStack: nbDeck });
   };
 
+  const refreshStack = (stackN) => {
+    let dStack = dStacks[stackN];
+    let stack = spider.stack(stackN);
+
+    dStack.refresh(stack);
+  };
+
+  const handleSelected = fxHandler2({
+    onBegin(fxDataSelected) {
+      let { stackN } = fxDataSelected.data;
+      refreshStack(stackN);
+    },
+    onUpdate() {
+    },
+    onEnd() {
+    }
+  }, () => spider.data.selected);
+
+  const handleSettled = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd(fxDataSettle) {
+      let { stackN } = fxDataSettle.data;
+      refreshStack(stackN);
+    }
+  }, () => spider.data.settle);
+
+  const handleDeal = fxHandler2({
+    onBegin() {
+    },
+    onUpdate() {
+    },
+    onEnd(fxDataEnd) {
+      let { stackN } = fxDataEnd.data;
+      refreshStack(stackN);
+    }
+  }, () => spider.data.deal);
+
   this.update = delta => {
+    handleSelected(delta);
+    handleSettled(delta);
+    handleDeal(delta);
+    spider.update(delta);
     components.forEach(_ => _.update(delta));
   };
 
@@ -149,6 +221,10 @@ export default function Spider(play, ctx, pbs) {
 
   this.remove = () => {
     container.parent.removeChild(container);
+  };
+
+  this.visible = (visible) => {
+    container.visible = visible;
   };
 
   this.move = (x, y) => container.position.set(x, y);

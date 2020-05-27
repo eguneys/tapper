@@ -57,6 +57,7 @@ export default function CandyDeck(play, ctx, bs) {
   this.extend = (height) => {
     height = Math.min(deckHeight, height);
     let cardExtend = nbStack === 0 ? 0 : height / nbStack;
+    iExtend.value(iExtend.value());
     iExtend.target(cardExtend);
   };
 

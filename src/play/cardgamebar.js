@@ -5,13 +5,15 @@ import { dContainer } from '../asprite';
 import TapSprite from './tapsprite';
 import FText from './ftext';
 
-import { tapHandler } from './util';
+import { callMaybe, tapHandler } from './util';
 
 export default function CardGameBar(play, ctx, pbs) {
 
   const { events, textures } = ctx;
 
   const mhud = textures['mhud'];
+
+  let { onMenuTap, onBackTap } = pbs;
 
   let bs = (() => {
 
@@ -101,14 +103,6 @@ export default function CardGameBar(play, ctx, pbs) {
     } else {
       dInGameContainer.visible = false;
     }
-  };
-
-  const onMenuTap = () => {
-    console.log('menu');
-  };
-
-  const onBackTap = () => {
-    console.log('back');
   };
 
   const handleMenuTap = tapHandler(onMenuTap, events, () => dMenu.bounds());

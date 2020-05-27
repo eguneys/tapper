@@ -45,7 +45,8 @@ const cards = (mcards) => {
     'clubs': mcards(0, 160, 32),
     'diamonds': mcards(0, 192, 32),
     'back': mcards(0, 224, 64, 89),
-    'highlight': mcards(0, 320, 64, 89)
+    'highlight': mcards(0, 320, 64, 89),
+    'shadow': mcards(64, 320, 64, 89),
   };
 };
 

@@ -1,5 +1,3 @@
-import { withDelay } from './util';
-
 import { makeOneDeck } from './deck';
 import Fx from './fxs';
 

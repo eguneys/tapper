@@ -54,10 +54,32 @@ export default function Solistack(play, ctx, bs) {
     solitaire = data.solitaire;
     stack = solitaire.stack(data.i);
 
-    dBacks.init({ nbStack: stack.hidden.length });
-    dFronts.init({ stack: stack.front });
-    
+    refresh();
+  };
+
+  const refresh = this.refresh = () => {
+    stack = solitaire.stack(stack.n);
+
     dCardPlace.init({});
+    dFronts.init({ stack: stack.front });
+    dBacks.init({ nbStack: stack.hidden.length });
+
+    let nbBacks = stack.hidden.length,
+        frontStack = stack.front;
+
+    // extendCards(nbBacks, frontStack.length);
+  };
+
+  const extendCards = (backs, fronts) => {
+    let nbCards = backs + fronts;
+    let extend = bs.stacks.height / (nbCards + 3);
+
+    let extendBacks = extend * backs,
+        extendFronts = extend * fronts + 3;
+
+    dBacks.extend(extendBacks);
+    dFronts.extend(extendFronts);
+
   };
 
   this.globalPositionNextCard = dFronts.globalPositionNextCard;
@@ -107,12 +129,6 @@ export default function Solistack(play, ctx, bs) {
       }
     }
   }, () => solitaire.data.deal);
-
-  const refresh = this.refresh = () => {
-    stack = solitaire.stack(stack.n);
-    dFronts.init({ stack: stack.front });
-    dBacks.init({ nbStack: stack.hidden.length });
-  };
 
   this.update = delta => {
     handleSelected(delta);

@@ -1,5 +1,9 @@
 import iPol from '../ipol';
 
+export function callMaybe(fn, ...args) {
+  if (fn) { fn(...args);  }
+};
+
 export function fxHandler2({
   onBegin,
   onUpdate,
@@ -89,6 +93,50 @@ export function moveHandler({ onBegin,
       if (running) {
         onEnd(running);
         running = undefined;
+      }
+    }
+  };
+  
+}
+
+export function tapHandler2({ onBegin,
+                              onUpdate,
+                              onEnd,
+                              boundsFn }, events) {
+
+  const runBegin = 'running';
+  const runCancel = 'cancel';
+  const runEnd = 'end';
+
+  let running = runEnd;
+
+  return () => {
+    const { current } = events.data;
+    if (current) {
+      let { epos } = current;
+      if (running === runEnd) {
+        if (hitTest(...epos, boundsFn())) {
+          onBegin(epos);
+          running = runBegin;
+        } else {
+          running = runCancel;
+        }
+      } else if (running === runCancel) {
+        
+      } else if (running === runBegin) {
+        if (hitTest(...epos, boundsFn())) {
+          onUpdate(epos);
+        } else {
+          onEnd(false);
+          running = runCancel;
+        }
+      }
+     } else {
+      if (running === runBegin) {
+        onEnd(true);
+        running = runEnd;
+      } else if (running === runCancel) {
+        running = runEnd;
       }
     }
   };

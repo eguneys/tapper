@@ -37,16 +37,23 @@ export default function SpiderStack(play, ctx, bs) {
 
   let n;
 
+  this.globalPositionNextCard = dFronts.globalPositionNextCard;
+  this.globalPositionLastCard = dBacks.globalPositionLastCard;
+
+  let spider;
+
   this.init = data => {
     n = data.i;
+    spider = data.spider;
 
-    this.refresh();
+    this.refresh(spider.stack(n));
   };
 
-  this.refresh = () => {
+  this.refresh = (stack) => {
+    let { hidden, front } = stack;
 
-    let nbBacks = n + 1;
-    let frontStack = nStack(n * 3);
+    let nbBacks = hidden.length;
+    let frontStack = front;
 
     dBacks.init({ nbStack: nbBacks });
     dFronts.init({ stack: frontStack });

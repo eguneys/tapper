@@ -8,6 +8,10 @@ export default function Play(play, ctx, bs) {
     new CandyCards(this, ctx, bs),
     new CandyCards(this, ctx, bs),
     new CandyCards(this, ctx, bs),
+    new CandyCards(this, ctx, bs),
+    new CandyCards(this, ctx, bs),
+    new CandyCards(this, ctx, bs),
+    new CandyCards(this, ctx, bs),
     new CandyCards(this, ctx, bs)
   ];
 
@@ -16,7 +20,7 @@ export default function Play(play, ctx, bs) {
   const initContainer = () => {
 
     dSuits.forEach((dSuit, n) => {
-      dSuit.move(0, (bs.draws.height * 0.5) * n);
+      dSuit.move(0, (bs.draws.height * 0.2) * n);
       dSuit.add(container);
       components.push(dSuit);
     });
@@ -31,7 +35,15 @@ export default function Play(play, ctx, bs) {
 
   const refresh = () => {
 
-    const suits = ['clubs', 'hearts', 'diamonds', 'spades'];
+    const suits = [
+      'clubs',
+      'hearts',
+      'diamonds',
+      'spades',
+      'spades',
+      'spades',
+      'spades',
+      'spades'];
 
     dSuits.forEach((dSuit, n) => {
       let suit = suits[n];
