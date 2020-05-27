@@ -1,4 +1,4 @@
-import { makeOneDeck } from './deck';
+import { makeOneDeck, oneSuitDeckRaw, twoSuitDeckRaw } from './deck';
 
 import Fx from './fxs';
 
@@ -82,8 +82,8 @@ export default function Spider() {
   this.stack = n => data.stacks[n];
   this.drawStack = data.drawStack;
 
-  let deck1 = makeOneDeck(),
-      deck2 = makeOneDeck();
+  let deck1,
+      deck2;
 
   this.newGame = () => {
     if (busyFxs() || dealsFxer.busy()) {
@@ -101,7 +101,23 @@ export default function Spider() {
     undos.undo();
   };
 
-  this.init = () => {
+  const decksByOption = {
+    'onesuit': [makeOneDeck(oneSuitDeckRaw()),
+                makeOneDeck(oneSuitDeckRaw())],
+    'twosuits': [makeOneDeck(twoSuitDeckRaw()),
+                 makeOneDeck(twoSuitDeckRaw())],
+    'foursuits': [makeOneDeck(),
+                  makeOneDeck()]
+  };
+
+  this.init = (options) => {
+
+    let suitOption = 'onesuit';
+
+    let decks = decksByOption[suitOption];
+    deck1 = decks[0];
+    deck2 = decks[1];
+
     reset();
     beginDeal();
   };
