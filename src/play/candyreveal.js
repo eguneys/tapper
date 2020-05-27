@@ -43,11 +43,15 @@ export default function CandyReveal(play, ctx, bs) {
     this.move(position.x, position.y);
   };
 
-  this.updateReveal = i => {
+  this.updateReveal = (i, position) => {
     if (i < 0.5) {
       dBack.scale(1.0-i*2, 1);
     } else {
       dFront.scale(i * 2.0 - 1.0, 1);
+    }
+
+    if (position) {
+      this.move(position.x, position.y);
     }
   };
 

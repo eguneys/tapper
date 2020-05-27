@@ -30,13 +30,17 @@ export default function SpiderReveal(play, ctx, bs) {
     onBegin({ n, card }) {
 
       let stack = play.stackN(n);
-      let position = stack.globalPositionLastCard();
+      let position = stack.globalPositionReveal();
 
       dReveal.beginReveal(position, card);
       stack.refresh();
     },
-    onUpdate(_, i) {
-      dReveal.updateReveal(i);
+    onUpdate({ n }, i) {
+
+      let stack = play.stackN(n);
+      let position = stack.globalPositionReveal();
+
+      dReveal.updateReveal(i, position);
     },
     onEnd({ n }) {
 

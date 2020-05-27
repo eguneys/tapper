@@ -13,7 +13,7 @@ export default function SpiderStack(play, ctx, bs) {
 
   let dBacks = new CandyDeck(this, ctx, {
     extendLimit: true,
-    deckHeight: bs.deck.height * 3.0,
+    deckHeight: bs.deck.height * 2.0,
     ...bs
   });
   let dFronts = new CandyStack(this, ctx, {
@@ -51,6 +51,7 @@ export default function SpiderStack(play, ctx, bs) {
 
   this.globalPositionNextCard = dFronts.globalPositionNextCard;
   this.globalPositionLastCard = dBacks.globalPositionLastCard;
+  this.globalPositionReveal = dBacks.globalPositionReveal;
 
   this.init = data => {
     n = data.i;

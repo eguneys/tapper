@@ -46,12 +46,12 @@ export default function CandyDeck(play, ctx, bs) {
       components.push(dCard);
     }
 
-    let cardExtend = nbStack === 0 ? 0 : deckHeight / nbStack;
-    if (extendLimit) {
-      cardExtend = Math.max(deckHeight, cardExtend);
-    }
-    iExtend.value(iExtend.value());
-    iExtend.target(cardExtend);
+    // let cardExtend = nbStack === 0 ? 0 : deckHeight / nbStack;
+    // if (extendLimit) {
+    //   cardExtend = Math.max(deckHeight, cardExtend);
+    // }
+    // iExtend.value(iExtend.value());
+    // iExtend.target(cardExtend);
   };
 
   this.extend = (height) => {
@@ -77,6 +77,17 @@ export default function CandyDeck(play, ctx, bs) {
     let card = dCards[dCards.length - 1];
 
     return card.globalPosition();
+  };
+
+  this.globalPositionReveal = () => {
+    let gp = container.getGlobalPosition();
+
+    let nb = this.nextBounds();
+
+    gp.x += nb[0];
+    gp.y += nb[1];
+
+    return gp;
   };
 
   const cardY = (i, iCardExtend) => {

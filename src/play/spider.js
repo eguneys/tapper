@@ -9,6 +9,7 @@ import CandyDeck from './candydeck';
 import SpiderDeal from './spiderdeal';
 import SpiderDrag from './spiderdrag';
 import SpiderReveal from './spiderreveal';
+import SpiderMove from './spidermove';
 
 import SpiderStack from './spiderstack';
 import SpiderHoles from './spiderholes';
@@ -108,6 +109,8 @@ export default function SpiderView(play, ctx, pbs) {
 
   let dReveal = new SpiderReveal(this, ctx, bs);
 
+  let dMove = new SpiderMove(this, ctx, bs);
+
   let components = [];
   const container = dContainer();
   const initContainer = () => {
@@ -143,6 +146,9 @@ export default function SpiderView(play, ctx, pbs) {
 
     dReveal.add(container);
     components.push(dReveal);
+
+    dMove.add(container);
+    components.push(dMove);
   };
   initContainer();
 
@@ -165,6 +171,7 @@ export default function SpiderView(play, ctx, pbs) {
     dDeal.init({spider});
     dDrag.init({spider});
     dReveal.init({spider});
+    dMove.init({spider});
 
     dBar.init({});
 

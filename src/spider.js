@@ -10,6 +10,15 @@ import Undos from './undos';
 
 export default function Spider() {
 
+  const decksByOption = {
+    'onesuit': [makeOneDeck(oneSuitDeckRaw()),
+                makeOneDeck(oneSuitDeckRaw())],
+    'twosuits': [makeOneDeck(twoSuitDeckRaw()),
+                 makeOneDeck(twoSuitDeckRaw())],
+    'foursuits': [makeOneDeck(),
+                  makeOneDeck()]
+  };
+
   let data = this.data = {
     drawStack: new SpiderDrawDeck(),
     stacks: [
@@ -71,13 +80,26 @@ export default function Spider() {
 
   let fxReveal = new Fx(data, 'reveal', onRevealEnd);
 
+  const onMoveEnd = ({ dstStackN, cards }) => {
+    let destStack = data.stacks[dstStackN];
+
+    destStack.add1(cards);
+  };
+
+  let fxMove = new Fx(data, 'move', onMoveEnd);
+
   const onPersistSelectEnd = ({stackN, cardN}) => {
     data.stacks[stackN].highlight1(false);
   };
 
   let fxPersistSelect = new Fx(data, 'persistselect', onPersistSelectEnd);
 
-  let allFxs = [fxDeal, fxUndoDeal, fxSelected, fxSettle, fxReveal];
+  let allFxs = [fxDeal, 
+                fxUndoDeal,
+                fxSelected,
+                fxSettle,
+                fxReveal,
+                fxMove];
 
   this.stack = n => data.stacks[n];
   this.drawStack = data.drawStack;
@@ -99,15 +121,6 @@ export default function Spider() {
     }
 
     undos.undo();
-  };
-
-  const decksByOption = {
-    'onesuit': [makeOneDeck(oneSuitDeckRaw()),
-                makeOneDeck(oneSuitDeckRaw())],
-    'twosuits': [makeOneDeck(twoSuitDeckRaw()),
-                 makeOneDeck(twoSuitDeckRaw())],
-    'foursuits': [makeOneDeck(),
-                  makeOneDeck()]
   };
 
   this.init = (options) => {
@@ -132,8 +145,11 @@ export default function Spider() {
   };
 
   const beginDeal = () => {
-    deck1.shuffle();
-    deck2.shuffle();
+    
+    // deck1.shuffle();
+    // deck2.shuffle();
+    deck1.test();
+    deck2.test();
 
     data.drawStack.init([...deck1.drawRest(),
                          ...deck2.drawRest()]);
@@ -157,6 +173,17 @@ export default function Spider() {
                      card: last });
   };
 
+  this.moveCards = (srcStackN, dstStackN, cardN) => {
+    let srcStack = data.stacks[srcStackN];
+    let cards = srcStack.cut1(cardN);
+
+    this.revealStack(srcStack);
+
+    fxMove.begin({ srcStackN,
+                   dstStackN,
+                   cards });
+  };
+
   this.beginDraw = () => {
     if (busyFxs() || dealsFxer.busy()) {
       return;
@@ -170,6 +197,26 @@ export default function Spider() {
   this.beginSelect = (stackN, cardN, epos, decay) => {
     if (busyFxs()) {
       return;
+    }
+
+    let persistSelectData = fxPersistSelect.value();
+    if (persistSelectData) {
+      let { stackN: srcStackN, cardN } = persistSelectData;
+
+
+      let dstStack = data.stacks[stackN],
+          srcStack = data.stacks[srcStackN];
+
+      let srcCard = srcStack.frontCard(cardN);
+
+      if (dstStack.canAdd([srcCard])) {
+
+        this.moveCards(srcStackN, stackN, cardN);
+
+        this.persistSelectEnd();
+        return;
+      }
+      
     }
 
     fxDataSelectedStack.doBegin(stackN, cardN, epos, decay);
@@ -260,6 +307,8 @@ function SpiderStack(n, hidden = [], front = []) {
   this.hidden = hidden;
 
   let highlight;
+
+  this.frontCard = (n) => front[n];
 
   this.highlight = () => highlight;
 
