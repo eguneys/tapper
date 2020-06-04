@@ -2,26 +2,16 @@ import { rect } from '../dquad/geometry';
 
 import { dContainer } from '../asprite';
 
-import CandyBackground from './candybackground';
-import CandyCards from './candycards';
-import SoliStack from './solistack';
-import SoliDraw from './solidraw';
-import DragStack from './dragstack';
-import SoliReveal from './solireveal';
-import SoliHole from './solihole';
-import SoliHud from './solihud';
-import SoliDeal from './solideal';
-
-import SpiderBar from './spiderbar';
-
+import AContainer from './acontainer';
 
 import Solitaire from '../solitaire';
+import SoliStacks from './solistacks';
+import SoliDraw from './solidraw';
+import SoliDeal from './solideal';
 
-import { backCard, queenHearts } from '../cards';
+import { moveHandler2 } from './util';
 
-import { fxHandler2, moveHandler, hitTest } from './util';
-
-export default function SolitaireView(play, ctx, pbs) {
+export default function Play(play, ctx, pbs) {
 
   const { events } = ctx;
 
@@ -76,154 +66,50 @@ export default function SolitaireView(play, ctx, pbs) {
     };
   })();
 
-  let solitaire = new Solitaire();
-
-  let dBg = new CandyBackground(this, ctx, bs);
+  let solitaire = this.solitaire = new Solitaire();
 
   let dDraw = new SoliDraw(this, ctx, bs);
-  
-  let dStacksContainer = dContainer();
-  let dStacks = [
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs),
-    new SoliStack(this, ctx, bs)
-  ];
 
-  let dHolesContainer = dContainer();
-  let dHoles = [
-    new SoliHole(this, ctx, bs),
-    new SoliHole(this, ctx, bs),
-    new SoliHole(this, ctx, bs),
-    new SoliHole(this, ctx, bs)
-    
-  ];
-
-  let dDragStack = new DragStack(this, ctx, bs);
-  
-  let dSoliReveal = new SoliReveal(this, ctx, bs);
+  let dStacks = new SoliStacks(this, ctx, bs);
 
   let dSoliDeal = new SoliDeal(this, ctx, bs);
 
-  // let dSoliHud = new SoliHud(this, ctx, bs);
-  let dSoliHud = new SpiderBar(this, ctx, {
-    onUndo() {
-      solitaire.undo();
-    },
-    onNewGame() {
-      solitaire.newGame();
-    },
-    ...bs
-  });
-
-  this.soliStackN = n => dStacks[n];
-  this.drawStack = dDraw.drawStack;
-  this.soliHoleN = n => dHoles[n];
+  this.dStackN = dStacks.dStackN;
+  this.dStackDraw = dDraw.dStackDraw;
   this.dDraw = dDraw;
 
-  let components = [];
-  const container = dContainer();
+  let container = this.container = new AContainer();
   const initContainer = () => {
 
-    dBg.add(container);
-    components.push(dBg);
+    container.addChild(dDraw);
+    dDraw.container.move(bs.draws.x, bs.draws.y);
 
-    dDraw.move(bs.draws.x, bs.draws.y);
-    dDraw.add(container);
-    components.push(dDraw);
+    container.addChild(dStacks);
+    container.addChild(dSoliDeal);
 
-    dHolesContainer.position.set(bs.holes.x, bs.holes.y);
-    container.addChild(dHolesContainer);
-    dHoles.forEach((dHole, i) => {
-      dHole.move(0, i * bs.holes.height);
-      dHole.add(dHolesContainer);
-      components.push(dHole);
-    });
-
-    dStacksContainer.position.set(bs.stacks.x, bs.stacks.y);
-    container.addChild(dStacksContainer);
-    dStacks.forEach((dStack, i) => {
-      dStack.move(i * bs.stacks.width, 0);
-      dStack.add(dStacksContainer);
-      components.push(dStack);
-    });
-
-    dSoliReveal.add(container);
-    components.push(dSoliReveal);
-
-    dDragStack.add(container);
-    components.push(dDragStack);
-
-    dSoliDeal.add(container);
-    components.push(dSoliDeal);
-
-    dSoliHud.move(bs.bar.x, bs.bar.y);
-    dSoliHud.add(container);
-    components.push(dSoliHud);
   };
   initContainer();
 
-  this.init = data => {
-
+  this.init = (data) => {
     solitaire.init();
-
-    dSoliHud.init({});
-
-    dSoliReveal.init({ solitaire });
-    dDragStack.init({ solitaire });
-    dDraw.init({ solitaire });
-    dSoliDeal.init({ solitaire });
-
-    dStacks.forEach((dStack, i) => {
-      dStack.init({
-        solitaire,
-        i
-      });
-    });
-
-    dHoles.forEach((dHole, i) => {
-      dHole.init({
-        solitaire,
-        i
-      });
-    });
+    dDraw.init();
   };
 
-  const handleTap = moveHandler({
-    onBegin(epos) {
-    },
-    onUpdate(epos) {
-      solitaire.moveSelect(epos);
+  const handleTap = moveHandler2({
+    onMove(epos) {
+      solitaire.userActionMove(epos);
     },
     onEnd() {
-      solitaire.endTap();
+      solitaire.userActionEndTap();
     }
   }, events);
 
   this.update = delta => {
-    solitaire.update(delta);
-    handleTap(delta);
-    components.forEach(_ => _.update(delta));
+    handleTap();
+    this.container.update(delta);
   };
 
   this.render = () => {
-    components.forEach(_ => _.render());
+    this.container.render();
   };
-
-  this.add = (parent) => {
-    parent.addChild(container);
-  };
-
-  this.remove = () => {
-    container.parent.removeChild(container);
-  };
-
-  this.visible = (visible) => {
-    container.visible = visible;
-  };
-
-  this.move = (x, y) => container.position.set(x, y);
 }

@@ -1,6 +1,17 @@
+import Pool from 'poolf';
 import AContainer from './acontainer';
 
-export default function Play(play, ctx, bs) {
+import iPol from '../ipol';
+
+import CardCard from './cardcard';
+
+import { backCard } from '../cards';
+
+export default function CardDeck(play, ctx, bs) {
+
+  let pCards = new Pool(() => new CardCard(this, ctx, bs));
+
+  let dCards = [];
 
   let container = this.container = new AContainer();
   const initContainer = () => {

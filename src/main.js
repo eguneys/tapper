@@ -58,7 +58,7 @@ export function app(element, options) {
 
       canvas.withApp(app => {
 
-        play.add(app.stage);
+        app.stage.addChild(play.container.c);
 
         app.ticker.add(delta => {
 
@@ -75,7 +75,7 @@ export function app(element, options) {
               play.remove();
               play = new Play(ctx);
               play.init(data);
-              play.add(app.stage);
+              app.stage.addChild(play.container.c);
             } catch (e) {
               console.log(e);
             }

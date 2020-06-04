@@ -1,10 +1,10 @@
-import { dContainer, sprite } from '../asprite';
+import AContainer from './acontainer';
 
 import CardGameView from './cardgame';
 
 export default function Play(ctx) {
 
-  const { textures, canvas } = ctx;
+  const { canvas } = ctx;
 
   let bs = (() => {
     let { width, height } = canvas;
@@ -17,36 +17,23 @@ export default function Play(ctx) {
 
   let dCardGame = new CardGameView(this, ctx, bs);
 
-  let components = [];
-  let container = dContainer();
+  let container = this.container = new AContainer();
   const initContainer = () => {
 
-    dCardGame.add(container);
-    components.push(dCardGame);
-
+    container.addChild(dCardGame);
+    
   };
   initContainer();
 
-  this.init = data => {
-
-    dCardGame.init({});
-
-  };
-
-  this.add = (parent) => {
-    parent.addChild(container);
-  };
-
-  this.remove = () => {
-    container.parent.removeChild(container);
+  this.init = (data) => {
+    dCardGame.init();
   };
 
   this.update = delta => {
-    components.forEach(_ => _.update(delta));
+    this.container.update(delta);
   };
 
   this.render = () => {
-    components.forEach(_ => _.render());
+    this.container.render();
   };
-
 }

@@ -1,42 +1,33 @@
-import { dContainer } from '../asprite';
+import AContainer from './acontainer';
+import { iPolPlus } from './util2';
 
-import CandyCards from './candycards';
-import { fxHandler, fxHandler2 } from './util';
 import { backCard } from '../cards';
 import * as v from '../vec2';
 
-export default function Play(play, ctx, bs) {
+import CardCard from './cardcard';
 
-  let dCards = new CandyCards(this, ctx, bs);
+export default function SoliDeal(play, ctx, bs) {
+
+  this.solitaire = play.solitaire;
+
+  let dCards = new CardCard(this, ctx, bs);
+  
+  let container = this.container = new AContainer();
+  const initContainer = () => {
+    
+  };
+  initContainer();
 
   let settleSource,
       settleTargetDiff;
 
-  let components = [];
-  const container = dContainer();
-  const initContainer = () => {
-
-    dCards.add(container);
-    components.push(dCards);
-
-  };
-  initContainer();
-
-  let solitaire;
-
-  this.init = data => {
-    solitaire = data.solitaire;
-  };
-
-  const handleDeal = fxHandler({
-    allowEnd: true,
-    duration: 1000 / 30,
-    onBegin(fxDataDeal) {
+  let iDeal = new iPolPlus({
+    onBegin(oDeal) {
       let { cards,
             stackN,
-            isHidden } = fxDataDeal.data;
+            isHidden } = oDeal;
 
-      dCards.visible(true);
+      dCards.container.visible(true);
 
       if (isHidden) {
         dCards.init(backCard);
@@ -44,39 +35,40 @@ export default function Play(play, ctx, bs) {
         dCards.init(cards[0]);
       }
 
-      settleSource = play.dDraw.drawDeckGlobalPosition();
-      let dDstStack = play.soliStackN(stackN);
-      let settleTarget = dDstStack.globalPositionNextCard();
+      settleSource = play.dDraw.deckGlobalPosition();
+      let dDstStack = play.dStackN(stackN);
+      let settleTarget = dDstStack.nextCardGlobalPosition();
 
       settleTargetDiff = [settleTarget[0] - settleSource.x,
                           settleTarget[1] - settleSource.y];
     },
     onUpdate(_, i) {
       let vSettleTarget = v.cscale(settleTargetDiff, i);
-      dCards.move(settleSource.x + vSettleTarget[0],
-                  settleSource.y + vSettleTarget[1]);      
+      dCards.container
+        .move(settleSource.x + vSettleTarget[0],
+              settleSource.y + vSettleTarget[1]);
     },
     onEnd() {
-      dCards.visible(false);
+      dCards.container.visible(false);
     }
-  }, () => solitaire.data.deal);
+  });
+
+  let observeDeal = this.solitaire.fx('deal');
+
+  observeDeal.subfun((oDeal, resolve) => {
+    iDeal.begin(oDeal, resolve);
+  });
+
+  this.init = (data) => {
+    
+  };
 
   this.update = delta => {
-    handleDeal(delta);
-    components.forEach(_ => _.update(delta));
+    iDeal.update(delta / (1000 / 30));
+    this.container.update(delta);
   };
 
   this.render = () => {
-    components.forEach(_ => _.render());
+    this.container.render();
   };
-
-  this.add = (parent) => {
-    parent.addChild(container);
-  };
-
-  this.remove = () => {
-    container.parent.removeChild(container);
-  };
-
-  this.move = (x, y) => container.position.set(x, y);
 }
