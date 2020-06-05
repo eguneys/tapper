@@ -16,7 +16,7 @@ export default function SoliHoles(play, ctx, bs) {
   let container = this.container = new AContainer();
   const initContainer = () => {
     dHoles.forEach((dHole, i) => {
-      dHole.container.move(0, i * bs.holes.height);
+      dHole.container.move(0, i * bs.holes.height + bs.stackMargin * 2.0);
       container.addChild(dHole);
     });
   };
@@ -73,6 +73,7 @@ function SoliHole(play, ctx, bs) {
     dHighlight.container.move(-1, -1);
     container.addChild(dHighlight);
     
+    dTop.highlight(false);
   };
   initContainer();
 

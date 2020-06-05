@@ -1,4 +1,4 @@
-# Card Game Issues
+### Card Game Issues
 
 - [ ] Menu bar
   -  [ ] menu button
@@ -7,7 +7,7 @@
    - [ ] game selection
    - [ ] Settings
     
-# Solitaire Issues
+### Solitaire Issues
 
 - [ ] Undo
    - [ ] undo card deal

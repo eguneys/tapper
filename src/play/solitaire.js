@@ -22,11 +22,12 @@ export default function SolitaireView(play, ctx, pbs) {
   let bs = (() => {
     let { width, height } = pbs;
 
-    let stackMargin = Math.round(height * 0.02 / 4);
+    let stackMargin = Math.round(height * 0.04 / 4);
+    let heightMargin = Math.round(height * 0.02 / 4);
 
     let cRatio = 64 / 89;
     let cMargin = stackMargin * 0.1,
-        cHeight = (height - stackMargin) / 4 - stackMargin,
+        cHeight = height / 4 - heightMargin * 4.0,
         cWidth = cRatio * cHeight;
     cHeight = Math.floor(cHeight);
     cWidth = Math.floor(cWidth);
@@ -44,7 +45,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
     let holes = rect(stacks.x + stacks.width * 7 + drawGap,
                      stacks.y,
-                     0, (cHeight + stackMargin));
+                     0, (cHeight + heightMargin * 3.0));
 
     let deck = rect(0, 0, cWidth, cHeight * 0.2);
 
