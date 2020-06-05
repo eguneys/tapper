@@ -1,16 +1,7 @@
 import AContainer from './acontainer';
 import CardStack from './cardstack';
 
-import { backCard } from '../cards';
-
-const hiddenDecks = (() => {
-  let res = {};
-
-  for (let i = 1; i < 8; i++) {
-    res[i] = new Array(i).fill(backCard);
-  }
-  return res;
-})();
+import { backCard, hiddenStacks } from '../cards';
 
 export default function SoliDraw(play, ctx, bs) {
 
@@ -37,7 +28,7 @@ export default function SoliDraw(play, ctx, bs) {
   this.init = (data) => {
     let nb = 3;
 
-    dDeck.init({ stack: hiddenDecks[nb] });
+    dDeck.init({ stack: hiddenStacks[nb] });
     dDeck.extend(bs.deck.height);
   };
 

@@ -41,7 +41,7 @@ export default function ASprite(play, ctx, bs) {
   };
 
   this.anchor = (x) => {
-    dBody.anchor = x;
+    dBody.anchor.set(x, x);
   };
 
   this.visible = (visible) => {

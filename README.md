@@ -1,3 +1,9 @@
+# Solitaire Issues
+
+* [] User selects a card stack highlights
+
+* [] User drags a card stack
+
 # User actions
 
 User taps on source, user releases

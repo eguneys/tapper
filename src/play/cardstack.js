@@ -105,7 +105,7 @@ export default function CardStack(play, ctx, bs) {
     onEnd(epos) {
 
       let hitCard = dCards.find((dCard, i) => {
-        let b = dCard.bounds();
+        let b = dCard.container.bounds();
         return hitTest(epos[0], epos[1], b);
       });
 
@@ -138,6 +138,10 @@ export default function CardStack(play, ctx, bs) {
     let iCardExtend = iExtend.value();
 
     return cardY(dCards.length, iCardExtend);
+  };
+
+  this.nextCardLocalPosition = () => {
+    return [0, this.nextCardY()];
   };
 
   this.cardsHeight = () => {

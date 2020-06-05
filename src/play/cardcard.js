@@ -1,6 +1,7 @@
 import { dContainer } from '../asprite';
 import AContainer from './acontainer';
 import ASprite from './asprite';
+import AText from './atext';
 
 const ranks = {
   'ace': 'A',
@@ -50,9 +51,9 @@ export default function CardCard(play, ctx, bs) {
     height: tHeight
   });
 
-  // let dRank = new FText(this, ctx, {
-  //   size: tWidth,
-  // });
+  let dRank = new AText(this, ctx, {
+    size: tWidth,
+  });
 
   let dHighlight = new ASprite(this, ctx, {
     width: cWidth + 2,
@@ -65,6 +66,9 @@ export default function CardCard(play, ctx, bs) {
 
     container.addChild(dBg);
 
+
+    container.c.addChild(dFrontContainer);
+
     dTop.anchor(0.5);
     dTop.container.move(tWidth * 0.5 + tMargin, tHeight * 0.5 + tMargin);
     dFrontContainer.addChild(dTop.container.c);
@@ -73,7 +77,8 @@ export default function CardCard(play, ctx, bs) {
     dMiddle.container.move(cWidth - mWidth * 0.5 - tMargin, cHeight - mHeight * 0.5 - tMargin);
     dFrontContainer.addChild(dMiddle.container.c);
 
-    // dRank.move(cWidth - tWidth - tMargin,  tMargin);
+    dRank.container.move(cWidth - tWidth - tMargin,  tMargin);
+    dFrontContainer.addChild(dRank.container.c);
     
     dHighlight.move(-1, -1);
     container.addChild(dHighlight);
@@ -98,17 +103,13 @@ export default function CardCard(play, ctx, bs) {
       dFrontContainer.visible = true;
       dMiddle.texture(mcards[data.suit]);
       dTop.texture(mcards[data.suit]);
-      dTop.texture(mcards[data.suit]);
+      dRank.setText(ranks[data.rank]);
 
-
-      // dRank.setText(ranks[data.rank]);
-
-      // if (data.rank === 'ten') {
-      //   dRank.move(cWidth - tWidth - tMargin * 4.0,  tMargin);
-      // } else {
-      //   dRank.move(cWidth - tWidth - tMargin,  tMargin);
-      // }
-      
+      if (data.rank === 'ten') {
+        dRank.container.move(cWidth - tWidth - tMargin * 4.0,  tMargin);
+      } else {
+        dRank.container.move(cWidth - tWidth - tMargin,  tMargin);
+      }      
     }
   };
 

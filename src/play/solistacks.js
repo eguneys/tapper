@@ -2,25 +2,30 @@ import AContainer from './acontainer';
 
 import CardStack from './cardstack';
 
+import { hiddenStacks } from '../cards';
+
 export default function SoliStacks(play, ctx, bs) {
 
   this.solitaire = play.solitaire;
 
   let dStacks = [
-    new SoliStack(this, ctx, { n: 0 }),
-    new SoliStack(this, ctx, { n: 1 }),
-    new SoliStack(this, ctx, { n: 2 }),
-    new SoliStack(this, ctx, { n: 3 }),
-    new SoliStack(this, ctx, { n: 4 }),
-    new SoliStack(this, ctx, { n: 5 }),
-    new SoliStack(this, ctx, { n: 6 })
+    new SoliStack(this, ctx, { n: 0, ...bs }),
+    new SoliStack(this, ctx, { n: 1, ...bs }),
+    new SoliStack(this, ctx, { n: 2, ...bs }),
+    new SoliStack(this, ctx, { n: 3, ...bs }),
+    new SoliStack(this, ctx, { n: 4, ...bs }),
+    new SoliStack(this, ctx, { n: 5, ...bs }),
+    new SoliStack(this, ctx, { n: 6, ...bs })
   ];
 
   this.dStackN = n => dStacks[n];
 
   let container = this.container = new AContainer();
   const initContainer = () => {
-    dStacks.forEach(_ => container.addChild(_));
+    dStacks.forEach((_, i) => {
+      _.container.move(i * bs.stacks.width, 0);
+      container.addChild(_);
+    });
   };
   initContainer();
 
@@ -45,22 +50,37 @@ function SoliStack(play, ctx, bs) {
     },
     onEndCard: (nCard) => {
       play.solitaire.userActionEndSelectStack(n);
-    }
+    },
+    ...bs
   });
 
-  let dBacks = new CardStack(this, ctx, {});
+  let dBacks = new CardStack(this, ctx, bs);
 
   let observeStack = play.solitaire.stackN(n);
 
   observeStack.subscribe(stack => {
     dFronts.init({ stack: stack.front });
+    dBacks.init({ stack: hiddenStacks[stack.hidden.length] });
+    extendCards(stack.hidden.length, stack.front.length);
   });
+
+  const extendCards = (backs, fronts) => {
+    let nbCards = backs + fronts;
+    let extend = bs.stacks.height / (nbCards + 3);
+
+    let extendBacks = extend * backs,
+        extendFronts = extend * (fronts + 3);
+
+    dBacks.extend(extendBacks);
+    dFronts.extend(extendFronts);
+  };
 
   this.nextCardGlobalPosition = dFronts.nextCardGlobalPosition;
   this.lastCardGlobalPosition = dBacks.lastCardGlobalPosition;
 
   let container = this.container = new AContainer();
   const initContainer = () => {
+    container.addChild(dBacks);
     container.addChild(dFronts);
   };
   initContainer();
@@ -73,7 +93,13 @@ function SoliStack(play, ctx, bs) {
     this.container.update(delta);
   };
 
+  const renderFront = () => {
+    let lb = dBacks.nextCardLocalPosition();
+    dFronts.container.move(lb[0], lb[1]);
+  };
+
   this.render = () => {
+    renderFront();
     this.container.render();
   };
 }

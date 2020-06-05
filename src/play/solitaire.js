@@ -8,10 +8,11 @@ import Solitaire from '../solitaire';
 import SoliStacks from './solistacks';
 import SoliDraw from './solidraw';
 import SoliDeal from './solideal';
+import SoliDrag from './solidrag';
 
 import { moveHandler2 } from './util';
 
-export default function Play(play, ctx, pbs) {
+export default function SolitaireView(play, ctx, pbs) {
 
   const { events } = ctx;
 
@@ -74,6 +75,8 @@ export default function Play(play, ctx, pbs) {
 
   let dSoliDeal = new SoliDeal(this, ctx, bs);
 
+  let dSoliDrag = new SoliDrag(this, ctx, bs);
+
   this.dStackN = dStacks.dStackN;
   this.dStackDraw = dDraw.dStackDraw;
   this.dDraw = dDraw;
@@ -85,8 +88,11 @@ export default function Play(play, ctx, pbs) {
     dDraw.container.move(bs.draws.x, bs.draws.y);
 
     container.addChild(dStacks);
+    dStacks.container.move(bs.stacks.x, bs.stacks.y);
+
     container.addChild(dSoliDeal);
 
+    container.addChild(dSoliDrag);
   };
   initContainer();
 
@@ -105,8 +111,9 @@ export default function Play(play, ctx, pbs) {
   }, events);
 
   this.update = delta => {
-    handleTap();
+    // order matters end select comes before end tap
     this.container.update(delta);
+    handleTap();
   };
 
   this.render = () => {

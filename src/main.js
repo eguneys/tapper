@@ -72,7 +72,7 @@ export function app(element, options) {
         if (module.hot) {
           module.hot.accept('./play', function() {
             try {
-              play.remove();
+              app.stage.removeChild(play.container.c);
               play = new Play(ctx);
               play.init(data);
               app.stage.addChild(play.container.c);

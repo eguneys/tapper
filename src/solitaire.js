@@ -18,10 +18,16 @@ export default function Solitaire() {
 
   let stackDraw = observable(new SoliDrawDeck());
 
-  let observeUserSelectStack = pobservable();
+  let beginSelection = this.bSelection = observable({});
+  let activeSelection = this.aSelection = observable({});
+
+  let observeUserSelectStack = pobservable(),
+      observeUserEndsSelect = pobservable();
 
   let fxs = {
-    'deal': pobservable()
+    'deal': pobservable(),
+    'settle': pobservable()
+
   };
 
   let dealer = new SoliDeal();
@@ -37,23 +43,52 @@ export default function Solitaire() {
       cardN,
       epos,
       decay });
+
+    activeSelection.mutate(_ => {
+      _.epos = epos;
+      _.decay = decay;
+    });
   };
 
-  this.userActionMove = () => {
-    
+  this.userActionMove = (epos) => {
+    activeSelection.mutate(_ => _.epos = epos);
+  };
+
+
+  this.userActionEndSelectStack = (stackN) => {
+    activeSelection.mutate(_ => _.stackN = stackN);
+  };
+
+
+  const effectBeginSelect = (cards) => {
+    beginSelection.mutate(_ => _.cards = cards);
   };
 
   this.userActionEndTap = () => {
-    
+    observeUserEndsSelect.resolve(activeSelection.apply(_ => ({
+      stackN: _.stackN
+    })));
   };
 
   this.init = () => {
-    actionSelectionStep();
+    actionReset();
     actionDealCards();
+    actionSelectionStep();
   };
 
   const userSelectsStack = () => {
     return observeUserSelectStack.begin();
+  };
+
+  const userEndsSelect = () => {
+    return observeUserEndsSelect.begin();
+  };
+
+  const actionReset = () => {
+    stacks.forEach(_ => 
+      _.mutate(_ => _.clear()));
+
+    return Promise.resolve();
   };
 
   const actionDealCards = async () => {
@@ -75,25 +110,67 @@ export default function Solitaire() {
     }
   };
 
-  const actionDealCard = (oDeal) => {
-    let card = stackDraw
-        .mutate(_ => _.dealDraw1());
+  const actionDealCard = async (oDeal) => {
+    let { i, hidden } = oDeal;
 
-    return fx('deal').begin({
-      stackN: oDeal.i,
-      cards: [card],
-      isHidden: oDeal.isHidden
+    let card = stackDraw
+        .mutate(_ => _.dealDraw1()),
+        cards = [card];
+
+    await fx('deal').begin({
+      stackN: i,
+      cards,
+      hidden
     });
+
+    if (hidden) {
+      stackN(i).mutate(_ => {
+        _.hide1(cards);
+      });
+    } else {
+      stackN(i).mutate(_ => {
+        _.add1(cards);
+      });      
+    }
   };
 
   const actionSelectStack = async () => {
 
     let { stackN, cardN } = await userSelectsStack();
 
-    console.log(stackN, cardN);
+    let cards = effectStackCut1(stackN, cardN);
 
-    return Promise.resolve();
+    effectBeginSelect(cards);
 
+    let target = await userEndsSelect();
+
+    let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
+
+    if (dstStackN) {
+      return Promise.resolve();
+    } else {
+      return await actionSettleStackCancel(stackN, cards, hasMoved);
+    }
+  };
+
+  const actionSettleStackCancel = async (stackN, cards, hasMoved) => {
+
+    await fx('settle').begin({
+      stackN,
+      cards
+    });
+
+    effectStackAdd1(stackN, cards);
+  };
+
+  const effectStackAdd1 = (_stackN, cards) => {
+    return stackN(_stackN)
+      .mutate(_ => _.add1(cards));
+  };
+
+  const effectStackCut1 = (_stackN, cardN) => {
+    return stackN(_stackN)
+      .mutate(_ => _.cut1(cardN));
   };
 
   const actionSelectionStep = async () => {
