@@ -5,6 +5,8 @@ import CardPlaceholder from './cardplaceholder';
 
 import { hiddenStacks } from '../cards';
 
+import { isN } from '../soliutils';
+
 export default function SoliStacks(play, ctx, bs) {
 
   this.solitaire = play.solitaire;
@@ -29,6 +31,26 @@ export default function SoliStacks(play, ctx, bs) {
     });
   };
   initContainer();
+
+  const observePSelection = ({ 
+    active,
+    stackN,
+    cards }) => {
+
+      if (!isN(stackN)) {
+        return;
+      }
+
+      let dStack = this.dStackN(stackN);
+
+      if (active) {
+        dStack.highlightCards(cards);
+      } else {
+        dStack.highlight(false);
+      }
+  };
+
+  this.solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 
@@ -83,6 +105,8 @@ function SoliStack(play, ctx, bs) {
     dFronts.extend(extendFronts);
   };
 
+  this.highlight = dFronts.highlight;
+  this.highlightCards = dFronts.highlightCards;
   this.nextCardGlobalPosition = dFronts.nextCardGlobalPosition;
   this.lastCardGlobalPosition = dBacks.lastCardGlobalPosition;
 

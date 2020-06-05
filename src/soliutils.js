@@ -1,3 +1,5 @@
+export const isN = n => n || n === 0;
+
 const canStack = (c1, c2) => 
       c1.color !== c2.color && c1.sRank === c2.sRank + 1;
 

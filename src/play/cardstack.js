@@ -27,7 +27,6 @@ export default function CardStack(play, ctx, bs) {
 
   this.init = (data) => {
     let stack = data.stack;
-    let highlight = data.highlight;
 
     dCards.forEach(_ => container.removeChild(_));
     dCards = [];
@@ -48,9 +47,6 @@ export default function CardStack(play, ctx, bs) {
     
     this.extend(bs.stacks.height);
     this.highlight(false);
-    if (highlight) {
-      highlight.forEach(n => this.highlightCard(n));
-    }
   };
 
   this.extend = (eHeight) => {
@@ -68,6 +64,10 @@ export default function CardStack(play, ctx, bs) {
 
   this.highlightCard = (n) => {
     dCards[n].highlight(true);
+  };
+
+  this.highlightCards = cards => {
+    cards.forEach((n, i) => this.highlightCard(dCards.length - 1 - i));
   };
 
   const handleMove = moveHandler({

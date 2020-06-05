@@ -1,9 +1,13 @@
-# Solitaire Issues
+e# Solitaire Issues
 
     
 [ ] User select deck to show draw cards
 [ ] User drags draw cards
 [ ] User selects a card stack highlights
+    [ ] Solitaire 
+      [ ] selecting a card stack highlights cards up to highest stack
+      [x] selecting a card  again highlights up to selected card
+[x] User selects a card then selects another card to move it.
 [x] User drags a card stack
 [x] User drops on card stack
     [x] User drops on empty card stack

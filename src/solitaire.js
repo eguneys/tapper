@@ -1,10 +1,8 @@
 import { makeOneDeck } from './deck';
-import { SoliStack, SoliDrawDeck } from './soliutils';
+import { isN, SoliStack, SoliDrawDeck } from './soliutils';
 import SoliDeal from './solideal';
 
 import { pobservable, observable } from './observable';
-
-const isN = n => n || n === 0;
 
 export default function Solitaire() {
 
@@ -23,13 +21,16 @@ export default function Solitaire() {
   let beginSelection = this.bSelection = observable({});
   let activeSelection = this.aSelection = observable({});
 
+  let persistSelection = this.pSelection = observable({});
+
   let observeUserSelectStack = pobservable(),
       observeUserEndsSelect = pobservable();
 
   let fxs = {
     'deal': pobservable(),
     'settle': pobservable(),
-    'reveal': pobservable()
+    'reveal': pobservable(),
+    'move': pobservable()
   };
 
   let dealer = new SoliDeal();
@@ -47,18 +48,25 @@ export default function Solitaire() {
       decay });
 
     activeSelection.mutate(_ => {
+      _.stackN = false;
+      _.hasMoved = false;
       _.epos = epos;
       _.decay = decay;
     });
   };
 
   this.userActionMove = (epos) => {
-    activeSelection.mutate(_ => _.epos = epos);
+    activeSelection.mutate(_ => {
+      _.epos = epos;
+      _.hasMoved = true;
+    });
   };
 
 
   this.userActionEndSelectStack = (stackN) => {
-    activeSelection.mutate(_ => _.stackN = stackN);
+    activeSelection.mutate(_ => {
+      _.stackN = stackN;
+    });
   };
 
 
@@ -68,7 +76,8 @@ export default function Solitaire() {
 
   this.userActionEndTap = () => {
     observeUserEndsSelect.resolve(activeSelection.apply(_ => ({
-      stackN: _.stackN
+      stackN: _.stackN,
+      hasMoved: _.hasMoved
     })));
   };
 
@@ -140,19 +149,52 @@ export default function Solitaire() {
 
     let { stackN, cardN } = await userSelectsStack();
 
+    let persistSelected = persistSelection.apply(_ => _.active);
+
+    if (persistSelected) {
+      let { stackN: persistStackN,
+            cardN,
+            cards } = persistSelection
+          .apply(_ => _);
+
+      if (persistStackN !== stackN) {
+
+        effectPersistSelectEnd();
+        
+        return await actionMoveCards(persistStackN, stackN, cardN);
+      }
+    }
+
     let cards = effectStackCut1(stackN, cardN);
 
+    effectPersistSelectEnd();
     effectBeginSelect(cards);
 
     let target = await userEndsSelect();
 
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
 
-    if (isN(dstStackN)) {
+    if (isN(dstStackN) && dstStackN !== stackN) {
       return await actionSettleStack(stackN, dstStackN, cards);
     } else {
       return await actionSettleStackCancel(stackN, cards, hasMoved);
     }
+  };
+
+  const actionMoveCards = async (srcStackN, dstStackN, cardN) => {
+
+    let cards = effectStackCut1(srcStackN, cardN);
+
+    let pReveal = actionRevealStack(srcStackN),
+        pMove = fx('move').begin({
+          srcStackN,
+          dstStackN,
+          cards
+        });
+
+    await Promise.all([pReveal, pMove]);
+
+    effectStackAdd1(dstStackN, cards);
   };
 
   const actionSettleStack = async (srcStackN, dstStackN, cards) => {
@@ -174,6 +216,10 @@ export default function Solitaire() {
     });
 
     effectStackAdd1(stackN, cards);
+
+    if (!hasMoved) {
+      effectPersistSelectStack(stackN, cards);
+    }
   };
 
   const actionRevealStack = async (_stackN) => {
@@ -193,6 +239,25 @@ export default function Solitaire() {
     });
 
     effectStackAdd1(_stackN, [last]);
+  };
+
+  const effectPersistSelectEnd = () => {
+    persistSelection.mutate(_ => {
+      _.active = false;
+    });
+  };
+
+  const effectPersistSelectStack = (_stackN, cards) => {
+    let cardN = stackN(_stackN)
+        .apply(_ => 
+          _.front.indexOf(cards[0]));
+
+    persistSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = _stackN;
+      _.cards = cards;
+      _.cardN = cardN;
+    });
   };
 
   const effectStackAdd1 = (_stackN, cards) => {
