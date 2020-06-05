@@ -1,5 +1,5 @@
 import { makeOneDeck } from './deck';
-import { isN, SoliStack, SoliDrawDeck } from './soliutils';
+import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
 import SoliDeal from './solideal';
 
 import { pobservable, observable } from './observable';
@@ -14,6 +14,13 @@ export default function Solitaire() {
     observable(new SoliStack()),
     observable(new SoliStack()),
     observable(new SoliStack())
+  ];
+
+  let holes = [
+    observable(new SoliHole()),
+    observable(new SoliHole()),
+    observable(new SoliHole()),
+    observable(new SoliHole())
   ];
 
   let drawer = this.drawer = observable(new SoliDrawDeck());
@@ -39,6 +46,7 @@ export default function Solitaire() {
 
   let dealer = new SoliDeal();
 
+  let holeN = this.holeN = n => holes[n];
   let stackN = this.stackN = n => stacks[n];
   let fx = this.fx = name => fxs[name];
 

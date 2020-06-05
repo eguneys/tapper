@@ -1,38 +1,44 @@
+# Card Game Issues
+
+- [ ] Menu bar
+  -  [ ] menu button
+  -  [ ] back button in game view brings into main menu
+- [ ] Main menu
+   - [ ] game selection
+   - [ ] Settings
+    
 # Solitaire Issues
 
-    
-[x] User select deck to show draw cards
-[x] User drags draw cards
-[ ] User selects a card stack highlights
-    [ ] Solitaire 
-      [ ] selecting a card stack highlights cards up to highest stack
-      [x] selecting a card  again highlights up to selected card
-[x] User selects a card then selects another card to move it.
-[x] User drags a card stack
-[x] User drops on card stack
-    [x] User drops on empty card stack
-    [x] empty stack reveals new card
+- [ ] Undo
+   - [ ] undo card deal
+   - [ ] undo stack stack move
+   - [ ] undo draw stack move
+   - [ ] undo stack hole move
+   - [ ] undo hole stack move
+- [ ] Cards move according to rules
+- [ ] User drags / moves stack to hole
+- [ ] User drags / moves hole to stack
+- [x] User select deck to show draw cards
+- [x] User drags draw cards
+- [+] User selects a card stack highlights
+  - [ ] selecting a card stack highlights cards up to highest stack
+  - [x] selecting a card  again highlights up to selected card
+- [x] User selects a card then selects another card to move it.
+- [x] User drags a card stack
+- [x] User drops on card stack
+  - [x] User drops on empty card stack
+  - [x] empty stack reveals new card
 
 # User actions
 
-User taps on source, user releases
+* User taps on source, user releases
+* User taps on source, moves on blank, releases
+* User taps on source, moves on target, releases
 
-User taps on source, moves on blank, releases
-
-User taps on source, moves on target, releases
-
-userActionBeginTap(source, tapData) {
-}
-
-userActionMoveTap(tapData) {
-}
-
-userActionRelaseOnTarget(target) {
-}
-
-userActionRelease() {
-}
-
+    userActionBeginTap(source, tapData)
+    userActionMoveTap(tapData)
+    userActionRelaseOnTarget(target)
+    userActionRelease()
 
 # Solitaire
 

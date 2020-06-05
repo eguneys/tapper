@@ -5,6 +5,7 @@ import { dContainer } from '../asprite';
 import AContainer from './acontainer';
 
 import Solitaire from '../solitaire';
+import SoliHoles from './soliholes';
 import SoliStacks from './solistacks';
 import SoliDraw from './solidraw';
 import SoliDeal from './solideal';
@@ -21,25 +22,27 @@ export default function SolitaireView(play, ctx, pbs) {
   let bs = (() => {
     let { width, height } = pbs;
 
-    let cRatio = 64 / 89;
-    let cMargin = 10,
-        cHeight = height / 4 - cMargin,
-        cWidth = cRatio * cHeight;
-    cHeight = Math.round(cHeight);
-    cWidth = Math.round(cWidth);
-    let card = rect(0, 0, cWidth, cHeight);
+    let stackMargin = Math.round(height * 0.02 / 4);
 
-    let stackMargin = Math.round(height * 0.1 / 4);
+    let cRatio = 64 / 89;
+    let cMargin = stackMargin * 0.1,
+        cHeight = (height - stackMargin) / 4 - stackMargin,
+        cWidth = cRatio * cHeight;
+    cHeight = Math.floor(cHeight);
+    cWidth = Math.floor(cWidth);
+    let card = rect(0, 0, cWidth, cHeight);
 
     let draws = rect(stackMargin, stackMargin,
                      cWidth, cHeight);
 
-    let stacks = rect(draws.x1 + stackMargin * 3.0,
+    let drawGap = stackMargin * 2.0;
+
+    let stacks = rect(draws.x1 + drawGap,
                       stackMargin,
                       (cWidth + stackMargin),
                       height - stackMargin);
 
-    let holes = rect(stacks.x + stacks.width * 7 + stackMargin * 2.0,
+    let holes = rect(stacks.x + stacks.width * 7 + drawGap,
                      stacks.y,
                      0, (cHeight + stackMargin));
 
@@ -75,6 +78,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let dStacks = new SoliStacks(this, ctx, bs);
 
+  let dHoles = new SoliHoles(this, ctx, bs);
+
   let dSoliDeal = new SoliDeal(this, ctx, bs);
 
   let dSoliDrag = new SoliDrag(this, ctx, bs);
@@ -95,6 +100,9 @@ export default function SolitaireView(play, ctx, pbs) {
     container.addChild(dStacks);
     dStacks.container.move(bs.stacks.x, bs.stacks.y);
 
+    container.addChild(dHoles);
+    dHoles.container.move(bs.holes.x, bs.holes.y);
+
     container.addChild(dSoliDeal);
     container.addChild(dSoliReveal);
     container.addChild(dSoliMove);
@@ -106,7 +114,6 @@ export default function SolitaireView(play, ctx, pbs) {
 
   this.init = (data) => {
     solitaire.init();
-    dDraw.init();
   };
 
   const handleTap = moveHandler2({
