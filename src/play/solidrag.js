@@ -36,7 +36,7 @@ export default function Play(play, ctx, bs) {
       let dStack = play.dStackN(stackN);
 
       settleSource = dDragStack.container.globalPosition();
-      let settleTarget = dStack.nextCardGlobalPosition(stackN);
+      let settleTarget = dStack.nextCardGlobalPosition();
 
       settleTargetDiff = [settleTarget[0] - settleSource.x,
                           settleTarget[1] - settleSource.y];

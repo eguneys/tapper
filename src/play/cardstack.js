@@ -123,25 +123,32 @@ export default function CardStack(play, ctx, bs) {
     this.container.update(delta);
   };
 
-  this.nextCardGlobalPosition = (noNextCard) => {
+  const nextCardY = (n) => {
+    let iCardExtend = iExtend.value();
+
+    return cardY(n, iCardExtend);
+  };
+
+  const lastCardY = () => nextCardY(dCards.length);
+
+
+  const cardNGlobalPosition = (n) => {
     let gPos = container.globalPosition();
-    let nextCardY = this.nextCardY();
-    if (noNextCard) {
-      nextCardY = 0;
-    }
+    let y = nextCardY(n);
+    return [gPos.x, gPos.y + y];
+  };
+
+  this.nextCardGlobalPosition = () => {
+    let gPos = container.globalPosition();
+    let nextCardY = lastCardY();
     return [gPos.x, gPos.y + nextCardY];
   };
 
-  this.lastCardGlobalPosition = () => this.nextCardGlobalPosition(true);
-
-  this.nextCardY = () => {
-    let iCardExtend = iExtend.value();
-
-    return cardY(dCards.length, iCardExtend);
-  };
+  this.lastCardGlobalPosition = () => 
+  cardNGlobalPosition(dCards.length); 
 
   this.nextCardLocalPosition = () => {
-    return [0, this.nextCardY()];
+    return [0, lastCardY()];
   };
 
   this.cardsHeight = () => {

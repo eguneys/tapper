@@ -1,6 +1,7 @@
 import AContainer from './acontainer';
 
 import CardStack from './cardstack';
+import CardPlaceholder from './cardplaceholder';
 
 import { hiddenStacks } from '../cards';
 
@@ -56,6 +57,13 @@ function SoliStack(play, ctx, bs) {
 
   let dBacks = new CardStack(this, ctx, bs);
 
+  let dPlaceholder = new CardPlaceholder(this, ctx, {
+    onEndCard: () => {
+      play.solitaire.userActionEndSelectStack(n);
+    },
+    ...bs
+  });
+
   let observeStack = play.solitaire.stackN(n);
 
   observeStack.subscribe(stack => {
@@ -80,13 +88,14 @@ function SoliStack(play, ctx, bs) {
 
   let container = this.container = new AContainer();
   const initContainer = () => {
+    container.addChild(dPlaceholder);
     container.addChild(dBacks);
     container.addChild(dFronts);
   };
   initContainer();
 
   this.init = (data) => {
-    
+    dPlaceholder.init();
   };
 
   this.update = delta => {

@@ -29,7 +29,7 @@ export default function CandyReveal(play, ctx, bs) {
     container.visible = false;
   };
 
-  this.beginReveal = (position, card) => {
+  this.beginReveal = (card) => {
     container.visible = true;
 
     dFront.init({
@@ -39,19 +39,13 @@ export default function CandyReveal(play, ctx, bs) {
 
     dFront.scale(0, 1);
     dBack.scale(1, 1);
-
-    this.move(position.x, position.y);
   };
 
-  this.updateReveal = (i, position) => {
+  this.updateReveal = (i) => {
     if (i < 0.5) {
       dBack.scale(1.0-i*2, 1);
     } else {
       dFront.scale(i * 2.0 - 1.0, 1);
-    }
-
-    if (position) {
-      this.move(position.x, position.y);
     }
   };
 

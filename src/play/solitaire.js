@@ -8,6 +8,7 @@ import Solitaire from '../solitaire';
 import SoliStacks from './solistacks';
 import SoliDraw from './solidraw';
 import SoliDeal from './solideal';
+import SoliReveal from './solireveal';
 import SoliDrag from './solidrag';
 
 import { moveHandler2 } from './util';
@@ -77,6 +78,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let dSoliDrag = new SoliDrag(this, ctx, bs);
 
+  let dSoliReveal = new SoliReveal(this, ctx, bs);
+
   this.dStackN = dStacks.dStackN;
   this.dStackDraw = dDraw.dStackDraw;
   this.dDraw = dDraw;
@@ -92,6 +95,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
     container.addChild(dSoliDeal);
 
+    container.addChild(dSoliReveal);
     container.addChild(dSoliDrag);
   };
   initContainer();

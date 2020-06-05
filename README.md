@@ -1,8 +1,13 @@
 # Solitaire Issues
 
-* [] User selects a card stack highlights
-
-* [] User drags a card stack
+    
+[ ] User select deck to show draw cards
+[ ] User drags draw cards
+[ ] User selects a card stack highlights
+[x] User drags a card stack
+[x] User drops on card stack
+    [x] User drops on empty card stack
+    [x] empty stack reveals new card
 
 # User actions
 

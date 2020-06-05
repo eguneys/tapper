@@ -23,6 +23,10 @@ export default function aContainer() {
     container.position.set(x, y);
   };
 
+  this.scale = (x, y) => container.scale.set(x, y);
+
+  this.pivot = (x, y) => container.pivot.set(x, y);
+
   this.visible = (visible) => container.visible = visible;
 
   this.update = (delta) => {

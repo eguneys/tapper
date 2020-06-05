@@ -4,6 +4,8 @@ import SoliDeal from './solideal';
 
 import { pobservable, observable } from './observable';
 
+const isN = n => n || n === 0;
+
 export default function Solitaire() {
 
   let stacks = [
@@ -26,8 +28,8 @@ export default function Solitaire() {
 
   let fxs = {
     'deal': pobservable(),
-    'settle': pobservable()
-
+    'settle': pobservable(),
+    'reveal': pobservable()
   };
 
   let dealer = new SoliDeal();
@@ -146,11 +148,22 @@ export default function Solitaire() {
 
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
 
-    if (dstStackN) {
-      return Promise.resolve();
+    if (isN(dstStackN)) {
+      return await actionSettleStack(stackN, dstStackN, cards);
     } else {
       return await actionSettleStackCancel(stackN, cards, hasMoved);
     }
+  };
+
+  const actionSettleStack = async (srcStackN, dstStackN, cards) => {
+    await fx('settle').begin({
+      stackN: dstStackN,
+      cards
+    });
+
+    effectStackAdd1(dstStackN, cards);
+
+    await actionRevealStack(srcStackN);
   };
 
   const actionSettleStackCancel = async (stackN, cards, hasMoved) => {
@@ -161,6 +174,25 @@ export default function Solitaire() {
     });
 
     effectStackAdd1(stackN, cards);
+  };
+
+  const actionRevealStack = async (_stackN) => {
+    let canReveal = stackN(_stackN).apply(_ => _.canReveal());
+
+    if (!canReveal) {
+      await Promise.resolve();
+      return;
+    }
+
+    let last = stackN(_stackN)
+        .mutate(_ => _.reveal1());
+
+    await fx('reveal').begin({
+      stackN: _stackN,
+      card: last
+    });
+
+    effectStackAdd1(_stackN, [last]);
   };
 
   const effectStackAdd1 = (_stackN, cards) => {
