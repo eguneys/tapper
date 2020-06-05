@@ -80,7 +80,16 @@ function SoliStack(play, ctx, bs) {
   let dBacks = new CardStack(this, ctx, bs);
 
   let dPlaceholder = new CardPlaceholder(this, ctx, {
+    onBeginCard: () => {
+      if (!dFronts.empty()) {
+        return;
+      }
+      play.solitaire.userActionSelectStack(n);
+    },
     onEndCard: () => {
+      if (!dFronts.empty()) {
+        return;
+      }
       play.solitaire.userActionEndSelectStack(n);
     },
     ...bs

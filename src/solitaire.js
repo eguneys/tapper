@@ -69,7 +69,9 @@ export default function Solitaire() {
       cardN
     });
 
-    effectActiveSelect(epos, decay);
+    if (epos) {
+      effectActiveSelect(epos, decay);
+    }
   };
 
   this.userActionSelectHole = (holeN, epos, decay) => {
@@ -234,6 +236,10 @@ export default function Solitaire() {
 
         return await actionMoveCardsDrawStack(stackN);
       }
+    }
+
+    if (!isN(cardN)) {
+      return Promise.resolve();
     }
 
     let cards = effectStackCut1(stackN, cardN);

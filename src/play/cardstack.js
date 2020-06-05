@@ -58,6 +58,8 @@ export default function CardStack(play, ctx, bs) {
     iExtend.target(cardExtend);
   };
 
+  this.empty = () => dCards.length === 0;
+
   this.highlight = (value) => {
     dCards.forEach(_ => _.highlight(value));
   };

@@ -9,18 +9,18 @@
     
 ### Solitaire Issues
 
+- [ ] Cards move according to rules
 - [ ] Undo
    - [ ] undo card deal
    - [ ] undo stack stack move
    - [ ] undo draw stack move
    - [ ] undo stack hole move
    - [ ] undo hole stack move
-- [ ] Cards move according to rules
-- [ ] User drags / moves stack to hole
-- [ ] User drags / moves hole to stack
-- [ ] persist select
-  - [ ] persist select hole
-  - [ ] persist select draw
+- [x] User drags / moves stack to hole
+- [x] User drags / moves hole to stack
+- [x] persist select
+  - [x] persist select hole
+  - [x] persist select draw
   - [x] persist select stack
 - [x] User select deck to show draw cards
 - [x] User drags draw cards
