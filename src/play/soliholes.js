@@ -4,6 +4,8 @@ import ASprite from './asprite';
 import CardCard from './cardcard';
 import CardPlaceholder from './cardplaceholder';
 
+import { isN } from '../soliutils';
+
 export default function SoliHoles(play, ctx, bs) {
 
   this.solitaire = play.solitaire;
@@ -25,6 +27,25 @@ export default function SoliHoles(play, ctx, bs) {
     });
   };
   initContainer();
+
+  const observePSelection = ({ 
+    active,
+    holeN }) => {
+      
+      if (!isN(holeN)) {
+        return;
+      }
+
+      let dHole = this.dHoleN(holeN);
+
+      if (active) {
+        dHole.highlight(true);
+      } else {
+        dHole.highlight(false);
+      }
+  };
+
+  this.solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {
     
@@ -99,6 +120,8 @@ function SoliHole(play, ctx, bs) {
       dTop.container.visible(false);
     }
   });
+
+  this.highlight = dTop.highlight;
 
   this.init = (data) => {
     

@@ -216,7 +216,7 @@ export default function Solitaire() {
             cards } = persistSelection
           .apply(_ => _);
 
-      if (persistStackN !== stackN) {
+      if (isN(persistStackN) && persistStackN !== stackN) {
 
         effectPersistSelectEnd();
         
@@ -316,6 +316,10 @@ export default function Solitaire() {
   const effectPersistSelectEnd = () => {
     persistSelection.mutate(_ => {
       _.active = false;
+      // _.stackN = false;
+      // _.cardN = false;
+      // _.holeN = false;
+      // _.drawN = false;
     });
   };
 
@@ -326,9 +330,38 @@ export default function Solitaire() {
 
     persistSelection.mutate(_ => {
       _.active = true;
+      _.stackN = false;
+      _.cardN = false;
+      _.holeN = false;
+      _.drawN = false;
+
       _.stackN = _stackN;
-      _.cards = cards;
       _.cardN = cardN;
+      _.cards = cards;
+    });
+  };
+
+  const effectPersistSelectHole = (_holeN) => {
+    persistSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = false;
+      _.cardN = false;
+      _.holeN = false;
+      _.drawN = false;
+
+      _.holeN = _holeN;
+    });
+  };
+
+  const effectPersistSelectDraw = () => {
+    persistSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = false;
+      _.cardN = false;
+      _.holeN = false;
+      _.drawN = false;
+
+      _.drawN = true;
     });
   };
 
@@ -396,7 +429,7 @@ export default function Solitaire() {
     effectHoleRemoveCancel(holeN, cards[0]);
 
     if (!hasMoved) {
-      // effectPersistSelectHole();
+      effectPersistSelectHole(holeN);
     }
   };
 
@@ -466,7 +499,7 @@ export default function Solitaire() {
     drawer.mutate(_ => _.drawCancel1(card));
 
     if (!hasMoved) {
-      // effetPersistSelectDraw();
+      effectPersistSelectDraw();
     }
   };
 

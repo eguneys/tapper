@@ -39,7 +39,7 @@ export default function SoliDraw(play, ctx, bs) {
   this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
   this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 
-  play.solitaire.drawer.subscribe(drawer => {
+  solitaire.drawer.subscribe(drawer => {
     let nbDeck = drawer.nbDeck();
 
     if (nbDeck === 0) {
@@ -54,13 +54,32 @@ export default function SoliDraw(play, ctx, bs) {
     dDraw.init({ stack: drawer.showStack3() });
   });
 
-  play.solitaire.fx('dealdraw').subscribe({
+  solitaire.fx('dealdraw').subscribe({
     onBegin(card, resolve) {
       resolve();
     },
     onEnd() {
     }
   });
+
+  const observePSelection = ({ 
+    active,
+    drawN
+  }) => {
+    
+    if (!drawN) {
+      return;
+    }
+
+    if (active) {
+      dDraw.highlightCards([0]);
+    } else {
+      dDraw.highlight(false);
+    }
+
+  };
+
+  solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 
