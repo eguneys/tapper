@@ -11,7 +11,12 @@ export default function SoliDraw(play, ctx, bs) {
 
   const mhud = textures['mhud'];
 
-  let dDeck = new CardStack(this, ctx, bs);
+  let dDeck = new CardStack(this, ctx, {
+    onBeginCard() {
+      console.log('tap');
+    },
+    ...bs
+  });
 
   let container = this.container = new AContainer();
   const initContainer = () => {

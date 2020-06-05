@@ -21,7 +21,10 @@ export default function Play(play, ctx, bs) {
     dDragStack.highlight(true);
   });
 
-  this.solitaire.aSelection.subscribe(({ epos, decay }) => {
+  this.solitaire.aSelection.subscribe(({ active, epos, decay }) => {
+    if (!active) {
+      return;
+    }
     dDragStack.container.move(epos[0] + decay[0],
                               epos[1] + decay[1]);
   });

@@ -48,6 +48,7 @@ export default function Solitaire() {
       decay });
 
     activeSelection.mutate(_ => {
+      _.active = true;
       _.stackN = false;
       _.hasMoved = false;
       _.epos = epos;
@@ -79,6 +80,10 @@ export default function Solitaire() {
       stackN: _.stackN,
       hasMoved: _.hasMoved
     })));
+
+    activeSelection.mutate(_ => {
+      _.active = false;
+    });
   };
 
   this.init = () => {
