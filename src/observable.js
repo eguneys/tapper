@@ -27,20 +27,31 @@ export function PromiseObservable() {
   let subs = [];
 
   let running;
-  let rresolve;
+  let rresolve,
+      rreject;
 
   this.begin = (value) => {
     if (!running) {
-      running = new Promise(resolve => {
+      running = new Promise((resolve, reject) => {
         rresolve = resolve;
-        subs.forEach(_ => _.onBegin(value, resolve));
+        rreject = reject;
+
+        subs.forEach(_ => _.onBegin(value, resolve, reject));
       }).finally(_ => {
         running = undefined;
         rresolve = undefined;
+        rreject = undefined;
         subs.forEach(_ => callMaybe(_.onEnd));
       });
     }
     return running;
+  };
+
+  this.reject = () => {
+    if (rreject) {
+      console.log('reject');
+      rreject();
+    }
   };
 
   this.resolve = (data) => {

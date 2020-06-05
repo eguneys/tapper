@@ -4,6 +4,8 @@ import { dContainer } from '../asprite';
 
 import AContainer from './acontainer';
 
+import CardBackground from './cardbackground';
+
 import Solitaire from '../solitaire';
 import SoliHoles from './soliholes';
 import SoliStacks from './solistacks';
@@ -75,6 +77,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let solitaire = this.solitaire = new Solitaire();
 
+  let dBg = new CardBackground(this, ctx, bs);
+
   let dDraw = new SoliDraw(this, ctx, bs);
 
   let dStacks = new SoliStacks(this, ctx, bs);
@@ -97,6 +101,8 @@ export default function SolitaireView(play, ctx, pbs) {
   let container = this.container = new AContainer();
   const initContainer = () => {
 
+    container.addChild(dBg);
+
     container.addChild(dDraw);
     dDraw.container.move(bs.draws.x, bs.draws.y);
 
@@ -117,6 +123,10 @@ export default function SolitaireView(play, ctx, pbs) {
 
   this.init = (data) => {
     solitaire.init();
+  };
+
+  this.remove = () => {
+    solitaire.remove();
   };
 
   const handleTap = moveHandler2({

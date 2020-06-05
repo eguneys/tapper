@@ -1,14 +1,16 @@
 ### Card Game Issues
 
-- [ ] Menu bar
-  -  [ ] menu button
-  -  [ ] back button in game view brings into main menu
+- [x] Menu bar
+  -  [x] menu button
+  -  [x] back button in game view brings into main menu
 - [ ] Main menu
-   - [ ] game selection
+   - [x] game selection
    - [ ] Settings
     
 ### Solitaire Issues
 
+- [ ] Side bar
+  - [ ] Score
 - [ ] Cards move according to rules
 - [ ] Undo
    - [ ] undo card deal

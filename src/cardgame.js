@@ -1,11 +1,42 @@
+import { pobservable, observable } from './observable';
+
 export default function CardGame() {
 
-  let data = this.data = {
-    view: 'menu'
+  let view = this.view = observable({});
+
+  this.init = () => {
+    actionReset();
   };
 
-  this.view = view => {
-    data.view = view;
+  this.userActionSelectGame = (game) => {
+    effectViewGame(game);
+  };
+
+  this.userActionSelectBack = () => {
+    effectViewMenu();
+  };
+
+  this.userActionSelectMenuBar = () => {
+    
+  };
+
+  const actionReset = () => {
+    effectViewMenu();
+    return Promise.resolve();
+  };
+
+  const effectViewGame = (game) => {
+    view.mutate(_ => {
+      _.menu = false;
+      _.game = game;
+    });
+  };
+
+  const effectViewMenu = () => {
+    view.mutate(_ => {
+      _.menu = true;
+      _.game = false;
+    });
   };
 
 }

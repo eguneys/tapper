@@ -38,6 +38,14 @@ export default function Solitaire() {
 
   let observeUserSelectHole = pobservable();
 
+  let userObserves = [
+    observeUserSelectStack,
+    observeUserEndsSelect,
+    observeUserDealDraw,
+    observeUserSelectDraw,
+    observeUserSelectHole
+  ];
+
   let fxs = {
     'deal': pobservable(),
     'settle': pobservable(),
@@ -53,6 +61,8 @@ export default function Solitaire() {
   let fx = this.fx = name => fxs[name];
 
   let deck = makeOneDeck();
+
+  let running;
 
   this.userActionDealDraw = () => {
     observeUserDealDraw.resolve();
@@ -130,13 +140,19 @@ export default function Solitaire() {
     effectPersistSelectEnd();
   };
 
+  const actionCancelUserObserves = () => {
+    userObserves.forEach(_ => _.reject());
+  };
+
+  this.remove = () => {
+    actionCancelUserObserves();
+    running = false;
+  };
+
   this.init = () => {
     actionReset();
     actionDealCards();
-    actionSelectionStep();
-    actionSelectHoleStep();
-    actionSelectDrawStep();
-    actionDealDrawStep();
+    actionLoopAll();
   };
 
   const userSelectsStack = () => {
@@ -160,6 +176,9 @@ export default function Solitaire() {
   };
 
   const actionReset = () => {
+
+    running = true;
+
     stacks.forEach(_ => 
       _.mutate(_ => _.clear()));
 
@@ -450,11 +469,6 @@ export default function Solitaire() {
       .mutate(_ => _.cutLast());
   };
 
-  const actionSelectionStep = async () => {
-    await actionSelectStack();
-    actionSelectionStep();
-  };
-
   // Select Hole
 
   const actionSelectHole = async () => {
@@ -536,11 +550,6 @@ export default function Solitaire() {
     });
   };
 
-  const actionSelectHoleStep = async () => {
-    await actionSelectHole();
-    actionSelectHoleStep();
-  };
-
   // Select Draw
 
   const actionSelectDraw = async () => {
@@ -589,11 +598,6 @@ export default function Solitaire() {
     }
   };
 
-  const actionSelectDrawStep = async () => {
-    await actionSelectDraw();
-    actionSelectDrawStep();
-  };
-
   // Deal Draw
 
   const actionDealDraw = async () => {
@@ -618,8 +622,24 @@ export default function Solitaire() {
     drawer.mutate(_ => _.drawCommit1());
   };
 
-  const actionDealDrawStep = async () => {
-    await actionDealDraw();
-    actionDealDrawStep();
+  let actionLoops = [
+    actionDealDraw,
+    actionSelectDraw,
+    actionSelectHole,
+    actionSelectStack
+  ];
+
+  const actionLoopAll = () => {
+    actionLoops.forEach(makeActionLoop);
+  };
+
+  const makeActionLoop = async (action) => {
+    try {
+      while (running) {
+        await action();
+      }
+    } catch (e) {
+      console.warn(e);
+    }
   };
 }

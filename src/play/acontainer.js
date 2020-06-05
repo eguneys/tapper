@@ -5,14 +5,14 @@ export default function aContainer() {
   let components = [],
       container = this.c = dContainer();
   
-  this.addChild = (component) => {
+  this.addChild = (component, opContainer = container) => {
     components.push(component);
-    container.addChild(component.container.c);
+    opContainer.addChild(component.container.c);
   };
 
-  this.removeChild = (component) => {
+  this.removeChild = (component, opContainer = container) => {
     components.splice(components.indexOf(component), 1);
-    container.removeChild(component.container.c);
+    opContainer.removeChild(component.container.c);
   };
 
   this.bounds = () => container.getBounds();
