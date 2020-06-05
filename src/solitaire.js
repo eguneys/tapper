@@ -124,6 +124,8 @@ export default function Solitaire() {
     activeSelection.mutate(_ => {
       _.active = false;
     });
+
+    effectPersistSelectEnd();
   };
 
   this.init = () => {
@@ -213,14 +215,24 @@ export default function Solitaire() {
     if (persistSelected) {
       let { stackN: persistStackN,
             cardN,
-            cards } = persistSelection
-          .apply(_ => _);
+            holeN: persistHoleN,
+            drawN: persistDrawN,
+            cards } = persistSelection.apply(_ => _);
 
       if (isN(persistStackN) && persistStackN !== stackN) {
 
         effectPersistSelectEnd();
         
-        return await actionMoveCards(persistStackN, stackN, cardN);
+        return await actionMoveCardsStackStack(persistStackN, stackN, cardN);
+      } else if (isN(persistHoleN)) {
+
+        effectPersistSelectEnd();
+
+        return await actionMoveCardsHoleStack(persistHoleN, stackN);
+      } else if (persistDrawN) {
+        effectPersistSelectEnd();
+
+        return await actionMoveCardsDrawStack(stackN);
       }
     }
 
@@ -242,7 +254,36 @@ export default function Solitaire() {
     }
   };
 
-  const actionMoveCards = async (srcStackN, dstStackN, cardN) => {
+  const actionMoveCardsDrawStack = async(dstStackN) => {
+    let card = effectDrawerDraw(),
+        cards = [card];
+    
+    await fx('move').begin({
+      srcDrawN: true,
+      dstStackN,
+      cards
+    });
+
+    effectDrawerCommitDraw();
+
+    effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionMoveCardsHoleStack = async(srcHoleN, dstStackN) => {
+
+    let card = effectHoleRemove(srcHoleN),
+        cards = [card];
+    
+    await fx('move').begin({
+      srcHoleN,
+      dstStackN,
+      cards
+    });
+
+    effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionMoveCardsStackStack = async (srcStackN, dstStackN, cardN) => {
 
     let cards = effectStackCut1(srcStackN, cardN);
 
@@ -256,6 +297,22 @@ export default function Solitaire() {
     await Promise.all([pReveal, pMove]);
 
     effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionMoveCardsStackHole = async (srcStackN, dstHoleN) => {
+    let card = effectStackCutLast(srcStackN),
+        cards = [card];
+
+    let pReveal = actionRevealStack(srcStackN),
+        pMove = fx('move').begin({
+          srcStackN,
+          dstHoleN,
+          cards
+        });
+
+    await Promise.all([pReveal, pMove]);
+
+    effectHoleAdd(dstHoleN, card);
   };
 
   const actionSettleHole = async (srcStackN, dstHoleN, cards) => {
@@ -314,6 +371,7 @@ export default function Solitaire() {
   };
 
   const effectPersistSelectEnd = () => {
+    // don't clear fields here to allow unhighlighting old values
     persistSelection.mutate(_ => {
       _.active = false;
       // _.stackN = false;
@@ -328,6 +386,7 @@ export default function Solitaire() {
         .apply(_ => 
           _.front.indexOf(cards[0]));
 
+    // TODO 
     persistSelection.mutate(_ => {
       _.active = true;
       _.stackN = false;
@@ -380,6 +439,11 @@ export default function Solitaire() {
       .mutate(_ => _.cut1(cardN));
   };
 
+  const effectStackCutLast = (_stackN) => {
+    return stackN(_stackN)
+      .mutate(_ => _.cutLast());
+  };
+
   const actionSelectionStep = async () => {
     await actionSelectStack();
     actionSelectionStep();
@@ -389,6 +453,21 @@ export default function Solitaire() {
 
   const actionSelectHole = async () => {
     let { holeN } = await userSelectsHole();
+
+    let persistSelected = persistSelection.apply(_ => _.active);
+
+    if (persistSelected) {
+      let { stackN: persistStackN,
+            cardN,
+            cards } = persistSelection.apply(_ => _);
+
+      if (isN(persistStackN)) {
+
+        effectPersistSelectEnd();
+
+        return await actionMoveCardsStackHole(persistStackN, holeN);
+      }
+    }
 
     if (!askHoleRemove(holeN)) {
       return Promise.resolve();
@@ -461,7 +540,7 @@ export default function Solitaire() {
   const actionSelectDraw = async () => {
     await userSelectsDraw();
 
-    let card = drawer.mutate(_ => _.draw1());
+    let card = effectDrawerDraw();
 
     effectPersistSelectEnd();
     effectBeginSelect([card]);
@@ -486,6 +565,7 @@ export default function Solitaire() {
       cards
     });
 
+    effectDrawerCommitDraw();
 
     effectStackAdd1(dstStackN, cards);
   };
@@ -520,8 +600,16 @@ export default function Solitaire() {
     drawer.mutate(_ => _.dealOne2(card));
   };
 
+  const effectDrawerDraw = () => {
+    return drawer.mutate(_ => _.draw1());
+  };
+
   const effectDealDraw = () => {
     return drawer.mutate(_ => _.dealOne1());
+  };
+
+  const effectDrawerCommitDraw = () => {
+    drawer.mutate(_ => _.drawCommit1());
   };
 
   const actionDealDrawStep = async () => {

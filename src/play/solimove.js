@@ -4,6 +4,8 @@ import AContainer from './acontainer';
 
 import CardStack from './cardstack';
 
+import { isN } from '../soliutils';
+
 export default function SoliMove(play, ctx, bs) {
 
   let dMove = new CardStack(this, ctx, bs);
@@ -21,10 +23,28 @@ export default function SoliMove(play, ctx, bs) {
   let iMove = new iPolPlus({
     onBegin(oMove) {
 
-      let { srcStackN, dstStackN } = oMove;
+      let { srcDrawN,
+            srcHoleN,
+            srcStackN, 
+            dstStackN,
+            dstHoleN } = oMove;
 
-      let dSrc = play.dStackN(srcStackN),
-          dDst = play.dStackN(dstStackN);
+      let dSrc,
+          dDst;
+
+      if (isN(srcStackN)) {
+        dSrc = play.dStackN(srcStackN);
+      } else if (isN(srcHoleN)) {
+        dSrc = play.dHoleN(srcHoleN);
+      } else if (srcDrawN) {
+        dSrc = play.dDrawN;
+      }
+
+      if (isN(dstStackN)) {
+        dDst = play.dStackN(dstStackN);
+      } else if (isN(dstHoleN)) {
+        dDst = play.dHoleN(dstHoleN);
+      }
 
       settleSource = dSrc.nextCardGlobalPosition();
       let settleTarget = dDst.nextCardGlobalPosition();

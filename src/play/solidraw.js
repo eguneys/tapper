@@ -36,6 +36,7 @@ export default function SoliDraw(play, ctx, bs) {
   };
   initContainer();
 
+  this.dDrawN = dDraw;
   this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
   this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 

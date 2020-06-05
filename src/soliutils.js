@@ -11,6 +11,8 @@ export function SoliStack(hidden = [], front = []) {
   this.front = front;
   this.hidden = hidden;
 
+  this.cutLast = () => front.pop();
+
   this.cut1 = n => front.splice(n, front.length - n);
 
   this.hide1 = cards => {
@@ -90,6 +92,8 @@ export function SoliHole(cards = []) {
 
 export function SoliDrawDeck() {
   
+  let inDrawing;
+
   let deck;
   let showStack;
 
@@ -119,15 +123,22 @@ export function SoliDrawDeck() {
   };
 
   this.draw1 = () => {
+    inDrawing = true;
     return showStack.pop();
   };
 
   this.drawCancel1 = (card) => {
+    inDrawing = false;
     showStack.push(card);
   };
 
+  this.drawCommit1 = () => {
+    inDrawing = false;
+  };
+
   this.showStack3 = () => {
-    return showStack.slice(-3, showStack.length);
+    let takeLast = inDrawing?-2:-3;
+    return showStack.slice(takeLast, showStack.length);
   };
 
 }

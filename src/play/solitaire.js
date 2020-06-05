@@ -91,6 +91,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   this.dHoleN = dHoles.dHoleN;
   this.dStackN = dStacks.dStackN;
+  this.dDrawN = dDraw.dDrawN;
   this.dDraw = dDraw;
 
   let container = this.container = new AContainer();
