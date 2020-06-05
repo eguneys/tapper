@@ -34,12 +34,18 @@ export default function Play(play, ctx, bs) {
   let iSettle = new iPolPlus({
     onBegin(oSettle) {
 
-      let { stackN } = oSettle;
+      let { drawN, stackN } = oSettle;
 
-      let dStack = play.dStackN(stackN);
+      let settleTarget;
 
       settleSource = dDragStack.container.globalPosition();
-      let settleTarget = dStack.nextCardGlobalPosition();
+
+      if (stackN) {
+        let dStack = play.dStackN(stackN);
+        settleTarget = dStack.nextCardGlobalPosition();
+      } else if (drawN) {
+        settleTarget = play.dDraw.showGlobalPosition();
+      }
 
       settleTargetDiff = [settleTarget[0] - settleSource.x,
                           settleTarget[1] - settleSource.y];

@@ -16,7 +16,7 @@ export default function Solitaire() {
     observable(new SoliStack())
   ];
 
-  let stackDraw = observable(new SoliDrawDeck());
+  let drawer = this.drawer = observable(new SoliDrawDeck());
 
   let beginSelection = this.bSelection = observable({});
   let activeSelection = this.aSelection = observable({});
@@ -26,11 +26,15 @@ export default function Solitaire() {
   let observeUserSelectStack = pobservable(),
       observeUserEndsSelect = pobservable();
 
+  let observeUserDealDraw = pobservable(),
+      observeUserSelectDraw = pobservable();
+
   let fxs = {
     'deal': pobservable(),
     'settle': pobservable(),
     'reveal': pobservable(),
-    'move': pobservable()
+    'move': pobservable(),
+    'dealdraw': pobservable()
   };
 
   let dealer = new SoliDeal();
@@ -39,6 +43,21 @@ export default function Solitaire() {
   let fx = this.fx = name => fxs[name];
 
   let deck = makeOneDeck();
+
+  this.userActionDealDraw = () => {
+    observeUserDealDraw.resolve();
+  };
+
+  this.userActionSelectDraw = (epos, decay) => {
+    observeUserSelectDraw.resolve();
+    activeSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = false;
+      _.hasMoved = false;
+      _.epos = epos;
+      _.decay = decay;
+    });
+  };
 
   this.userActionSelectStack = (stackN, cardN, epos, decay) => {
     observeUserSelectStack.resolve({
@@ -90,6 +109,8 @@ export default function Solitaire() {
     actionReset();
     actionDealCards();
     actionSelectionStep();
+    actionSelectDrawStep();
+    actionDealDrawStep();
   };
 
   const userSelectsStack = () => {
@@ -98,6 +119,14 @@ export default function Solitaire() {
 
   const userEndsSelect = () => {
     return observeUserEndsSelect.begin();
+  };
+
+  const userDealsDraw = () => {
+    return observeUserDealDraw.begin();
+  };
+
+  const userSelectsDraw = () => {
+    return observeUserSelectDraw.begin();
   };
 
   const actionReset = () => {
@@ -110,7 +139,7 @@ export default function Solitaire() {
   const actionDealCards = async () => {
     deck.shuffle();
 
-    stackDraw.mutate(_ => _.init(deck.drawRest()));
+    drawer.mutate(_ => _.init(deck.drawRest()));
     dealer.init();
 
     await actionDealCardsStep();
@@ -129,8 +158,7 @@ export default function Solitaire() {
   const actionDealCard = async (oDeal) => {
     let { i, hidden } = oDeal;
 
-    let card = stackDraw
-        .mutate(_ => _.dealDraw1()),
+    let card = drawer.mutate(_ => _.dealOne1()),
         cards = [card];
 
     await fx('deal').begin({
@@ -278,5 +306,78 @@ export default function Solitaire() {
   const actionSelectionStep = async () => {
     await actionSelectStack();
     actionSelectionStep();
+  };
+
+  // Select Draw
+
+  const actionSelectDraw = async () => {
+    await userSelectsDraw();
+
+    let card = drawer.mutate(_ => _.draw1());
+
+    effectPersistSelectEnd();
+    effectBeginSelect([card]);
+
+    let target = await userEndsSelect();
+
+    let { stackN: dstStackN, hasMoved } = target;
+
+    if (isN(dstStackN)) {
+      return await actionSettleStackSrcDraw(dstStackN, card);
+    } else {
+      return await actionSettleDrawCancel(card, hasMoved);
+    }    
+  };
+
+  const actionSettleStackSrcDraw = async (dstStackN, card) => {
+
+    let cards = [card];
+
+    await fx('settle').begin({
+      stackN: dstStackN,
+      cards
+    });
+
+
+    effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionSettleDrawCancel = async (card, hasMoved) => {
+    await fx('settle').begin({
+      drawN: true,
+      cards: [card]
+    });
+
+    drawer.mutate(_ => _.drawCancel1(card));
+
+    if (!hasMoved) {
+      // effetPersistSelectDraw();
+    }
+  };
+
+  const actionSelectDrawStep = async () => {
+    await actionSelectDraw();
+    actionSelectDrawStep();
+  };
+
+  // Deal Draw
+
+  const actionDealDraw = async () => {
+    await userDealsDraw();
+
+    let card = effectDealDraw();
+
+    await fx('dealdraw').begin(card);
+
+    drawer.mutate(_ => _.dealOne2(card));
+  };
+
+  const effectDealDraw = () => {
+    return drawer.mutate(_ => _.dealOne1());
+  };
+
+  const actionDealDrawStep = async () => {
+    await actionDealDraw();
+    actionDealDrawStep();
   };
 }

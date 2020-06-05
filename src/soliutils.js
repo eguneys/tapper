@@ -110,8 +110,12 @@ export function SoliDrawDeck() {
     return cards;
   };
 
-  this.dealDraw1 = () => {
+  this.dealOne1 = () => {
     return deck.pop();
+  };
+
+  this.dealOne2 = (card) => {
+    showStack.push(card);
   };
 
   this.draw1 = () => {
@@ -119,15 +123,6 @@ export function SoliDrawDeck() {
   };
 
   this.drawCancel1 = (card) => {
-    showStack.push(card);
-  };
-
-  this.deal1 = () => {
-    let card = deck.pop();
-    return card;
-  };
-
-  this.deal2 = (card) => {
     showStack.push(card);
   };
 

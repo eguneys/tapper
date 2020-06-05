@@ -13,7 +13,14 @@ export default function SoliDraw(play, ctx, bs) {
 
   let dDeck = new CardStack(this, ctx, {
     onBeginCard() {
-      console.log('tap');
+      solitaire.userActionDealDraw();
+    },
+    ...bs
+  });
+
+  let dDraw = new CardStack(this, ctx, {
+    onBeginCard(n, epos, decay) {
+      solitaire.userActionSelectDraw(epos, decay);
     },
     ...bs
   });
@@ -23,19 +30,39 @@ export default function SoliDraw(play, ctx, bs) {
 
     container.addChild(dDeck);
 
+    container.addChild(dDraw);
+    dDraw.container.move(0, bs.card.height + bs.deck.height);
+
   };
   initContainer();
 
-  this.deckGlobalPosition = () => {
-    return dDeck.lastCardGlobalPosition();
-  };
+  this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
+  this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 
-  this.init = (data) => {
-    let nb = 3;
+  play.solitaire.drawer.subscribe(drawer => {
+    let nbDeck = drawer.nbDeck();
 
-    dDeck.init({ stack: hiddenStacks[nb] });
+    if (nbDeck === 0) {
+      // dOver.visible(true);
+    } else {
+      // dOver.visible(false);
+    }
+
+    dDeck.init({ stack: hiddenStacks[Math.min(3, nbDeck)] });
     dDeck.extend(bs.deck.height);
-  };
+
+    dDraw.init({ stack: drawer.showStack3() });
+  });
+
+  play.solitaire.fx('dealdraw').subscribe({
+    onBegin(card, resolve) {
+      resolve();
+    },
+    onEnd() {
+    }
+  });
+
+  this.init = (data) => {};
 
   this.update = delta => {
     this.container.update(delta);

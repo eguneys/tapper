@@ -1,8 +1,8 @@
-e# Solitaire Issues
+# Solitaire Issues
 
     
-[ ] User select deck to show draw cards
-[ ] User drags draw cards
+[x] User select deck to show draw cards
+[x] User drags draw cards
 [ ] User selects a card stack highlights
     [ ] Solitaire 
       [ ] selecting a card stack highlights cards up to highest stack
