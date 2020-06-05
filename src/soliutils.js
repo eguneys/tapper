@@ -55,7 +55,7 @@ function canStackHole(c1, c2) {
   return c1.suit === c2.suit && c1.sRank === c2.sRank - 1;
 }
 
-export function SoliHole(cards) {
+export function SoliHole(cards = []) {
 
   this.top = () => cards[cards.length - 1];
 

@@ -3,6 +3,7 @@ import AContainer from './acontainer';
 import CardStack from './cardstack';
 import * as v from '../vec2';
 import { iPolPlus } from './util2';
+import { isN } from '../soliutils';
 
 export default function Play(play, ctx, bs) {
 
@@ -34,17 +35,20 @@ export default function Play(play, ctx, bs) {
   let iSettle = new iPolPlus({
     onBegin(oSettle) {
 
-      let { drawN, stackN } = oSettle;
+      let { drawN, stackN, holeN } = oSettle;
 
       let settleTarget;
 
       settleSource = dDragStack.container.globalPosition();
 
-      if (stackN) {
+      if (isN(stackN)) {
         let dStack = play.dStackN(stackN);
         settleTarget = dStack.nextCardGlobalPosition();
-      } else if (drawN) {
+      } else if (isN(drawN)) {
         settleTarget = play.dDraw.showGlobalPosition();
+      } else if (isN(holeN)) {
+        let dHole = play.dHoleN(holeN);
+        settleTarget = dHole.nextCardGlobalPosition();
       }
 
       settleTargetDiff = [settleTarget[0] - settleSource.x,

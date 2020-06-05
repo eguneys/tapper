@@ -89,6 +89,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let dSoliMove = new SoliMove(this, ctx, bs);
 
+  this.dHoleN = dHoles.dHoleN;
   this.dStackN = dStacks.dStackN;
   this.dDraw = dDraw;
 

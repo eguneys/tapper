@@ -61,6 +61,7 @@ export default function Solitaire() {
     activeSelection.mutate(_ => {
       _.active = true;
       _.stackN = false;
+      _.holeN = false;
       _.hasMoved = false;
       _.epos = epos;
       _.decay = decay;
@@ -77,6 +78,7 @@ export default function Solitaire() {
     activeSelection.mutate(_ => {
       _.active = true;
       _.stackN = false;
+      _.holeN = false;
       _.hasMoved = false;
       _.epos = epos;
       _.decay = decay;
@@ -97,6 +99,12 @@ export default function Solitaire() {
     });
   };
 
+  this.userActionEndSelectHole = (holeN) => {
+    activeSelection.mutate(_ => {
+      _.holeN = holeN;
+    });
+  };
+
 
   const effectBeginSelect = (cards) => {
     beginSelection.mutate(_ => _.cards = cards);
@@ -105,6 +113,7 @@ export default function Solitaire() {
   this.userActionEndTap = () => {
     observeUserEndsSelect.resolve(activeSelection.apply(_ => ({
       stackN: _.stackN,
+      holeN: _.holeN,
       hasMoved: _.hasMoved
     })));
 
@@ -215,7 +224,9 @@ export default function Solitaire() {
 
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
 
-    if (isN(dstStackN) && dstStackN !== stackN) {
+    if (isN(dstHoleN)) {
+      return await actionSettleHole(stackN, dstHoleN, cards);
+    } else if (isN(dstStackN) && dstStackN !== stackN) {
       return await actionSettleStack(stackN, dstStackN, cards);
     } else {
       return await actionSettleStackCancel(stackN, cards, hasMoved);
@@ -236,6 +247,17 @@ export default function Solitaire() {
     await Promise.all([pReveal, pMove]);
 
     effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionSettleHole = async (srcStackN, dstHoleN, cards) => {
+    await fx('settle').begin({
+      holeN: dstHoleN,
+      cards
+    });
+
+    effectHoleAdd(dstHoleN, cards[0]);
+
+    await actionRevealStack(srcStackN);
   };
 
   const actionSettleStack = async (srcStackN, dstStackN, cards) => {
@@ -299,6 +321,11 @@ export default function Solitaire() {
       _.cards = cards;
       _.cardN = cardN;
     });
+  };
+
+  const effectHoleAdd = (_holeN, card) => {
+    return holeN(_holeN)
+      .mutate(_ => _.add(card));
   };
 
   const effectStackAdd1 = (_stackN, cards) => {
