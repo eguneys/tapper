@@ -60,7 +60,7 @@ function SoliHole(play, ctx, bs) {
 
   let dPlaceholder = new CardPlaceholder(this, ctx, {
     onBeginCard(epos, decay) {
-      
+      solitaire.userActionSelectHole(n, epos, decay);
     },
     onEndCard() {
       solitaire.userActionEndSelectHole(n);

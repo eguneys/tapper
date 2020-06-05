@@ -36,6 +36,8 @@ export default function Solitaire() {
   let observeUserDealDraw = pobservable(),
       observeUserSelectDraw = pobservable();
 
+  let observeUserSelectHole = pobservable();
+
   let fxs = {
     'deal': pobservable(),
     'settle': pobservable(),
@@ -58,31 +60,23 @@ export default function Solitaire() {
 
   this.userActionSelectDraw = (epos, decay) => {
     observeUserSelectDraw.resolve();
-    activeSelection.mutate(_ => {
-      _.active = true;
-      _.stackN = false;
-      _.holeN = false;
-      _.hasMoved = false;
-      _.epos = epos;
-      _.decay = decay;
-    });
+    effectActiveSelect(epos, decay);
   };
 
   this.userActionSelectStack = (stackN, cardN, epos, decay) => {
     observeUserSelectStack.resolve({
       stackN,
-      cardN,
-      epos,
-      decay });
-
-    activeSelection.mutate(_ => {
-      _.active = true;
-      _.stackN = false;
-      _.holeN = false;
-      _.hasMoved = false;
-      _.epos = epos;
-      _.decay = decay;
+      cardN
     });
+
+    effectActiveSelect(epos, decay);
+  };
+
+  this.userActionSelectHole = (holeN, epos, decay) => {
+    observeUserSelectHole.resolve({
+      holeN
+    });
+    effectActiveSelect(epos, decay);
   };
 
   this.userActionMove = (epos) => {
@@ -105,6 +99,16 @@ export default function Solitaire() {
     });
   };
 
+  const effectActiveSelect = (epos, decay) => {
+    activeSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = false;
+      _.holeN = false;
+      _.hasMoved = false;
+      _.epos = epos;
+      _.decay = decay;
+    });
+  };
 
   const effectBeginSelect = (cards) => {
     beginSelection.mutate(_ => _.cards = cards);
@@ -126,6 +130,7 @@ export default function Solitaire() {
     actionReset();
     actionDealCards();
     actionSelectionStep();
+    actionSelectHoleStep();
     actionSelectDrawStep();
     actionDealDrawStep();
   };
@@ -144,6 +149,10 @@ export default function Solitaire() {
 
   const userSelectsDraw = () => {
     return observeUserSelectDraw.begin();
+  };
+
+  const userSelectsHole = () => {
+    return observeUserSelectHole.begin();
   };
 
   const actionReset = () => {
@@ -341,6 +350,77 @@ export default function Solitaire() {
   const actionSelectionStep = async () => {
     await actionSelectStack();
     actionSelectionStep();
+  };
+
+  // Select Hole
+
+  const actionSelectHole = async () => {
+    let { holeN } = await userSelectsHole();
+
+    if (!askHoleRemove(holeN)) {
+      return Promise.resolve();
+    }
+
+    let card = effectHoleRemove(holeN),
+        cards = [card];
+
+    effectPersistSelectEnd();
+    effectBeginSelect(cards);
+
+    let target = await userEndsSelect();
+
+    let { stackN: dstStackN, hasMoved } = target;
+
+    if (isN(dstStackN)) {
+      return await actionSettleStackSrcHole(dstStackN, cards);
+    } else {
+      return await actionSettleHoleCancel(holeN, cards, hasMoved);
+    }
+  };
+
+  const actionSettleStackSrcHole = async (dstStackN, cards) => {
+    await fx('settle').begin({
+      stackN: dstStackN,
+      cards
+    });
+
+    effectStackAdd1(dstStackN, cards);
+  };
+
+  const actionSettleHoleCancel = async (holeN, cards, hasMoved) => {
+    await fx('settle').begin({
+      holeN,
+      cards
+    });
+
+    effectHoleRemoveCancel(holeN, cards[0]);
+
+    if (!hasMoved) {
+      // effectPersistSelectHole();
+    }
+  };
+
+  const effectHoleRemoveCancel = (_holeN, card) => {
+    return holeN(_holeN).mutate(_ => {
+      return _.add(card);
+    });
+  };
+
+  const askHoleRemove = _holeN => {
+    return holeN(_holeN).apply(_ => {
+      return _.canRemove();
+    });
+  };
+
+  const effectHoleRemove = _holeN => {
+    return holeN(_holeN).mutate(_ => {
+      return _.remove();
+    });
+  };
+
+  const actionSelectHoleStep = async () => {
+    await actionSelectHole();
+    actionSelectHoleStep();
   };
 
   // Select Draw

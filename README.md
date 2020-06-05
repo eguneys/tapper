@@ -18,6 +18,10 @@
 - [ ] Cards move according to rules
 - [ ] User drags / moves stack to hole
 - [ ] User drags / moves hole to stack
+- [ ] persist select
+  - [ ] persist select hole
+  - [ ] persist select draw
+  - [x] persist select stack
 - [x] User select deck to show draw cards
 - [x] User drags draw cards
 - [+] User selects a card stack highlights
