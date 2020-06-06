@@ -22,6 +22,7 @@ export default function CardGame() {
 
   const actionReset = () => {
     effectViewMenu();
+    effectViewGame('solitaire');
     return Promise.resolve();
   };
 

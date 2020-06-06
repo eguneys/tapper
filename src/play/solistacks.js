@@ -112,6 +112,12 @@ function SoliStack(play, ctx, bs) {
 
     dBacks.extend(extendBacks);
     dFronts.extend(extendFronts);
+
+    // still a bug when there is one hidden card on the stack
+    // calculate dFronts next card position for undo move
+    dBacks.render();
+    dFronts.render();
+    this.render();
   };
 
   this.highlight = dFronts.highlight;

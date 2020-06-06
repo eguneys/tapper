@@ -6,7 +6,10 @@
 - [ ] Main menu
    - [x] game selection
    - [ ] Settings
-    
+- [ ] Continue game from last position
+- [ ] New game starts a new game
+- [ ] 
+
 ### Solitaire Issues
 
 - [ ] Side bar

@@ -19,7 +19,17 @@ export default function CardGameView(play, ctx, pbs) {
   let bs = (() => {
     let { width, height } = pbs;
 
+    let barWidth = width * 0.09,
+        barHeight = height * 0.4,
+        boundsMargin = width * 0.01;
+
+    let bar = rect(width - barWidth, 
+                   barHeight,
+                   barWidth, 
+                   height - barHeight - boundsMargin * 2.0);
+
     return {
+      bar,
       width,
       height
     };
@@ -84,6 +94,10 @@ export default function CardGameView(play, ctx, pbs) {
       container.addChild(_, dGameContainer);
       _.init();
     });
+    let sideView = dView[1];
+    if (sideView) {
+      sideView.container.move(bs.bar.x, bs.bar.y);
+    }
   });
 
   this.init = (data) => {

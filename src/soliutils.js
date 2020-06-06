@@ -8,6 +8,8 @@ const canTop = c1 =>
 
 export function SoliStack(hidden = [], front = []) {
 
+  let options = this.options = {};
+
   this.front = front;
   this.hidden = hidden;
 
@@ -30,6 +32,16 @@ export function SoliStack(hidden = [], front = []) {
 
   this.reveal1 = () => {
     return hidden.pop();
+  };
+
+  this.unreveal1 = () => {
+    options.dontExtend = true;
+    front.pop();
+  };
+
+  this.unreveal2 = (card) => {
+    options.dontExtend = false;
+    hidden.push(card);
   };
 
   const top = () => front[front.length - 1];

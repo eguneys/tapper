@@ -25,6 +25,16 @@ export default function Play(play, ctx, bs) {
   this.init = (data) => {
   };
 
+  this.beginUnreveal = (card) => {
+    container.visible(true);
+    dFront.init({
+      ...card
+    });
+
+    dFront.container.scale(1, 1);
+    dBack.container.scale(0, 1);
+  };
+
   this.beginReveal = (card) => {
     container.visible(true);
 
@@ -37,6 +47,14 @@ export default function Play(play, ctx, bs) {
     dBack.container.scale(1, 1);
   };
 
+  this.updateUnreveal = (i) => {
+    if (i < 0.5) {
+      dFront.container.scale(1.0-i*2, 1);
+    } else {
+      dBack.container.scale(i * 2.0 - 1.0, 1);
+    }    
+  };
+
   this.updateReveal = (i) => {
     if (i < 0.5) {
       dBack.container.scale(1.0-i*2, 1);
@@ -46,6 +64,10 @@ export default function Play(play, ctx, bs) {
   };
 
   this.endReveal = () => {
+    container.visible(false);
+  };
+
+  this.endUnreveal = () => {
     container.visible(false);
   };
 

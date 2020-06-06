@@ -19,6 +19,12 @@ export default function Play(play, ctx, bs) {
     }
   });
 
+  let iUnReveal = new iPolPlus({
+    onUpdate(_, i) {
+      dReveal.updateUnreveal(i);
+    }
+  });
+
   play.solitaire.fx('reveal').subscribe({
     onBegin({ stackN, card }, resolve) {
       let dStack = play.dStackN(stackN);
@@ -34,12 +40,28 @@ export default function Play(play, ctx, bs) {
     }
   });
 
+  play.solitaire.fx('unreveal').subscribe({
+    onBegin({ stackN, card }, resolve) {
+      let dStack = play.dStackN(stackN);
+      let pos = dStack.lastCardGlobalPosition();
+
+      dReveal.beginUnreveal(card);
+      dReveal.container.move(pos[0], pos[1]);
+
+      iUnReveal.begin(card, resolve);
+    },
+    onEnd() {
+      dReveal.endUnreveal();
+    }
+  });
+
   this.init = (data) => {
     
   };
 
   this.update = delta => {
     iReveal.update(delta / 200);
+    iUnReveal.update(delta / 200);
     this.container.update(delta);
   };
 
