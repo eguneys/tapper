@@ -27,7 +27,8 @@ export default function SoliMove(play, ctx, bs) {
             srcHoleN,
             srcStackN, 
             dstStackN,
-            dstHoleN } = oMove;
+            dstHoleN,
+            dstDrawN } = oMove;
 
       let dSrc,
           dDst;
@@ -44,6 +45,8 @@ export default function SoliMove(play, ctx, bs) {
         dDst = play.dStackN(dstStackN);
       } else if (isN(dstHoleN)) {
         dDst = play.dHoleN(dstHoleN);
+      } else if (isN(dstDrawN)) {
+        dDst = play.dDrawN;
       }
 
       settleSource = dSrc.nextCardGlobalPosition();
