@@ -87,7 +87,7 @@ export function tapHandler2({ onBegin,
       let { epos } = current;
       if (running === runEnd) {
         if (hitTest(...epos, boundsFn())) {
-          onBegin(epos);
+          callMaybe(onBegin, epos);
           running = runBegin;
         } else {
           running = runCancel;
@@ -96,15 +96,15 @@ export function tapHandler2({ onBegin,
         
       } else if (running === runBegin) {
         if (hitTest(...epos, boundsFn())) {
-          onUpdate(epos);
+          callMaybe(onUpdate, epos);
         } else {
-          onEnd(false);
+          callMaybe(onEnd, false);
           running = runCancel;
         }
       }
      } else {
       if (running === runBegin) {
-        onEnd(true);
+        callMaybe(onEnd, true);
         running = runEnd;
       } else if (running === runCancel) {
         running = runEnd;

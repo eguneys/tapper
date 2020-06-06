@@ -1,13 +1,17 @@
 import AContainer from './acontainer';
+import ASprite from './asprite';
+
 import CardStack from './cardstack';
 
 import { backCard, hiddenStacks } from '../cards';
+
+import { tapHandler2 } from './util';
 
 export default function SoliDraw(play, ctx, bs) {
 
   let solitaire = play.solitaire;
 
-  const { textures } = ctx;
+  const { events, textures } = ctx;
 
   const mhud = textures['mhud'];
 
@@ -25,6 +29,14 @@ export default function SoliDraw(play, ctx, bs) {
     ...bs
   });
 
+  let overW = bs.card.width - bs.stackMargin;
+
+  let dOver = new ASprite(this, ctx, {
+    width: overW,
+    height: overW,
+    texture: mhud['over']
+  });
+
   let container = this.container = new AContainer();
   const initContainer = () => {
 
@@ -32,6 +44,12 @@ export default function SoliDraw(play, ctx, bs) {
 
     container.addChild(dDraw);
     dDraw.container.move(0, bs.card.height + bs.deck.height);
+
+    dOver.container.move((bs.card.width - overW) * 0.5,
+                         (bs.card.height - overW) * 0.5);
+
+    container.addChild(dOver);
+    dOver.visible(false);
 
   };
   initContainer();
@@ -44,9 +62,9 @@ export default function SoliDraw(play, ctx, bs) {
     let nbDeck = drawer.nbDeck();
 
     if (nbDeck === 0) {
-      // dOver.visible(true);
+      dOver.visible(true);
     } else {
-      // dOver.visible(false);
+      dOver.visible(false);
     }
 
     dDeck.init({ stack: hiddenStacks[Math.min(3, nbDeck)] });
@@ -84,7 +102,19 @@ export default function SoliDraw(play, ctx, bs) {
 
   this.init = (data) => {};
 
+  const handleTapOver = tapHandler2({
+    onBegin() {
+      let isDrawEmpty = dDeck.empty();
+
+      if (isDrawEmpty) {
+        solitaire.userActionShuffle();
+      }
+    },
+    boundsFn: () => dOver.container.bounds()
+  }, events);
+
   this.update = delta => {
+    handleTapOver();
     this.container.update(delta);
   };
 

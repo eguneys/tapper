@@ -44,12 +44,15 @@ export default function Solitaire() {
 
   let observeUserSelectHole = pobservable();
 
+  let observeUserShuffleDraw = pobservable();
+
   let userObserves = [
     observeUserSelectStack,
     observeUserEndsSelect,
     observeUserDealDraw,
     observeUserSelectDraw,
-    observeUserSelectHole
+    observeUserSelectHole,
+    observeUserShuffleDraw
   ];
 
   let fxs = {
@@ -70,6 +73,10 @@ export default function Solitaire() {
   let deck = makeOneDeck();
 
   let running;
+
+  this.userActionShuffle = async () => {
+    observeUserShuffleDraw.resolve();
+  };
 
   this.userActionUndo = async () => {
     actionUndosQueue();
@@ -181,6 +188,10 @@ export default function Solitaire() {
     actionReset();
     actionDealCards();
     actionLoopAll();
+  };
+
+  const userShufflesDraw = () => {
+    return observeUserShuffleDraw.begin();
   };
 
   const userSelectsStack = () => {
@@ -746,7 +757,7 @@ export default function Solitaire() {
 
     effectUndoPush(async () => {
       await actionUndoDealDraw(card);
-    });    
+    });
   };
 
   const effectDrawerDraw = () => {
@@ -884,6 +895,9 @@ export default function Solitaire() {
     drawer.mutate(_ => _.undealOne(card));
   };
 
+  const actionUndoShuffleDraw = async () => {
+    drawer.mutate(_ => _.undoShuffle());
+  };
 
   // actionUndos = [
   //   actionUndoDealDraw,
@@ -893,7 +907,22 @@ export default function Solitaire() {
   //   actionUndoHoleStack
   // ];
 
+  // shuffle
+
+  const actionShuffleDraw = async () => {
+    await userShufflesDraw();
+
+    let cards = drawer.mutate(_ => _.shuffle1());
+
+    drawer.mutate(_ => _.shuffle2(cards));
+
+    effectUndoPush(async () => {
+      await actionUndoShuffleDraw();
+    });
+  };
+
   let actionLoops = [
+    actionShuffleDraw,
     actionDealDraw,
     actionSelectDraw,
     actionSelectHole,

@@ -120,14 +120,19 @@ export function SoliDrawDeck() {
 
   this.nbDeck = () => deck.length;
 
-  this.reshuffle2 = (cards) => {
+  this.shuffle2 = (cards) => {
     deck = cards.reverse();
   };
 
-  this.reshuffle1 = () => {
+  this.shuffle1 = () => {
     let cards = showStack;
     showStack = [];
     return cards;
+  };
+
+  this.undoShuffle = () => {
+    showStack = deck.reverse();
+    deck = [];
   };
 
   this.dealOne1 = () => {
