@@ -10,6 +10,8 @@ import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
 import SolitaireView from './solitaire';
 
+import SoliSideBar from './solisidebar';
+
 export default function CardGameView(play, ctx, pbs) {
 
   let cardGame = this.cardGame = new CardGame();
@@ -36,7 +38,16 @@ export default function CardGameView(play, ctx, pbs) {
   let dMenu = new CardGameMenu(this, ctx, bs);
 
   let dGameContainer = dContainer();
+
   let dSolitaire = new SolitaireView(this, ctx, bs);
+  let dSoliSideBar = new SoliSideBar(dSolitaire, ctx, bs);
+
+  const dViewMap = {
+    'menu': [dMenu, null],
+    'solitaire': [dSolitaire, dSoliSideBar],
+    'spider': [dSolitaire, dSoliSideBar],
+    'freecell': [dSolitaire, dSoliSideBar]
+  };
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -54,20 +65,25 @@ export default function CardGameView(play, ctx, pbs) {
     let dView;
 
     if (menu) {
-      dView = dMenu;
+      dView = dViewMap['menu'];
     } else {
-      dView = dSolitaire;
+      dView = dViewMap[game];
     }
 
     if (dLastView) {
-      dLastView.remove();
-      container.removeChild(dLastView, dGameContainer);
+      dLastView.forEach(_ => {
+        if (!_) { return; };
+        _.remove();
+        container.removeChild(_, dGameContainer);
+      });
     }
     dLastView = dView;
 
-    container.addChild(dView, dGameContainer);
-
-    dView.init();
+    dView.forEach(_ => {
+      if (!_) return;
+      container.addChild(_, dGameContainer);
+      _.init();
+    });
   });
 
   this.init = (data) => {

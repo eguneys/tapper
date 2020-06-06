@@ -11,6 +11,7 @@
 
 - [ ] Side bar
   - [ ] Score
+  - [ ] New game
 - [ ] Cards move according to rules
 - [ ] Undo
    - [ ] undo card deal

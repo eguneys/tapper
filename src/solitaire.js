@@ -140,12 +140,19 @@ export default function Solitaire() {
     effectPersistSelectEnd();
   };
 
+  const actionCancelFxs = () => {
+    for (let key in fxs) {
+      fx(key).reject();
+    }
+  };
+
   const actionCancelUserObserves = () => {
     userObserves.forEach(_ => _.reject());
   };
 
   this.remove = () => {
     actionCancelUserObserves();
+    actionCancelFxs();
     running = false;
   };
 
@@ -195,12 +202,23 @@ export default function Solitaire() {
   };
 
   const actionDealCardsStep = async () => {
-    let res = dealer.acquireDeal();
-    if (!res) {
-      Promise.resolve();
-    } else {
-      await actionDealCard(res);
-      actionDealCardsStep();
+
+    try {
+
+      if (!running) {
+        Promise.reject();
+        return;
+      }
+
+      let res = dealer.acquireDeal();
+      if (!res) {
+        Promise.resolve();
+      } else {
+        await actionDealCard(res);
+        actionDealCardsStep();
+      }
+    } catch (e) {
+      console.warn(e);
     }
   };
 
