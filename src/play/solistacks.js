@@ -98,9 +98,12 @@ function SoliStack(play, ctx, bs) {
   let observeStack = play.solitaire.stackN(n);
 
   observeStack.subscribe(stack => {
-    dFronts.init({ stack: stack.front });
-    dBacks.init({ stack: hiddenStacks[stack.hidden.length] });
-    extendCards(stack.hidden.length, stack.front.length);
+    let inProgress = stack.inProgress();
+    dFronts.init({ stack: stack.front, inProgress });
+    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
+    if (!inProgress) {
+      extendCards(stack.hidden.length, stack.front.length);
+    }
   });
 
   const extendCards = (backs, fronts) => {

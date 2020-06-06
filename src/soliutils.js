@@ -8,14 +8,27 @@ const canTop = c1 =>
 
 export function SoliStack(hidden = [], front = []) {
 
+  let inProgress;
+
   let options = this.options = {};
 
   this.front = front;
   this.hidden = hidden;
 
+  this.inProgress = () => inProgress;
+
   this.cutLast = () => front.pop();
 
   this.cut1 = n => front.splice(n, front.length - n);
+
+  this.cutInProgress = n => {
+    inProgress = true;
+    return this.cut1(n);
+  };
+
+  this.cutInProgressCommit = () => {
+    inProgress = false;
+  };
 
   this.hide1 = cards => {
     cards.forEach(_ => hidden.push(_));

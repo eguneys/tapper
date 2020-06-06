@@ -12,16 +12,24 @@
 
 ### Solitaire Issues
 
+- [ ] 3 deal game
+- [ ] Animations
+  - [ ] Place hole animation
+  - [ ] End game animation
+  - [ ] Move cards animation
 - [ ] Side bar
   - [ ] Score
-  - [ ] New game
-- [ ] Cards move according to rules
-- [ ] Undo
-   - [ ] undo card deal
-   - [ ] undo stack stack move
-   - [ ] undo draw stack move
-   - [ ] undo stack hole move
-   - [ ] undo hole stack move
+  - [x] New game
+- [ ] Cards auto place into holes in a chain reaction
+- [ ] Double tap to auto place into holes
+- [ ] Don't extend cards while dragging
+- [x] Cards move according to rules
+- [x] Undo
+   - [x] undo card deal
+   - [x] undo stack stack move
+   - [x] undo draw stack move
+   - [x] undo stack hole move
+   - [x] undo hole stack move
 - [x] User drags / moves stack to hole
 - [x] User drags / moves hole to stack
 - [x] persist select

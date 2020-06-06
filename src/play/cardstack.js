@@ -27,6 +27,7 @@ export default function CardStack(play, ctx, bs) {
 
   this.init = (data) => {
     let stack = data.stack;
+    let inProgress = data.inProgress;
 
     dCards.forEach(_ => container.removeChild(_));
     dCards = [];
@@ -45,7 +46,9 @@ export default function CardStack(play, ctx, bs) {
       container.addChild(dCard);
     });
     
-    this.extend(bs.stacks.height);
+    if (!inProgress) {
+      this.extend(bs.stacks.height);
+    }
     this.highlight(false);
   };
 

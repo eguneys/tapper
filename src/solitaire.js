@@ -299,24 +299,28 @@ export default function Solitaire() {
 
         effectPersistSelectEnd();
         
-        return await actionMoveCardsStackStack(persistStackN, stackN, cardN);
+        await actionMoveCardsStackStack(persistStackN, stackN, cardN);
+        return;
       } else if (isN(persistHoleN) && canSettleStack(stackN, cards)) {
 
         effectPersistSelectEnd();
 
-        return await actionMoveCardsHoleStack(persistHoleN, stackN);
+        await actionMoveCardsHoleStack(persistHoleN, stackN);
+        return;
       } else if (persistDrawN && canSettleStack(stackN, cards)) {
         effectPersistSelectEnd();
 
-        return await actionMoveCardsDrawStack(stackN);
+        await actionMoveCardsDrawStack(stackN);
+        return;
       }
     }
 
     if (!isN(cardN)) {
-      return Promise.resolve();
+      return;
     }
 
-    let cards = effectStackCut1(stackN, cardN);
+    // let cards = effectStackCut1(stackN, cardN);
+    let cards = effectStackCutInProgress(stackN, cardN);
 
     effectPersistSelectEnd();
     effectBeginSelect(cards);
@@ -326,13 +330,16 @@ export default function Solitaire() {
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
 
     if (isN(dstHoleN) && canSettleHole(dstHoleN, cards)) {
-      return await actionSettleHole(stackN, dstHoleN, cards);
+      await actionSettleHole(stackN, dstHoleN, cards);
+      effectStackCutInProgressCommit(stackN);
+
     } else if (isN(dstStackN) &&
                dstStackN !== stackN && 
                canSettleStack(dstStackN, cards)) {
-      return await actionSettleStack(stackN, dstStackN, cards);
+      await actionSettleStack(stackN, dstStackN, cards);
+      effectStackCutInProgressCommit(stackN);
     } else {
-      return await actionSettleStackCancel(stackN, cards, hasMoved);
+      await actionSettleStackCancel(stackN, cards, hasMoved);
     }
   };
 
@@ -473,6 +480,9 @@ export default function Solitaire() {
 
     effectStackAdd1(stackN, cards);
 
+    // call this before persist select stack because of highlight
+    effectStackCutInProgressCommit(stackN);
+
     if (!hasMoved) {
       effectPersistSelectStack(stackN, cards);
     }
@@ -567,6 +577,16 @@ export default function Solitaire() {
   const effectStackCut1 = (_stackN, cardN) => {
     return stackN(_stackN)
       .mutate(_ => _.cut1(cardN));
+  };
+
+  const effectStackCutInProgress = (_stackN, cardN) => {
+    return stackN(_stackN)
+      .mutate(_ => _.cutInProgress(cardN));
+  };
+
+  const effectStackCutInProgressCommit = (_stackN) => {
+    return stackN(_stackN)
+      .mutate(_ => _.cutInProgressCommit());
   };
 
   const effectStackCutLast = (_stackN) => {
