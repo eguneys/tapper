@@ -30,10 +30,13 @@ export default function sprites(resources) {
 
 const hud = (mhud) => {
   return {
+    'menubg': mhud(48, 0, 48),
     'undo': mhud(0, 0, 32),
     'over': mhud(0, 32, 32),
     'menu': mhud(0, 32 * 2, 32),
-    'back': mhud(0, 32 * 3, 32)
+    'back': mhud(0, 32 * 3, 32),
+    'pause': mhud(0, 32 * 4, 32),
+    'play': mhud(0, 32 * 5, 32)
   };
 };
 

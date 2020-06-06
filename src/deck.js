@@ -79,31 +79,31 @@ export default function Deck(baseDeck) {
     deck = shuffle(baseDeck.slice(0));
   };
 
-  this.remaining = () => deck.length;
-  this.out = () => deck.length === 0;
-  this.out3 = () => deck.length < 3;
+  this.debug = () => {
+    let ss = suits.slice(0);
 
-  this.draw = () => deck.pop();
-  this.draw3 = () => [    
-    deck.pop(),
-    deck.pop(),
-    deck.pop()
-  ];
+    let res = [];
 
-  this.draw3Rest = () => {
-    if (deck.length === 0) {
-      return [];
-    } else if (deck.length === 1) {
-      return [deck.pop()];
-    } else if (deck.length === 2) {
-      return [deck.pop(),
-              deck.pop()];
-    } else {
-      return [deck.pop(),
-              deck.pop(),
-              deck.pop()];
+    for (let c of deck) {
+      if (c.rank === 'ace') {
+        res.push(c.suit);
+      }
     }
+
+    res.sort();
+    ss.sort();
+
+    for (let i = 0; i < 4; i++) {
+      if (res[i] !== ss[i]) {
+        throw "Bad Deck " + res;
+      }
+    }
+
+
   };
 
+  this.remaining = () => deck.length;
+
+  this.draw = () => deck.pop();
   this.drawRest = () => deck;
 }

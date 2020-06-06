@@ -49,7 +49,6 @@ export function PromiseObservable() {
 
   this.reject = () => {
     if (rreject) {
-      console.log('reject');
       rreject();
     }
   };

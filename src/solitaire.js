@@ -242,7 +242,10 @@ export default function Solitaire() {
 
   const actionDealCards = async () => {
     deck.shuffle();
-    
+
+    deck.debug();
+
+
     drawer.mutate(_ => _.init(deck.drawRest()));
     dealer.init();
 
