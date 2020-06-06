@@ -210,6 +210,9 @@ export default function Solitaire() {
     stacks.forEach(_ => 
       _.mutate(_ => _.clear()));
 
+    holes.forEach(_ =>
+      _.mutate(_ => _.clear()));
+
     return Promise.resolve();
   };
 
@@ -331,6 +334,10 @@ export default function Solitaire() {
     effectDrawerCommitDraw();
 
     effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      await actionUndoStackSrcDraw(dstStackN, card);
+    });
   };
 
   const actionMoveCardsHoleStack = async(srcHoleN, dstStackN) => {
@@ -345,6 +352,10 @@ export default function Solitaire() {
     });
 
     effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      actionUndoStackSrcHole(srcHoleN, dstStackN, cards);
+    });
   };
 
   const actionMoveCardsStackStack = async (srcStackN, dstStackN, cardN) => {
@@ -379,9 +390,14 @@ export default function Solitaire() {
           cards
         });
 
-    await Promise.all([pReveal, pMove]);
+    let revealCard = await pReveal;
+    await pMove;
 
     effectHoleAdd(dstHoleN, card);
+
+    effectUndoPush(async () => {
+      await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);
+    });
   };
 
   const actionSettleHole = async (srcStackN, dstHoleN, cards) => {
@@ -392,7 +408,11 @@ export default function Solitaire() {
 
     effectHoleAdd(dstHoleN, cards[0]);
 
-    await actionRevealStack(srcStackN);
+    let revealCard = await actionRevealStack(srcStackN);
+
+    effectUndoPush(async () => {
+      await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);
+    });
   };
 
   const actionSettleStack = async (srcStackN, dstStackN, cards) => {
@@ -558,19 +578,23 @@ export default function Solitaire() {
     let { stackN: dstStackN, hasMoved } = target;
 
     if (isN(dstStackN)) {
-      return await actionSettleStackSrcHole(dstStackN, cards);
+      return await actionSettleStackSrcHole(holeN, dstStackN, cards);
     } else {
       return await actionSettleHoleCancel(holeN, cards, hasMoved);
     }
   };
 
-  const actionSettleStackSrcHole = async (dstStackN, cards) => {
+  const actionSettleStackSrcHole = async (holeN, dstStackN, cards) => {
     await fx('settle').begin({
       stackN: dstStackN,
       cards
     });
 
     effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      actionUndoStackSrcHole(holeN, dstStackN, cards);
+    });
   };
 
   const actionSettleHoleCancel = async (holeN, cards, hasMoved) => {
@@ -637,6 +661,10 @@ export default function Solitaire() {
     effectDrawerCommitDraw();
 
     effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      await actionUndoStackSrcDraw(dstStackN, card);
+    });
   };
 
   const actionSettleDrawCancel = async (card, hasMoved) => {
@@ -678,6 +706,10 @@ export default function Solitaire() {
 
   const effectDrawerCommitDraw = () => {
     drawer.mutate(_ => _.drawCommit1());
+  };
+
+  const effectDrawerUndoDraw = (card) => {
+    drawer.mutate(_ => _.undoDraw(card));
   };
 
   // Undo
@@ -735,6 +767,49 @@ export default function Solitaire() {
           cards
         });
 
+
+    effectStackAdd1(srcStackN, cards);
+  };
+
+  const actionUndoStackSrcDraw = async (dstStackN) => {
+    let card = effectStackCutLast(dstStackN);
+
+    effectDrawerUndoDraw(card);
+  };
+
+  const actionUndoStackSrcHole = async (holeN, dstStackN, cards) => {
+    effectStackCutLastCards(dstStackN, cards);
+
+    await fx('move').begin({
+      srcStackN: dstStackN,
+      dstHoleN: holeN,
+      cards
+    });
+
+    effectHoleRemoveCancel(holeN, cards[0]);
+  };
+
+  const actionUndoHole = async (srcStackN, holeN, cards, revealCard) => {
+
+    if (revealCard) {
+
+      stackN(srcStackN).mutate(_ => _.unreveal1(revealCard));
+
+      await fx('unreveal').begin({
+        stackN: srcStackN,
+        card: revealCard
+      });
+
+      stackN(srcStackN).mutate(_ => _.unreveal2(revealCard));
+    }    
+
+    effectHoleRemove(holeN);
+
+    await fx('move').begin({
+      srcHoleN: holeN,
+      dstStackN: srcStackN,
+      cards
+    });
 
     effectStackAdd1(srcStackN, cards);
   };

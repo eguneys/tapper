@@ -75,6 +75,10 @@ export function SoliHole(cards = []) {
 
   this.remove = () => cards.pop();
 
+  this.clear = () => {
+    cards = [];
+  };
+
   this.add = card => {
     cards.push(card);
   };
@@ -137,6 +141,11 @@ export function SoliDrawDeck() {
   this.undealOne = () => {
     let card = showStack.pop();
     deck.push(card);
+  };
+
+  this.undoDraw = (card) => {
+    inDrawing = false;
+    showStack.push(card);
   };
 
   this.draw1 = () => {
