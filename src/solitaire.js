@@ -44,15 +44,12 @@ export default function Solitaire() {
 
   let observeUserSelectHole = pobservable();
 
-  let observeUserUndo = pobservable();
-
   let userObserves = [
     observeUserSelectStack,
     observeUserEndsSelect,
     observeUserDealDraw,
     observeUserSelectDraw,
-    observeUserSelectHole,
-    observeUserUndo
+    observeUserSelectHole
   ];
 
   let fxs = {
@@ -75,7 +72,7 @@ export default function Solitaire() {
   let running;
 
   this.userActionUndo = async () => {
-    observeUserUndo.resolve();
+    actionUndosQueue();
   };
 
   this.userActionNewGame = async () => {
@@ -184,10 +181,6 @@ export default function Solitaire() {
     actionReset();
     actionDealCards();
     actionLoopAll();
-  };
-
-  const userUndos = () => {
-    return observeUserUndo.begin();
   };
 
   const userSelectsStack = () => {
@@ -365,12 +358,14 @@ export default function Solitaire() {
           cards
         });
 
-    await pReveal;
+    let revealCard = await pReveal;
     await pMove;
 
     effectStackAdd1(dstStackN, cards);
 
-    
+    effectUndoPush(async () => {
+      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+    });    
   };
 
   const actionMoveCardsStackHole = async (srcStackN, dstHoleN) => {
@@ -410,8 +405,8 @@ export default function Solitaire() {
 
     let revealCard = await actionRevealStack(srcStackN);
 
-    effectUndoPush(() => {
-      actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+    effectUndoPush(async () => {
+      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
     });
   };
 
@@ -667,6 +662,10 @@ export default function Solitaire() {
     await fx('dealdraw').begin(card);
 
     drawer.mutate(_ => _.dealOne2(card));
+
+    effectUndoPush(async () => {
+      await actionUndoDealDraw(card);
+    });    
   };
 
   const effectDrawerDraw = () => {
@@ -683,19 +682,32 @@ export default function Solitaire() {
 
   // Undo
 
-  const actionUndos = async () => {
-    await userUndos();
+  function serialPromise() {
+    let lastPromise = Promise.resolve();
+    return function(fn) {
+      lastPromise = lastPromise.then(fn);
+      return lastPromise;
+    };
+  }
 
+  let userUndosQueue = serialPromise();
+
+  const actionUndosQueue = () => {
+    userUndosQueue(actionUndos);
+  };
+
+  let i = 0;
+  const actionUndos = async () => {
     let canUndo = undoer.apply(_ => _.length > 0);
 
     if (!canUndo) {
+      await Promise.resolve();
       return;
     }
 
     let undoAction = undoer.mutate(_ => _.pop());
 
     await undoAction();
-
   };
 
   const effectUndoPush = undo => {
@@ -703,7 +715,6 @@ export default function Solitaire() {
   };
 
   const actionUndoStackStack = async (srcStackN, dstStackN, cards, revealCard) => {
-
     if (revealCard) {
 
       stackN(srcStackN).mutate(_ => _.unreveal1(revealCard));
@@ -728,6 +739,10 @@ export default function Solitaire() {
     effectStackAdd1(srcStackN, cards);
   };
 
+  const actionUndoDealDraw = async (card) => {
+    drawer.mutate(_ => _.undealOne(card));
+  };
+
 
   // actionUndos = [
   //   actionUndoDealDraw,
@@ -741,8 +756,7 @@ export default function Solitaire() {
     actionDealDraw,
     actionSelectDraw,
     actionSelectHole,
-    actionSelectStack,
-    actionUndos
+    actionSelectStack
   ];
 
   const actionLoopAll = () => {

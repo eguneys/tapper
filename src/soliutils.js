@@ -134,6 +134,11 @@ export function SoliDrawDeck() {
     showStack.push(card);
   };
 
+  this.undealOne = () => {
+    let card = showStack.pop();
+    deck.push(card);
+  };
+
   this.draw1 = () => {
     inDrawing = true;
     return showStack.pop();
