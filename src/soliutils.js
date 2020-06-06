@@ -1,4 +1,4 @@
-export const isN = n => n || n === 0;
+export const isN = n => (n || n === 0) && !(n < 0);
 
 const canStack = (c1, c2) => 
       c1.color !== c2.color && c1.sRank === c2.sRank + 1;
@@ -58,6 +58,8 @@ export function SoliStack(hidden = [], front = []) {
   };
 
   const top = () => front[front.length - 1];
+
+  this.topCard = () => top();
 
   this.canAdd = cards => {
     let t = top(),
@@ -178,6 +180,10 @@ export function SoliDrawDeck() {
 
   this.drawCommit1 = () => {
     inDrawing = false;
+  };
+
+  this.topCard = () => {
+    return showStack[showStack.length - 1];
   };
 
   this.showStack3 = () => {

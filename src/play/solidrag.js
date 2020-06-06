@@ -7,9 +7,14 @@ import { isN } from '../soliutils';
 
 export default function Play(play, ctx, bs) {
 
-  this.solitaire = play.solitaire;
+  let solitaire = this.solitaire = play.solitaire;
 
-  let dDragStack = new CardStack(this, ctx, bs);
+  let dDragStack = new CardStack(this, ctx, {
+    onBeginCard() {
+      solitaire.userActionDoubleTapStack();
+    },
+    ...bs
+  });
 
   let container = this.container = new AContainer();
   const initContainer = () => {

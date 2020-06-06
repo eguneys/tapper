@@ -46,14 +46,19 @@ export default function Solitaire() {
 
   let observeUserShuffleDraw = pobservable();
 
+  let observeUserDoubleTapStack = pobservable();
+
   let userObserves = [
     observeUserSelectStack,
     observeUserEndsSelect,
     observeUserDealDraw,
     observeUserSelectDraw,
     observeUserSelectHole,
-    observeUserShuffleDraw
+    observeUserShuffleDraw,
+    observeUserDoubleTapStack
   ];
+
+  let observeHackDoubleTapSelectInfo = pobservable();
 
   let fxs = {
     'deal': pobservable(),
@@ -73,6 +78,10 @@ export default function Solitaire() {
   let deck = makeOneDeck();
 
   let running;
+
+  this.userActionDoubleTapStack = async () => {
+    observeUserDoubleTapStack.resolve();
+  };
 
   this.userActionShuffle = async () => {
     observeUserShuffleDraw.resolve();
@@ -188,6 +197,10 @@ export default function Solitaire() {
     actionReset();
     actionDealCards();
     actionLoopAll();
+  };
+
+  const userDoubleTapsStack = () => {
+    return observeUserDoubleTapStack.begin();
   };
 
   const userShufflesDraw = () => {
@@ -325,6 +338,13 @@ export default function Solitaire() {
     effectPersistSelectEnd();
     effectBeginSelect(cards);
 
+
+    // hack
+    hackDoubleTapSelectInfo = {
+      stackN,
+      cards
+    };
+
     let target = await userEndsSelect();
 
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
@@ -341,6 +361,10 @@ export default function Solitaire() {
     } else {
       await actionSettleStackCancel(stackN, cards, hasMoved);
     }
+
+    observeHackDoubleTapSelectInfo.resolve({
+      stackN
+    });
   };
 
   const actionMoveCardsDrawStack = async(dstStackN) => {
@@ -706,12 +730,16 @@ export default function Solitaire() {
     let { stackN: dstStackN, holeN: dstHoleN, hasMoved } = target;
 
     if (isN(dstStackN) && canSettleStack(dstStackN, [card])) {
-      return await actionSettleStackSrcDraw(dstStackN, card);
+      await actionSettleStackSrcDraw(dstStackN, card);
     } else if (isN(dstHoleN) && canSettleHole(dstHoleN, [card])) {
-      return await actionSettleHoleSrcDraw(dstHoleN, card);
+      await actionSettleHoleSrcDraw(dstHoleN, card);
     } else {
-      return await actionSettleDrawCancel(card, hasMoved);
-    }    
+      await actionSettleDrawCancel(card, hasMoved);
+    }
+
+    observeHackDoubleTapSelectInfo.resolve({
+      drawN: true
+    });
   };
 
   const actionSettleHoleSrcDraw = async (dstHoleN, card) => {
@@ -941,12 +969,48 @@ export default function Solitaire() {
     });
   };
 
+  // double tap stack
+
+  let hackDoubleTapSelectInfo;
+
+  const actionDoubleTapStack = async () => {
+    // probably not needed this
+    await userDoubleTapsStack();
+
+    let { stackN: _stackN, drawN } = 
+        await observeHackDoubleTapSelectInfo.begin();
+
+    if (isN(_stackN)) {
+
+      let card = stackN(_stackN).apply(_ => _.topCard());
+      let _holeN = findHoleCanAddCard(card);
+
+      if (isN(_holeN)) {
+        await actionMoveCardsStackHole(_stackN, _holeN);
+      }
+
+    } else if (drawN) {
+      let card = drawer.apply(_ => _.topCard());
+      let _holeN = findHoleCanAddCard(card);
+
+      if (isN(_holeN)) {
+        await actionMoveCardsDrawHole(_holeN);
+      }
+    }
+  };
+
+  const findHoleCanAddCard = (card) => {
+    return holes.findIndex(_ => _.apply(_ => _.canAdd([card])));    
+  };
+
+
   let actionLoops = [
     actionShuffleDraw,
     actionDealDraw,
     actionSelectDraw,
     actionSelectHole,
-    actionSelectStack
+    actionSelectStack,
+    actionDoubleTapStack
   ];
 
   const actionLoopAll = () => {
@@ -974,8 +1038,5 @@ export default function Solitaire() {
     return stackN(dstStackN)
       .apply(_ => _.canAdd(cards));
   };
-
-
-
 
 }

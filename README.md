@@ -21,8 +21,8 @@
   - [ ] Score
   - [x] New game
 - [ ] Cards auto place into holes in a chain reaction
-- [ ] Double tap to auto place into holes
-- [ ] Don't extend cards while dragging
+- [x] Double tap to auto place into holes
+- [x] Don't extend cards while dragging
 - [x] Cards move according to rules
 - [x] Undo
    - [x] undo card deal
