@@ -1,6 +1,43 @@
-# RxJs
+# AI
+
+    let soliState = merge({
+        stacks,
+        holes,
+        draw
+    });
+
+    let state = observable({});
+
+    init() {
+        state.mutate(_ => {
+            _.inContext = false;
+            _.isPlaying = false;
+        });
+    }
+
+    let aiAction = merge({
+        soliState,
+        state
+    });
+
+    aiAction.subscribe(({ soliState, state: { inContext, isPlaying } }) => {
+        if (inContext && isPlaying) {
+            
+        }
+    });
 
     
+    async actionAutoPlay() {
+      let action = await onAction();
+      action();
+    }
+
+
+    actionDrawStack(stackN) {
+        solitaire.userActionSelectDraw();
+        delay();
+        solitaire.userActionSelectStack(stackN, cardN);
+    }
 
 
 

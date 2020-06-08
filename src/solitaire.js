@@ -102,7 +102,10 @@ export default function Solitaire() {
 
   this.userActionSelectDraw = (epos, decay) => {
     observeUserSelectDraw.resolve();
-    effectActiveSelect(epos, decay);
+
+    if (epos) {
+      effectActiveSelect(epos, decay);
+    }
   };
 
   this.userActionSelectStack = (stackN, cardN, epos, decay) => {
@@ -120,7 +123,10 @@ export default function Solitaire() {
     observeUserSelectHole.resolve({
       holeN
     });
-    effectActiveSelect(epos, decay);
+
+    if (epos) {
+      effectActiveSelect(epos, decay);
+    }
   };
 
   this.userActionMove = (epos) => {
@@ -174,13 +180,13 @@ export default function Solitaire() {
 
   const actionCancelFxs = async () => {
     for (let key in fxs) {
-      fx(key).reject();
+      fx(key).reject("Action cancel Fxs");
     }
     await pDelay(0);
   };
 
   const actionCancelUserObserves = async () => {
-    userObserves.forEach(_ => _.reject());
+    userObserves.forEach(_ => _.reject("Action cancel user observes"));
     await pDelay(0);
   };
 
