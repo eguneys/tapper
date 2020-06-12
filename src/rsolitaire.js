@@ -5,67 +5,97 @@ import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
 
 import RSoliDealer from './rsolidealer';
 
-export default function RSolitaire() {
+export default function RSolitaire(esUserDragsStacks) {
 
   let deck = makeOneDeck();
 
-  let pStacks = [
-    StackProperty(),
-    StackProperty(),
-    StackProperty(),
-    StackProperty(),
-    StackProperty(),
-    StackProperty(),
-    StackProperty()
-  ];
+  const makeEsDealer = () => RSoliDealer();
+  const makeEsTweenDeal = (duration = 20) =>
+        Bacon.sequentially(duration/11, [0, 
+                                   0.1,
+                                   0.2,
+                                   0.3,
+                                   0.4,
+                                   0.5,
+                                   0.6,
+                                   0.7,
+                                   0.8,
+                                   0.9,
+                                   1.0]);
 
-  const esDealer = RSoliDealer();
+  let esUserInit = Bacon.once(true);
 
+  let esInit = esUserInit.doAction(_ => {
+    deck.shuffle();
+  }).map(_ => deck.drawRest());
 
-  let esInit = this.userInits = new Bacon.Bus();
-  let esDragsStackToStack = this.userDragsStackToStack = new Bacon.Bus();
-  
-  let esDrawerDealOne = esInit.flatMapLatest(_ => {
-    return esDealer;
-  });
-  let esDrawerInit = this.userInits.map(_ => deck.drawRest());
+  let esDealCards = esInit
+      .flatMapLatest(_ => makeEsDealer());
 
-  let esDrawer = {
-    init: esDrawerInit,
-    dealOne: esDrawerDealOne
-  };
-  let pDrawer = DrawerProperty(esDrawer);
-
-  this.pStackN = n => pStacks[n];
-
-}
-
-function DrawerProperty({
-  init,
-  dealOne
-}) {
-  return Bacon.update(new SoliDrawDeck(),
-                      [init, (_, cards) => _.init(cards)],
-                      [dealOne, (_) => _.dealOne1()]);
-}
-
-function StackProperty() {
-  return Bacon.constant(new SoliStack());
-}
-
-function testing() {
-
-  let userInit = Bacon.interval(2000, true);
-
-  let deal = Bacon.repeatedly(1000, [1,2,3]);
-  let dealI = Bacon.interval(4000, true);
-
-  let drawerAdd = userInit.flatMapLatest(_ => 
-    deal
-      .zip(dealI, _ => _)
+  let esDealOne = esDealCards.flatMapConcat(_ => 
+    Bacon.once({ dealOne: true, ..._ })
+      .concat(makeEsTweenDeal()
+              .filter(_ => false))
+      .concat(Bacon.once({ dealOne2: true }))
   );
 
-  drawerAdd.log();
+  let esDealOne1 = esDealOne.filter(_ => _.dealOne);
+  let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
+    
+  let wholeProperty = WholeProperty(esInit, 
+                                    esDealOne1,
+                                    esDealOne2);
+
+  this.pStackN = n => wholeProperty
+    .map(({ stacks }) => stacks[n]);
+
+  esUserDragsStacks.map(_ => _.epos).log();
+
 }
 
-// testing();
+function WholeProperty(esInit, esDealOne1, esDealOne2) {
+  let init = (_, cards) => {
+    let { drawer } = _;
+    drawer.init(cards);
+    return _; };
+  let dealOne1 = (_, oDeal) => { 
+    let { hidden, i } = oDeal;
+    let { drawer } = _;
+
+    let card = drawer.dealOne1();
+
+    _.oDeal = {
+      i,
+      hidden,
+      cards: [card]
+    };
+
+    return _; };
+  let dealOne2 = _ => {
+    let { stacks, oDeal: { i, hidden, cards } } = _;
+    
+    if (hidden) {
+      stacks[i].hide1(cards);
+    } else {
+      stacks[i].add1(cards);
+    }
+
+    return _;
+  };
+
+  return Bacon.update({
+    drawer: new SoliDrawDeck(),
+    stacks: [
+      new SoliStack(),
+      new SoliStack(),
+      new SoliStack(),
+      new SoliStack(),
+      new SoliStack(),
+      new SoliStack(),
+      new SoliStack()
+    ]
+  }, 
+                      [esInit, init],
+                      [esDealOne1, dealOne1],
+                      [esDealOne2, dealOne2]);
+}

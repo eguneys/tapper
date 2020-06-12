@@ -133,7 +133,10 @@ export function SoliDrawDeck() {
     showStack = [];
   };
 
-  this.nbDeck = () => deck.length;
+  this.nbDeck = () => {
+    if (!deck) return 0;
+    return deck.length;
+  };
 
   this.shuffle2 = (cards) => {
     deck = cards.reverse();

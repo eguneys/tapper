@@ -1,14 +1,14 @@
-import { fromBinder } from 'baconjs';
+import { End, fromBinder } from 'baconjs';
 
 export default function RSoliDealer() {
 
   const dealsData = [0, 1, 2, 3, 4, 5, 6];
 
+  let i = 0;
+  let deals = dealsData.slice(0);
+  let done = false;
+
   return fromBinder(function(sink) {
-    let i = 0;
-    let deals = dealsData.slice(0);
-    let done = false;
-    
     while (!done) {
 
       let deal = deals[i];
@@ -37,6 +37,8 @@ export default function RSoliDealer() {
         });
       }
     }
+
+    sink(new End());
     
     return function() {
       

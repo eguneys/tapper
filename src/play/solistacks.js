@@ -53,7 +53,9 @@ export default function SoliStacks(play, ctx, bs) {
 
   this.solitaire.pSelection.subscribe(observePSelection);
 
-  this.init = (data) => {};
+  this.init = (data) => {
+    dStacks.forEach(_ => _.init());
+  };
 
   this.update = delta => {
     this.container.update(delta);
@@ -154,6 +156,8 @@ function SoliStack(play, ctx, bs) {
 
   this.init = (data) => {
     dPlaceholder.init();
+
+    listenSolitaire();
   };
 
   this.update = delta => {
@@ -175,13 +179,15 @@ function SoliStack(play, ctx, bs) {
   this.drags = dFronts.drags.map(insertN);
   this.drops = dFronts.drops.map(insertN);
 
+  function listenSolitaire() {
 
-  play.rsolitaire.pStackN(n).onValue(stack => {
-    let inProgress = stack.inProgress();
-    dFronts.init({ stack: stack.front, inProgress });
-    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
-    if (!inProgress) {
-      extendCards(stack.hidden.length, stack.front.length);
-    }
-  });
+    play.rsolitaire().pStackN(n).onValue(stack => {
+      let inProgress = stack.inProgress();
+      dFronts.init({ stack: stack.front, inProgress });
+      dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
+      if (!inProgress) {
+        extendCards(stack.hidden.length, stack.front.length);
+      }
+    });
+  }
 }

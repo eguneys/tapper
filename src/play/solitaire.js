@@ -76,7 +76,9 @@ export default function SolitaireView(play, ctx, pbs) {
     };
   })();
 
-  let rsolitaire = this.rsolitaire = new RSolitaire();
+  let rsolitaire;
+
+  this.rsolitaire = () => rsolitaire;
 
   let solitaire = this.solitaire = new Solitaire();
 
@@ -100,6 +102,10 @@ export default function SolitaireView(play, ctx, pbs) {
   this.dStackN = dStacks.dStackN;
   this.dDrawN = dDraw.dDrawN;
   this.dDraw = dDraw;
+
+  let userDragsStacks = dStacks.drags;
+  
+  rsolitaire = new RSolitaire(userDragsStacks);
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -126,6 +132,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   this.init = (data) => {
     solitaire.init();
+    dStacks.init();
   };
 
   this.remove = () => {

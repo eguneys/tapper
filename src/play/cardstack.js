@@ -180,8 +180,9 @@ export default function CardStack(play, ctx, bs) {
     this.container.render();
   };
 
-  const inCardHitBounds = dragE => {
-    let hD = getHitCardWithDecay(dragE);
+  const inCardHitBounds = (selectPos = _ => _.epos) => dragE => {
+    let pos = selectPos(dragE);
+    let hD = getHitCardWithDecay(pos);
     if (hD) {
       return {
         cardN: hD.hitCard.n(),
@@ -192,8 +193,7 @@ export default function CardStack(play, ctx, bs) {
     return revents.never;
   };
 
-  const getHitCardWithDecay = event => {
-        let { epos } = event;
+  const getHitCardWithDecay = pos => {
 
     let iCardExtend = iExtend.value();
 
@@ -208,13 +208,13 @@ export default function CardStack(play, ctx, bs) {
         width: b.width,
         height: lastCard?b.height:iCardExtend
       };
-      return hitTest(epos[0], epos[1], handleBounds);
+      return hitTest(pos[0], pos[1], handleBounds);
     });
 
     if (hitCard) {
       let b = hitCard.container.bounds();
-      let decay = [-epos[0] + b.x,
-                   -epos[1] + b.y];
+      let decay = [-pos[0] + b.x,
+                   -pos[1] + b.y];
       return {
         hitCard,
         decay
@@ -223,8 +223,11 @@ export default function CardStack(play, ctx, bs) {
     return null;
   };
 
-  this.clicks = revents.clicks.flatMap(inCardHitBounds);
-  this.drags = revents.drags.flatMap(inCardHitBounds);
-  this.drops = revents.drops.flatMap(inCardHitBounds);
+  this.clicks = revents.clicks
+    .flatMap(inCardHitBounds());
+  this.drags = revents.drags
+    .flatMap(inCardHitBounds(_ => _.start));
+  this.drops = revents.drops
+    .flatMap(inCardHitBounds());
 
 }
