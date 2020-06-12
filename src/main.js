@@ -7,6 +7,8 @@ import Events from './events';
 import Keyboard from './keyboard';
 import Play from './play';
 
+import Revents from './revents';
+
 export function app(element, options) {
 
   const config = Config(options);
@@ -43,11 +45,14 @@ export function app(element, options) {
 
       canvas.bindResize();
 
+      const revents = new Revents(canvas);
+
       const ctx = {
         canvas,
         config,
         textures,
-        events
+        events,
+        revents
       };
 
       const data = {};

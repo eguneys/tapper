@@ -9,6 +9,7 @@ import { isN } from '../soliutils';
 
 export default function SoliStacks(play, ctx, bs) {
 
+  this.rsolitaire = play.rsolitaire;
   this.solitaire = play.solitaire;
 
   let dStacks = [
@@ -61,22 +62,37 @@ export default function SoliStacks(play, ctx, bs) {
   this.render = () => {
     this.container.render();
   };
+
+  const { revents } = ctx;
+
+  this.drags = dStacks.map(_ => _.drags)
+    .reduce((acc, _) => acc.merge(_), 
+            revents.never);
+  this.drops = dStacks.map(_ => _.drops)
+    .reduce((acc, _) => acc.merge(_), 
+            revents.never);
+
+  this.dragStackToStack = revents.update(
+    {},
+    [this.drags, (acc, dragE) => {
+      return {
+        drag: dragE
+      };
+    }],
+    [this.drops, (acc, dropE) => {
+      return {
+        ...acc,
+        drop: dropE
+      };
+    }]).filter(_ => _.drag && _.drop);
+
 }
 
 function SoliStack(play, ctx, bs) {
 
   let { n } = bs;
 
-  let dFronts = new CardStack(this, ctx, {
-    onBeginCard: (nCard, epos, decay) => {
-      play.solitaire.userActionSelectStack(n, nCard, epos, decay);
-    },
-    onEndCard: (nCard) => {
-      play.solitaire.userActionEndSelectStack(n);
-    },
-    ...bs
-  });
-
+  let dFronts = new CardStack(this, ctx, bs);
   let dBacks = new CardStack(this, ctx, bs);
 
   let dPlaceholder = new CardPlaceholder(this, ctx, {
@@ -95,16 +111,16 @@ function SoliStack(play, ctx, bs) {
     ...bs
   });
 
-  let observeStack = play.solitaire.stackN(n);
+  // let observeStack = play.solitaire.stackN(n);
 
-  observeStack.subscribe(stack => {
-    let inProgress = stack.inProgress();
-    dFronts.init({ stack: stack.front, inProgress });
-    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
-    if (!inProgress) {
-      extendCards(stack.hidden.length, stack.front.length);
-    }
-  });
+  // observeStack.subscribe(stack => {
+  //   let inProgress = stack.inProgress();
+  //   dFronts.init({ stack: stack.front, inProgress });
+  //   dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
+  //   if (!inProgress) {
+  //     extendCards(stack.hidden.length, stack.front.length);
+  //   }
+  // });
 
   const extendCards = (backs, fronts) => {
     let nbCards = backs + fronts;
@@ -153,4 +169,19 @@ function SoliStack(play, ctx, bs) {
     renderFront();
     this.container.render();
   };
+
+  const insertN = _ => ({ ..._, stackN: n });
+  this.clicks = dFronts.clicks.map(insertN);
+  this.drags = dFronts.drags.map(insertN);
+  this.drops = dFronts.drops.map(insertN);
+
+
+  play.rsolitaire.pStackN(n).onValue(stack => {
+    let inProgress = stack.inProgress();
+    dFronts.init({ stack: stack.front, inProgress });
+    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
+    if (!inProgress) {
+      extendCards(stack.hidden.length, stack.front.length);
+    }
+  });
 }

@@ -1317,6 +1317,11 @@ babel-plugin-dynamic-import-node@^2.3.0:
   dependencies:
     object.assign "^4.1.0"
 
+baconjs@^3.0.13:
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/baconjs/-/baconjs-3.0.13.tgz#241ba3dab1d3ad5e798fb3e4ee2952a979511fcf"
+  integrity sha512-5rrJFq9O69UwSALfLumxdeHGeBoe8dT6bTu5SllcnB6N44/iCXntZKiDG6WdTwxcx4Im1B1pQ3K0tXKUWgy89Q==
+
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"

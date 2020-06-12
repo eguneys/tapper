@@ -3,6 +3,8 @@ import AContainer from './acontainer';
 import ASprite from './asprite';
 import AText from './atext';
 
+import { hitTest } from './util';
+
 const ranks = {
   'ace': 'A',
   'two': '2',
@@ -21,7 +23,7 @@ const ranks = {
 
 export default function CardCard(play, ctx, bs) {
 
-  const { textures } = ctx;
+  const { revents, textures } = ctx;
 
   let mcards = textures['mcards'];
 
@@ -132,4 +134,10 @@ export default function CardCard(play, ctx, bs) {
   this.render = () => {
     this.container.render();
   };
+
+  let inHitBounds = _ => hitTest(..._.start, container.bounds());
+  let insertN = _ => ({ ..._, n });
+  this.clicks = revents.clicks.filter(inHitBounds).map(insertN);
+  this.drags = revents.drags.filter(inHitBounds).map(insertN);
+  this.drops = revents.drops.filter(inHitBounds).map(insertN);
 }

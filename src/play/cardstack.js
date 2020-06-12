@@ -9,7 +9,7 @@ import { hitTest, moveHandler } from './util';
 
 export default function CardStack(play, ctx, bs) {
 
-  const { events } = ctx;
+  const { revents, events } = ctx;
 
   let { onBeginCard, onEndCard } = bs;
 
@@ -51,6 +51,7 @@ export default function CardStack(play, ctx, bs) {
     }
     this.highlight(false);
   };
+
 
   this.extend = (eHeight) => {
     let nbCards = dCards.length;
@@ -178,4 +179,52 @@ export default function CardStack(play, ctx, bs) {
     renderCards();
     this.container.render();
   };
+
+  const inCardHitBounds = dragE => {
+    let hD = getHitCardWithDecay(dragE);
+    if (hD) {
+      return {
+        cardN: hD.hitCard.n(),
+        decay: hD.decay,
+        ...dragE
+      };
+    }
+    return revents.never;
+  };
+
+  const getHitCardWithDecay = event => {
+        let { epos } = event;
+
+    let iCardExtend = iExtend.value();
+
+    let hitCard = dCards.find((dCard, i) => {
+      let lastCard = i === (dCards.length - 1);
+
+      let b = dCard.container.bounds();
+
+      let handleBounds = {
+        x: b.x,
+        y: b.y,
+        width: b.width,
+        height: lastCard?b.height:iCardExtend
+      };
+      return hitTest(epos[0], epos[1], handleBounds);
+    });
+
+    if (hitCard) {
+      let b = hitCard.container.bounds();
+      let decay = [-epos[0] + b.x,
+                   -epos[1] + b.y];
+      return {
+        hitCard,
+        decay
+      };
+    }
+    return null;
+  };
+
+  this.clicks = revents.clicks.flatMap(inCardHitBounds);
+  this.drags = revents.drags.flatMap(inCardHitBounds);
+  this.drops = revents.drops.flatMap(inCardHitBounds);
+
 }

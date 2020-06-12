@@ -6,6 +6,7 @@ import AContainer from './acontainer';
 
 import CardBackground from './cardbackground';
 
+import RSolitaire from '../rsolitaire';
 import Solitaire from '../solitaire';
 import SoliHoles from './soliholes';
 import SoliStacks from './solistacks';
@@ -74,6 +75,8 @@ export default function SolitaireView(play, ctx, pbs) {
       height
     };
   })();
+
+  let rsolitaire = this.rsolitaire = new RSolitaire();
 
   let solitaire = this.solitaire = new Solitaire();
 
