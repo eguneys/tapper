@@ -3,7 +3,7 @@ import AContainer from './acontainer';
 import CardStack from './cardstack';
 import * as v from '../vec2';
 import { iPolPlus } from './util2';
-import { isN } from '../soliutils';
+import { isN, isUndefined } from '../soliutils';
 
 export default function Play(play, ctx, bs) {
 
@@ -23,19 +23,6 @@ export default function Play(play, ctx, bs) {
     container.addChild(dDragStack);
   };
   initContainer();
-
-  // this.solitaire.bSelection.subscribe(({ cards }) => {
-  //   dDragStack.init({ stack: cards });
-  //   dDragStack.highlight(true);
-  // });
-
-  // this.solitaire.aSelection.subscribe(({ active, epos, decay }) => {
-  //   if (!active) {
-  //     return;
-  //   }
-  //   dDragStack.container.move(epos[0] + decay[0],
-  //                             epos[1] + decay[1]);
-  // });
 
   // let settleSource,
   //     settleTargetDiff;
@@ -68,16 +55,6 @@ export default function Play(play, ctx, bs) {
   //   }
   // });
 
-  // this.solitaire.fx('settle').subscribe({
-  //   onBegin(oSettle, resolve) {
-  //     iSettle.begin(oSettle, resolve);
-  //   },
-  //   onEnd() {
-  //     dDragStack.init({ stack: [] });
-  //   }
-  // });
-
-
   this.init = (data) => {
     listenSolitaire();
   };
@@ -105,11 +82,56 @@ export default function Play(play, ctx, bs) {
   };
 
   const endDrag = () => {
+  };
+
+  let settleSource,
+      settleTargetDiff;
+  const beginSettle = (oSettle) => {
+    let { drawN, stackN, holeN } = oSettle;
+
+      let settleTarget;
+
+      settleSource = dDragStack.container.globalPosition();
+
+      if (isN(stackN)) {
+        let dStack = play.dStackN(stackN);
+        settleTarget = dStack.nextCardGlobalPosition();
+      } else if (isN(drawN)) {
+        settleTarget = play.dDraw.showGlobalPosition();
+      } else if (isN(holeN)) {
+        let dHole = play.dHoleN(holeN);
+        settleTarget = dHole.nextCardGlobalPosition();
+      }
+
+      settleTargetDiff = [settleTarget[0] - settleSource.x,
+                          settleTarget[1] - settleSource.y];
+  };
+
+  const updateSettle = (i) => {
+    let vSettleTarget = v.cscale(settleTargetDiff, i);
+    dDragStack.container.move(settleSource.x + vSettleTarget[0],
+                              settleSource.y + vSettleTarget[1]);
+  };
+
+  const endSettle = () => {
     dDragStack.init({ stack: [] });
   };
 
   const listenSolitaire = () => {
     
+    rsolitaire().pFx('settle').onValue(settle => {
+      let { i, oSettle } = settle;
+
+      if (oSettle && isUndefined(i)) {
+        beginSettle(oSettle);
+      } else if (!isUndefined(i)) {
+        updateSettle(i);
+      } else {
+        endSettle();
+      }
+
+    });
+
     rsolitaire().pHanging.onValue(hanging => {
       let { drag, cards, start, moving } = hanging;
 

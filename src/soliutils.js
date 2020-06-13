@@ -1,3 +1,5 @@
+export const isUndefined = n => n === undefined;
+
 export const isN = n => (n || n === 0) && !(n < 0);
 
 const canStack = (c1, c2) => 

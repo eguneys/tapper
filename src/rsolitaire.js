@@ -1,6 +1,8 @@
 import { objMap } from './util2';
 import * as Bacon from 'baconjs';
 
+import FxBus from './rfxbus';
+
 import { makeOneDeck } from './deck';
 import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
 
@@ -11,18 +13,10 @@ export default function RSolitaire(esDrags, esDrops) {
   let deck = makeOneDeck();
 
   const makeEsDealer = () => RSoliDealer();
-  const makeEsTweenDeal = (duration = 20) =>
-        Bacon.sequentially(duration/11, [0, 
-                                   0.1,
-                                   0.2,
-                                   0.3,
-                                   0.4,
-                                   0.5,
-                                   0.6,
-                                   0.7,
-                                   0.8,
-                                   0.9,
-                                   1.0]);
+
+  let _fxBus = new FxBus();
+
+  let { bFx, prependWithFx, initPrependWithFx } = _fxBus;
 
   let esUserInit = Bacon.once(true);
 
@@ -35,9 +29,9 @@ export default function RSolitaire(esDrags, esDrops) {
 
   let esDealOne = esDealCards.flatMapConcat(_ => 
     Bacon.once({ dealOne: true, ..._ })
-      .concat(makeEsTweenDeal()
-              .filter(_ => false))
-      .concat(Bacon.once({ dealOne2: true, ..._ }))
+      .concat(
+        prependWithFx({ dealOne2: true, ..._ },
+                      'dealOne'))
   );
 
   let esDealOne1 = esDealOne.filter(_ => _.dealOne);
@@ -53,17 +47,38 @@ export default function RSolitaire(esDrags, esDrops) {
       .toEventStream();
 
   let esDragStackCancel = pDragDrop
-      .flatMap(_ => _.dragStackCancel?
-               _.dragStackCancel:Bacon.never())
+      .flatMap(_ => {
+        return _.dragStackCancel?
+          initPrependWithFx('settle', {
+            oSettle: { 
+              stackN: _.dragStackCancel.stackN }
+          }, _.dragStackCancel, 100):
+        Bacon.never();
+      })
       .toEventStream();
 
   let esStackDragStart = esDragStackStart;
   let esStackDragCancel = esDragStackCancel;
 
-  let esHAppend = bHanging.filter(_ => _.append);
   let esHInit = bHanging.filter(_ => _.init);
+  let esHAppend = bHanging.filter(_ => _.append);
 
   let pHanging = HangingStateProperty(esHInit, esHAppend);
+
+  const fxProperty = name => {
+    let esFxInit = bFx.filter(_ => _.init);
+    let esFxAppend = bFx.filter(_ => _.append);
+    const filterName = (es, name) => es
+          .filter(_ => _.name === name);
+
+    return HangingStateProperty(filterName(esFxInit, name),
+                                filterName(esFxAppend, name));
+  };
+
+  let pFx = {
+    dealOne: fxProperty('dealOne'),
+    settle: fxProperty('settle')
+  };
   
   let pDrawer = DrawerProperty(bHanging, esInit, esDealOne1);
 
@@ -91,6 +106,8 @@ export default function RSolitaire(esDrags, esDrops) {
   this.pDrawer = pDrawer;
   this.pHanging = pHanging;
 
+  this.pFx = name => pFx[name];
+
   pDrawer.log();
   // pHanging.log();
   // pDragDrop.log();
@@ -110,6 +127,9 @@ function DragDropProperty(bHanging, esDrags, esDrops) {
 
   let esDropCancel = esDrops
       .filter(_ => !isN(_.stackN));
+
+  let esDropStack = esDrops
+      .filter(_ => isN(_.stackN));
 
   const dragMove = (_, dragMove) => {
     bHanging.push({ append: 
@@ -148,10 +168,23 @@ function DragDropProperty(bHanging, esDrags, esDrops) {
     }
   };
 
+  const dropStack = (_, esDrop) => {
+    let dragStackMove = _.dragStackStart || _.dragMove;
+    if (dragStackMove) {
+      return {
+        dragStackDropStack: { drag: dragStackMove,
+                              drop: esDrop }
+      };
+    } else {
+      return {};
+    }
+  };
+
   return Bacon.update
   ({}, [esDragStackStart, dragStackStart],
    [esDragMove, dragMove],
-   [esDropCancel, dropCancel]);
+   [esDropCancel, dropCancel],
+   [esDropStack, dropStack]);
   
 }
 
