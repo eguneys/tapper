@@ -1,36 +1,29 @@
 import * as Bacon from 'baconjs';
 
-const makeEsTween = (duration = 20) =>
-      Bacon.sequentially(duration/11, [0, 
-                                       0.1,
-                                       0.2,
-                                       0.3,
-                                       0.4,
-                                       0.5,
-                                       0.6,
-                                       0.7,
-                                       0.8,
-                                       0.9,
-                                       1.0]);
+import { makeEsTween } from './rtween';
 
 export default function FxBus() {
 
   let bFx = this.bFx = new Bacon.Bus();
 
-  const fxUpdate = (name, value) => {
-    bFx.push({ name, append: value });
+  const fxUpdate = (key, value) => {
+    bFx.push({ name: key, update: { key, value } });
   };
 
-  const fxInit = (name, value) => {
-    bFx.push({ name, init: value});
+  const fxRemove = key => {
+    bFx.push({ name: key, remove: key });
   };
 
-  const fxDelete = name => fxInit(name, {});
+  const initWithFxEs = this.initWithFxEs = (es, pullValue, fxName) => {
+    return es.doAction(_ => {
+      fxUpdate(fxName, pullValue(_));
+    }).take(0);
+  };
 
   const initWithFx = (value, fxName) => {
     return Bacon.once(false).
       doAction(_ => {
-        fxInit(fxName, value);
+        fxUpdate(fxName, value);
       }).filter(_ => _);
   };
 
@@ -42,7 +35,7 @@ export default function FxBus() {
       .filter(_ => false)
       .concat(Bacon.once(value)
               .doAction(_ => {
-                fxDelete(fxName);
+                fxRemove(fxName);
               }));
   };
 
@@ -54,5 +47,4 @@ export default function FxBus() {
                                 .concat(prependWithFx(afterValue, 
                                                       fxName, duration));
                             };
-  
 }

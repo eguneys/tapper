@@ -146,6 +146,7 @@ export default function SolitaireView(play, ctx, pbs) {
     solitaire.init();
     dStacks.init();
     dSoliDrag.init();
+    dSoliReveal.init();
   };
 
   this.remove = () => {

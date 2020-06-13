@@ -24,37 +24,6 @@ export default function Play(play, ctx, bs) {
   };
   initContainer();
 
-  // let settleSource,
-  //     settleTargetDiff;
-  // let iSettle = new iPolPlus({
-  //   onBegin(oSettle) {
-
-  //     let { drawN, stackN, holeN } = oSettle;
-
-  //     let settleTarget;
-
-  //     settleSource = dDragStack.container.globalPosition();
-
-  //     if (isN(stackN)) {
-  //       let dStack = play.dStackN(stackN);
-  //       settleTarget = dStack.nextCardGlobalPosition();
-  //     } else if (isN(drawN)) {
-  //       settleTarget = play.dDraw.showGlobalPosition();
-  //     } else if (isN(holeN)) {
-  //       let dHole = play.dHoleN(holeN);
-  //       settleTarget = dHole.nextCardGlobalPosition();
-  //     }
-
-  //     settleTargetDiff = [settleTarget[0] - settleSource.x,
-  //                         settleTarget[1] - settleSource.y];
-  //   },
-  //   onUpdate(_, i) {
-  //     let vSettleTarget = v.cscale(settleTargetDiff, i);
-  //     dDragStack.container.move(settleSource.x + vSettleTarget[0],
-  //                               settleSource.y + vSettleTarget[1]);
-  //   }
-  // });
-
   this.init = (data) => {
     listenSolitaire();
   };
@@ -119,26 +88,31 @@ export default function Play(play, ctx, bs) {
 
   const listenSolitaire = () => {
     
-    rsolitaire().pFx('settle').onValue(settle => {
+    rsolitaire().pFx('settle').onValue(_settle => {
+      let { settle } = _settle;
+
+      if (!settle) {
+        endSettle();
+        return;
+      }
+
       let { i, oSettle } = settle;
 
       if (oSettle && isUndefined(i)) {
         beginSettle(oSettle);
       } else if (!isUndefined(i)) {
         updateSettle(i);
-      } else {
-        endSettle();
       }
 
     });
 
     rsolitaire().pHanging.onValue(hanging => {
-      let { drag, cards, start, moving } = hanging;
+      let { dragstart, dragcards, moving } = hanging;
 
-      if (drag && !moving && cards) {
-        initDrag(cards, start);
-      } else if (drag && moving) {
-        moveDrag(start, moving);
+      if (dragstart && !moving && dragcards) {
+        initDrag(dragcards, dragstart);
+      } else if (dragstart && moving) {
+        moveDrag(dragstart, moving);
       } else {
         endDrag();
       }
