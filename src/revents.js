@@ -101,6 +101,7 @@ export default function Revents (canvas) {
   this.update = Bacon.update;
   this.when = Bacon.when;
 
+  this.once = Bacon.once;
   this.never = never();
 
   this.starts = starts;

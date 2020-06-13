@@ -184,11 +184,11 @@ export default function CardStack(play, ctx, bs) {
     let pos = selectPos(dragE);
     let hD = getHitCardWithDecay(pos);
     if (hD) {
-      return {
+      return revents.once({
         cardN: hD.hitCard.n(),
         decay: hD.decay,
         ...dragE
-      };
+      });
     }
     return revents.never;
   };
@@ -226,6 +226,7 @@ export default function CardStack(play, ctx, bs) {
   this.clicks = revents.clicks
     .flatMap(inCardHitBounds());
   this.drags = revents.drags
+    .filter(_ => _.initial)
     .flatMap(inCardHitBounds(_ => _.start));
   this.drops = revents.drops
     .flatMap(inCardHitBounds());
