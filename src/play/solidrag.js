@@ -7,6 +7,8 @@ import { isN } from '../soliutils';
 
 export default function Play(play, ctx, bs) {
 
+  let rsolitaire = play.rsolitaire;
+
   let solitaire = this.solitaire = play.solitaire;
 
   let dDragStack = new CardStack(this, ctx, {
@@ -21,8 +23,6 @@ export default function Play(play, ctx, bs) {
     container.addChild(dDragStack);
   };
   initContainer();
-
-  
 
   // this.solitaire.bSelection.subscribe(({ cards }) => {
   //   dDragStack.init({ stack: cards });
@@ -92,9 +92,35 @@ export default function Play(play, ctx, bs) {
     this.container.render();
   };
 
+  const initDrag = (cards, { epos, decay }) => {
+    dDragStack.init({ stack: cards });
+    dDragStack.highlight(true);    
+    dDragStack.container.move(epos[0] + decay[0],
+                              epos[1] + decay[1]);
+  };
+
+  const moveDrag = ({ decay }, { epos }) => {
+    dDragStack.container.move(epos[0] + decay[0],
+                              epos[1] + decay[1]);
+  };
+
+  const endDrag = () => {
+    dDragStack.init({ stack: [] });
+  };
+
   const listenSolitaire = () => {
     
-    // this.rsolitaire().
+    rsolitaire().pHanging.onValue(hanging => {
+      let { drag, cards, start, moving } = hanging;
+
+      if (drag && !moving && cards) {
+        initDrag(cards, start);
+      } else if (drag && moving) {
+        moveDrag(start, moving);
+      } else {
+        endDrag();
+      }
+    });
 
   };
 }

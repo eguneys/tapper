@@ -43,22 +43,34 @@ export default function RSolitaire(esDrags, esDrops) {
   let esDealOne1 = esDealOne.filter(_ => _.dealOne);
   let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
 
-
-  
-
-  let esStackCutInProgress = Bacon.never();
-
   let bHanging = new Bacon.Bus();
 
-  let esSetCards = bHanging.filter(_ => _.cards);
+  let pDragDrop = DragDropProperty(bHanging, esDrags, esDrops);
 
-  let pHanging = HangingStateProperty(esSetCards);
-    
+  let esDragStackStart = pDragDrop
+      .flatMap(_ => _.dragStackStart?
+               _.dragStackStart:Bacon.never())
+      .toEventStream();
+
+  let esDragStackCancel = pDragDrop
+      .flatMap(_ => _.dragStackCancel?
+               _.dragStackCancel:Bacon.never())
+      .toEventStream();
+
+  let esStackDragStart = esDragStackStart;
+  let esStackDragCancel = esDragStackCancel;
+
+  let esHAppend = bHanging.filter(_ => _.append);
+  let esHInit = bHanging.filter(_ => _.init);
+
+  let pHanging = HangingStateProperty(esHInit, esHAppend);
+  
   let pDrawer = DrawerProperty(bHanging, esInit, esDealOne1);
 
   let essStack = {
     esDealOne2,
-    esStackCutInProgress
+    esStackDragStart,
+    esStackDragCancel
   };
 
   const mapToI = (os, n) =>
@@ -66,13 +78,13 @@ export default function RSolitaire(esDrags, esDrops) {
           es.filter(_ => _.i === n));
 
   let pStacks = [
-    StackProperty(mapToI(essStack, 0), pHanging),
-    StackProperty(mapToI(essStack, 1), pHanging),
-    StackProperty(mapToI(essStack, 2), pHanging),
-    StackProperty(mapToI(essStack, 3), pHanging),
-    StackProperty(mapToI(essStack, 4), pHanging),
-    StackProperty(mapToI(essStack, 5), pHanging),
-    StackProperty(mapToI(essStack, 6), pHanging)
+    StackProperty(bHanging, mapToI(essStack, 0), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 1), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 2), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 3), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 4), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 5), pHanging),
+    StackProperty(bHanging, mapToI(essStack, 6), pHanging)
   ];
 
   this.pStackN = n => pStacks[n];
@@ -80,16 +92,80 @@ export default function RSolitaire(esDrags, esDrops) {
   this.pHanging = pHanging;
 
   pDrawer.log();
+  // pHanging.log();
+  // pDragDrop.log();
 }
 
+function DragDropProperty(bHanging, esDrags, esDrops) {
 
-function HangingStateProperty(esSetCards) {
-  let setCards = (_, cards) => {
-    return { ..._, ...cards };
+  let esDragStackStart = esDrags
+      .filter(_ => _.initial && isN(_.stackN))
+      .map(_ => ({
+        i: _.stackN,
+        ..._
+      }));
+
+  let esDragMove = esDrags
+      .filter(_ => !_.initial && !isN(_.stackN));
+
+  let esDropCancel = esDrops
+      .filter(_ => !isN(_.stackN));
+
+  const dragMove = (_, dragMove) => {
+    bHanging.push({ append: 
+                    { moving: dragMove }
+                  });
+
+    if (_.dragStackStart) {
+      return { dragMove: _.dragStackStart };
+    } else if (_.dragMove) {
+      return _;
+    } else {
+      return {};
+    }
+  };
+
+  const dragStackStart = (_, dragStackStart) => {
+
+    bHanging.push({ init: { drag: true, start: dragStackStart }});
+
+    return {
+      dragStackStart
+    };
+  };
+
+  const dropCancel = (_, __) => {
+    if (_.dragStackStart) {
+      return {
+        dragStackCancel: _.dragStackStart
+      };
+    } else if (_.dragMove) {
+      return {
+        dragStackCancel: _.dragMove
+      };
+    } else {
+      return {};
+    }
+  };
+
+  return Bacon.update
+  ({}, [esDragStackStart, dragStackStart],
+   [esDragMove, dragMove],
+   [esDropCancel, dropCancel]);
+  
+}
+
+function HangingStateProperty(esHInit, esHAppend) {
+  let init = (_, { init }) => {
+    return init;
+  };
+  let append = (_, { append }) => {
+    return { ..._, ...append };
   };
 
   return Bacon.update({},
-                      [esSetCards, setCards]);
+                      [esHInit, init],
+                      [esHAppend, append]);
 }
 
 
@@ -99,7 +175,9 @@ function DrawerProperty(bHanging, esInit, esDealOne1) {
     return _; };
   let dealOne1 = (_) => { 
     let card = _.dealOne1();
-    bHanging.push({ cards: [card] });
+    bHanging.push({ init: 
+                    { deal: true, 
+                      cards: [card] } });
 
     return _; };
 
@@ -108,13 +186,15 @@ function DrawerProperty(bHanging, esInit, esDealOne1) {
                       [esDealOne1, dealOne1]);
 }
 
-function StackProperty({
+function StackProperty(bHanging, {
   esDealOne2,
-  esStackCutInProgress},
+  esStackDragCancel,
+  esStackDragStart},
                        pHanging) {
 
-  let cutInProgress = (_, { cardN }) => {
-    _.cutInProgress(cardN);
+  let dragStart = (_, { cardN }) => {
+    let cards = _.cutInProgress(cardN);
+    bHanging.push({ append: { cards } });
     return _;
   };
 
@@ -129,7 +209,16 @@ function StackProperty({
     return _;
   };
 
+  let dragCancel = (_, __, hangingState) => {
+    bHanging.push({ init: { } });
+    let cards = hangingState.cards;
+    _.add1(cards);
+    _.cutInProgressCommit();
+    return _;
+  };
+
   return Bacon.update(new SoliStack(),
                       [esDealOne2, pHanging, dealOne2],
-                      [esStackCutInProgress, cutInProgress]);
+                      [esStackDragCancel, pHanging, dragCancel],
+                      [esStackDragStart, dragStart]);
 }
