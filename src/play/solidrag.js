@@ -11,7 +11,7 @@ export default function Play(play, ctx, bs) {
 
   let dDragStack = new CardStack(this, ctx, {
     onBeginCard() {
-      solitaire.userActionDoubleTapStack();
+      // solitaire.userActionDoubleTapStack();
     },
     ...bs
   });
@@ -22,71 +22,79 @@ export default function Play(play, ctx, bs) {
   };
   initContainer();
 
-  this.solitaire.bSelection.subscribe(({ cards }) => {
-    dDragStack.init({ stack: cards });
-    dDragStack.highlight(true);
-  });
+  
 
-  this.solitaire.aSelection.subscribe(({ active, epos, decay }) => {
-    if (!active) {
-      return;
-    }
-    dDragStack.container.move(epos[0] + decay[0],
-                              epos[1] + decay[1]);
-  });
+  // this.solitaire.bSelection.subscribe(({ cards }) => {
+  //   dDragStack.init({ stack: cards });
+  //   dDragStack.highlight(true);
+  // });
 
-  let settleSource,
-      settleTargetDiff;
-  let iSettle = new iPolPlus({
-    onBegin(oSettle) {
+  // this.solitaire.aSelection.subscribe(({ active, epos, decay }) => {
+  //   if (!active) {
+  //     return;
+  //   }
+  //   dDragStack.container.move(epos[0] + decay[0],
+  //                             epos[1] + decay[1]);
+  // });
 
-      let { drawN, stackN, holeN } = oSettle;
+  // let settleSource,
+  //     settleTargetDiff;
+  // let iSettle = new iPolPlus({
+  //   onBegin(oSettle) {
 
-      let settleTarget;
+  //     let { drawN, stackN, holeN } = oSettle;
 
-      settleSource = dDragStack.container.globalPosition();
+  //     let settleTarget;
 
-      if (isN(stackN)) {
-        let dStack = play.dStackN(stackN);
-        settleTarget = dStack.nextCardGlobalPosition();
-      } else if (isN(drawN)) {
-        settleTarget = play.dDraw.showGlobalPosition();
-      } else if (isN(holeN)) {
-        let dHole = play.dHoleN(holeN);
-        settleTarget = dHole.nextCardGlobalPosition();
-      }
+  //     settleSource = dDragStack.container.globalPosition();
 
-      settleTargetDiff = [settleTarget[0] - settleSource.x,
-                          settleTarget[1] - settleSource.y];
-    },
-    onUpdate(_, i) {
-      let vSettleTarget = v.cscale(settleTargetDiff, i);
-      dDragStack.container.move(settleSource.x + vSettleTarget[0],
-                                settleSource.y + vSettleTarget[1]);
-    }
-  });
+  //     if (isN(stackN)) {
+  //       let dStack = play.dStackN(stackN);
+  //       settleTarget = dStack.nextCardGlobalPosition();
+  //     } else if (isN(drawN)) {
+  //       settleTarget = play.dDraw.showGlobalPosition();
+  //     } else if (isN(holeN)) {
+  //       let dHole = play.dHoleN(holeN);
+  //       settleTarget = dHole.nextCardGlobalPosition();
+  //     }
 
-  this.solitaire.fx('settle').subscribe({
-    onBegin(oSettle, resolve) {
-      iSettle.begin(oSettle, resolve);
-    },
-    onEnd() {
-      dDragStack.init({ stack: [] });
-    }
-  });
+  //     settleTargetDiff = [settleTarget[0] - settleSource.x,
+  //                         settleTarget[1] - settleSource.y];
+  //   },
+  //   onUpdate(_, i) {
+  //     let vSettleTarget = v.cscale(settleTargetDiff, i);
+  //     dDragStack.container.move(settleSource.x + vSettleTarget[0],
+  //                               settleSource.y + vSettleTarget[1]);
+  //   }
+  // });
+
+  // this.solitaire.fx('settle').subscribe({
+  //   onBegin(oSettle, resolve) {
+  //     iSettle.begin(oSettle, resolve);
+  //   },
+  //   onEnd() {
+  //     dDragStack.init({ stack: [] });
+  //   }
+  // });
 
 
   this.init = (data) => {
-    
+    listenSolitaire();
   };
   
 
   this.update = delta => {
-    iSettle.update(delta / 200);
+    // iSettle.update(delta / 200);
     this.container.update(delta);
   };
 
   this.render = () => {
     this.container.render();
+  };
+
+  const listenSolitaire = () => {
+    
+    // this.rsolitaire().
+
   };
 }

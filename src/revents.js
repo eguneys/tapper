@@ -42,9 +42,9 @@ export default function Revents (canvas) {
   }));
 
   let drags = starts.flatMap(startE => {
-    return moves
+    let eRes = moves
       .skipWhile(moveE => {
-        let { start } = startE;
+          let { start } = startE;
         let { epos } = moveE;
 
         let dist = v.distance(start, epos);
@@ -60,6 +60,10 @@ export default function Revents (canvas) {
           ...startE,
           ...moveE };
       });
+
+    return eRes.take(1)
+      .map(_ => ({ initial: true, ..._ }))
+      .merge(eRes.skip(1));
   });
 
   let drops = starts.flatMap(startE => {
