@@ -103,9 +103,21 @@ export default function SolitaireView(play, ctx, pbs) {
   this.dDrawN = dDraw.dDrawN;
   this.dDraw = dDraw;
 
-  let userDragsStacks = dStacks.drags;
-  
-  rsolitaire = new RSolitaire(userDragsStacks);
+  const { revents } = ctx;
+
+  const fid = _ => _;
+
+  let eDrops = revents.when(
+    [dStacks.drops, revents.drops, fid],
+    [revents.drops, fid]
+  );
+
+  let eDrags = revents.when(
+    [dStacks.drags, revents.drags, fid],
+    [revents.drags, fid]
+  );
+
+  rsolitaire = new RSolitaire(eDrags, eDrops);
 
   let container = this.container = new AContainer();
   const initContainer = () => {

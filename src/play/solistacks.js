@@ -68,25 +68,10 @@ export default function SoliStacks(play, ctx, bs) {
   const { revents } = ctx;
 
   this.drags = dStacks.map(_ => _.drags)
-    .reduce((acc, _) => acc.merge(_), 
-            revents.never);
+    .reduce((acc, _) => acc.merge(_));
   this.drops = dStacks.map(_ => _.drops)
-    .reduce((acc, _) => acc.merge(_), 
-            revents.never);
+    .reduce((acc, _) => acc.merge(_));
 
-  this.dragStackToStack = revents.update(
-    {},
-    [this.drags, (acc, dragE) => {
-      return {
-        drag: dragE
-      };
-    }],
-    [this.drops, (acc, dropE) => {
-      return {
-        ...acc,
-        drop: dropE
-      };
-    }]).filter(_ => _.drag && _.drop);
 
 }
 
@@ -175,6 +160,7 @@ function SoliStack(play, ctx, bs) {
   };
 
   const insertN = _ => ({ ..._, stackN: n });
+
   this.clicks = dFronts.clicks.map(insertN);
   this.drags = dFronts.drags.map(insertN);
   this.drops = dFronts.drops.map(insertN);

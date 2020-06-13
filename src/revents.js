@@ -55,7 +55,6 @@ export default function Revents (canvas) {
       .map(moveE => {
         let dpos = v.csub(moveE.epos, startE.start);
         return {
-          drags: true,
           dpos,
           ...startE,
           ...moveE };
@@ -67,8 +66,7 @@ export default function Revents (canvas) {
   });
 
   let drops = starts.flatMap(startE => {
-    return ends.first().map(endE => ({ drops: true, 
-                                       ...startE,
+    return ends.first().map(endE => ({ ...startE,
                                        ...endE }));
   });
 

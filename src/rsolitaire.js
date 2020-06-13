@@ -6,7 +6,7 @@ import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
 
 import RSoliDealer from './rsolidealer';
 
-export default function RSolitaire(esUserDragsStack) {
+export default function RSolitaire(esDrags, esDrops) {
 
   let deck = makeOneDeck();
 
@@ -43,12 +43,10 @@ export default function RSolitaire(esUserDragsStack) {
   let esDealOne1 = esDealOne.filter(_ => _.dealOne);
   let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
 
-  let esDragStackInitial = esUserDragsStack
-      .filter(_ => _.initial)
-      .map(_ => ({ i: _.stackN,
-                   cardN: _.cardN }));
 
-  let esStackCutInProgress = esDragStackInitial;
+  
+
+  let esStackCutInProgress = Bacon.never();
 
   let bHanging = new Bacon.Bus();
 
