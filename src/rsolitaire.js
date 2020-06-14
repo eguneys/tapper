@@ -30,22 +30,40 @@ export default function RSolitaire(esDrags, esDrops) {
 
   let esDealOne = esDealCards.flatMapConcat(_ => 
     Bacon.once({ dealOne: true, ..._ })
-      .concat(
-        prependWithFx({ dealOne2: true, ..._ },
-                      'dealOne'))
+      .concat(makeEsTween()
+              .map(_ => ({ dealTween: true, i : _ })))
+      .concat(Bacon.once({ dealOne2: true, ..._ }))
   );
 
   let esDealOne1 = esDealOne.filter(_ => _.dealOne);
   let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
 
-  let _bHanging = new HangingBus();
+  // let esDealOne = esDealCards.flatMapConcat(_ => 
+  //   Bacon.once({ dealOne: true, ..._ })
+  //     .concat(
+  //       prependWithFx({ dealOne2: true, ..._ },
+  //                     'dealOne'))
+  // );
 
-  let esHUpdate = _bHanging.b.filter(_ => _.update);
-  let esHRemove = _bHanging.b.filter(_ => _.remove);
+  // let esDealOne1 = esDealOne.filter(_ => _.dealOne);
+  // let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
 
-  let pHanging = HangingStateProperty(esHUpdate, esHRemove);
+  // let _bHanging = new HangingBus();
 
-  let pDragDrop = DragDropProperty(_bHanging, esDrags, esDrops);
+  // let esHUpdate = _bHanging.b.filter(_ => _.update);
+  // let esHRemove = _bHanging.b.filter(_ => _.remove);
+
+  // let pHanging = HangingStateProperty(esHUpdate, esHRemove);
+
+  let pDrawer = DrawerProperty(esInit, esDealOne1, esDealOne2);
+
+  let esDealOne2WithCards = 
+      esDealOne2.zip(pDrawer
+                     .filter(withExtra('dealcards'))
+                     .map(withExtra('dealcards')),
+                     (_, cards) => ({ cards, ..._ }));
+
+  let pDragDrop = DragDropProperty(esDrags, esDrops);
 
   const withI = (obj, pullI) => ({
     i: pullI(obj),
@@ -53,36 +71,54 @@ export default function RSolitaire(esDrags, esDrops) {
   });
 
   let esDragStackStart = pDragDrop
+      .map(_ => _.base)
       .flatMap(_ => _.dragStackStart?
                withI(_.dragStackStart,
                      _ => _.stackN)
                :Bacon.never())
       .toEventStream();
 
-  const prependSettleFx = (stackN, prepend) =>
-        initPrependWithFx('settle', {
-          oSettle: { stackN }
-        }, prepend, 100);
+  // const prependSettleFx = (stackN, prepend) =>
+  //       initPrependWithFx('settle', {
+  //         oSettle: { stackN }
+  //       }, prepend, 100);
+
+  // let esDragStackCancel = pDragDrop
+  //     .flatMap(_ => {
+  //       return _.dragStackCancel?
+  //         prependSettleFx(_.dragStackCancel.stackN,
+  //                       withI(_.dragStackCancel, 
+  //                             _ => _.stackN)):
+  //       Bacon.never();
+  //     })
+  //     .toEventStream();
+
+  // let esDragStackDropStack = pDragDrop
+  //     .flatMap(_ => {
+  //       return _.dragStackDropStack?
+  //         prependSettleFx(
+  //           _.dragStackDropStack.drop.stackN,
+  //           withI(_.dragStackDropStack, 
+  //                 _ => _.drop.stackN)):
+  //         Bacon.never();
+  //     }).toEventStream();
+
 
   let esDragStackCancel = pDragDrop
-      .flatMap(_ => {
-        return _.dragStackCancel?
-          prependSettleFx(_.dragStackCancel.stackN,
-                        withI(_.dragStackCancel, 
-                              _ => _.stackN)):
-        Bacon.never();
-      })
-      .toEventStream();
+      .map(_ => _.base)
+      .filter(_ => _.dragStackCancel)
+      .map(_ => _.dragStackCancel)
+      .flatMap(
+        _ => withI(_, _ => _.stackN)
 
-  let esDragStackDropStack = pDragDrop
-      .flatMap(_ => {
-        return _.dragStackDropStack?
-          prependSettleFx(
-            _.dragStackDropStack.drop.stackN,
-            withI(_.dragStackDropStack, 
-                  _ => _.drop.stackN)):
-          Bacon.never();
-      }).toEventStream();
+      ).toEventStream();
+
+  let esDragStackCancelWithCards =
+      Bacon.when(
+        [esDragStackCancel, akdlj, fMergeArgs],
+        [esDragStackCancel, fId]);
+
+  let esDragStackDropStack = Bacon.never();
 
   let esStackDragStart = esDragStackStart;
   let esStackDragCancel = esDragStackCancel;
@@ -91,9 +127,7 @@ export default function RSolitaire(esDrags, esDrops) {
   let esStackReveal = esStackDropStack
       .map(_ => withI(_.drag, _ => _.stackN));
 
-  let esStackRevealFxBegin = pHanging
-      .filter(_ => _.reveal)
-      .map(_ => _.reveal);
+  let esStackRevealFxBegin = Bacon.never();
 
   let esStackReveal2 = esStackRevealFxBegin.flatMap(_ => {
     return initPrependWithFx('reveal', {
@@ -117,10 +151,9 @@ export default function RSolitaire(esDrags, esDrops) {
     reveal: fxProperty('reveal')
   };
   
-  let pDrawer = DrawerProperty(_bHanging, esInit, esDealOne1);
 
   let essStack = {
-    esDealOne2,
+    esDealOne2: esDealOne2WithCards,
     esStackDragStart,
     esStackDragCancel,
     esStackDropStack,
@@ -133,7 +166,7 @@ export default function RSolitaire(esDrags, esDrops) {
           es.filter(_ => _.i === n));
 
   const stackProperty = n => 
-        StackProperty(n, _bHanging, mapToI(essStack, n), pHanging);
+        StackProperty(n, mapToI(essStack, n));
 
   let pStacks = [
     stackProperty(0),
@@ -145,9 +178,26 @@ export default function RSolitaire(esDrags, esDrops) {
     stackProperty(6),
   ];
 
-  this.pStackN = n => pStacks[n];
+  let esDragCards = pStacks.map(pStack =>
+    pStack
+      .map(_ => _.extra)
+      .filter(_ => _.dragcards)
+      .toEventStream()
+  ).reduce((acc, _) => acc.merge(_));
+
+  let esDragLive = pDragDrop.map(_ => _.extra)
+      .toEventStream();
+
+  const fId = _ => _;
+  const fMergeArgs = (_, __) => ({ ..._, ...__ });
+
+  esDragLive = Bacon.when([esDragLive, esDragCards, fMergeArgs],
+                         [esDragLive, _ => _]);
+
+
+  this.pStackN = n => pStacks[n].map(_ => _.base);
   this.pDrawer = pDrawer;
-  this.pHanging = pHanging;
+  this.esDragLive = esDragLive;
 
   this.pFx = name => pFx[name];
 
@@ -160,80 +210,106 @@ export default function RSolitaire(esDrags, esDrops) {
   // }).take(0).log();
 }
 
-function StackProperty(n, _bHanging, {
+function StackProperty(n, {
   esDealOne2,
   esStackDragCancel,
   esStackDragStart,
   esStackDropStack,
   esStackReveal,
   esStackReveal2
-},
-                       pHanging) {
+}) {
 
   let dragStart = (_, { cardN }) => {
-    let cards = _.cutInProgress(cardN);
-    _bHanging.update('dragcards', cards);
+    let cards = _.apply(_ => _.cutInProgress(cardN));
+    _.add('dragcards', cards);
     return _;
   };
 
-  let dealOne2 = (_, { i, hidden }, hangingState) => {
-    let { cards } = hangingState.deal;
+  let dealOne2 = (_, { hidden, cards }) => {
     if (hidden) {
-      _.hide1(cards);
+      _.apply(_ => _.hide1(cards));
     } else {
-      _.add1(cards);
+      _.apply(_ => _.add1(cards));
     }
-    console.log('resmove');
-    _bHanging.remove('deal');
     return _;
   };
 
-  let dragCancel = (_, __, hangingState) => {
-    let cards = hangingState.dragcards;
-    _.add1(cards);
-    _.cutInProgressCommit();
-    _bHanging.remove('dragcards');
+  let dragCancel = (_, __) => {
+    console.log(__);
+    // let cards = hangingState.dragcards;
+    // _.add1(cards);
+    // _.cutInProgressCommit();
+    // _bHanging.remove('dragcards');
     return _;
   };
 
   let dropStack = (_, __, hangingState) => {
-    let cards = hangingState.dragcards;
-    _.add1(cards);
-    _.cutInProgressCommit();
-    _bHanging.remove('dragcards');
+    // let cards = hangingState.dragcards;
+    // _.add1(cards);
+    // _.cutInProgressCommit();
+    // _bHanging.remove('dragcards');
     return _;
   };
 
   let reveal1 = (_) => {
-    if (!_.canReveal()) {
+    if (!_.apply(_.canReveal())) {
       return _;
     }
-    let card = _.reveal1();
-    _bHanging.update('reveal', {
-      stackN: n,
-      card
-    });
+    let card = _.apply(_.reveal1());
+    // _bHanging.update('reveal', {
+    //   stackN: n,
+    //   card
+    // });
     return _;
   };
 
   let reveal2 = (_, __, hangingState) => {
-    let { card } = hangingState.reveal;
-
-    _bHanging.remove('reveal');
-    _.add1([card]);
+    // let { card } = hangingState.reveal;
+    // _bHanging.remove('reveal');
+    // _.add1([card]);
     return _;
   };
 
-  return Bacon.update(new SoliStack(),
-                      [esDealOne2, pHanging, dealOne2],
-                      [esStackDragCancel, pHanging, dragCancel],
-                      [esStackDropStack, pHanging, dropStack],
+  return Bacon.update(new ExtraValues(new SoliStack()),
+                      [esDealOne2, dealOne2],
+                      [esStackDragCancel, dragCancel],
+                      [esStackDropStack, dropStack],
                       [esStackReveal, reveal1],
-                      [esStackReveal2, pHanging, reveal2],
+                      [esStackReveal2, reveal2],
                       [esStackDragStart, dragStart]);
 }
 
-function DragDropProperty(_bHanging, esDrags, esDrops) {
+function DrawerProperty(esInit,
+                        esDealOne1,
+                        esDealOne2) {
+  let init = (_, cards) => {
+
+    _.apply(_ => _.init(cards));
+
+    return _; };
+  let dealOne1 = (_) => { 
+    _.applyExtra('dealcards',
+                 _ => [_.dealOne1()]);
+
+    // _bHanging.update('deal',
+    //                  { cards: [card] });
+
+    return _; };
+
+  let dealOne2 = _ => {
+    _.remove('dealcards');
+    return _;
+  };
+
+  return Bacon.update(new ExtraValues(
+    new SoliDrawDeck()
+  ),
+                      [esInit, init],
+                      [esDealOne2, dealOne2],
+                      [esDealOne1, dealOne1]);
+}
+
+function DragDropProperty(esDrags, esDrops) {
 
   let esDragStackStart = esDrags
       .filter(_ => _.initial && isN(_.stackN));
@@ -248,83 +324,94 @@ function DragDropProperty(_bHanging, esDrags, esDrops) {
       .filter(_ => isN(_.stackN));
 
   const dragMove = (_, dragMove) => {
-    _bHanging.update('moving', dragMove);
+    // _bHanging.update('moving', dragMove);
+    _.add('moving', dragMove);
 
-    if (_.dragStackStart) {
-      return { dragMove: _.dragStackStart };
-    } else if (_.dragMove) {
-      return _;
+    let dragStackStart = _.apply(_ => _.dragStackStart);
+
+    if (dragStackStart) {
+      _.set({ dragMove: dragStackStart }); 
+    } else if (_.apply(_ => _.dragMove)) {
     } else {
-      return {};
+      _.set({});
     }
+    return _;
   };
 
   const dragStackStart = (_, dragStackStart) => {
+    // _bHanging.update('dragstart', dragStackStart);
+    _.add('dragstart', dragStackStart);
 
-    _bHanging.update('dragstart', dragStackStart);
 
-    return {
+    _.set({
       dragStackStart
-    };
+    });
+
+    return _;
   };
 
-  const dropBase = () => {
-    _bHanging.remove('dragstart');
-    _bHanging.remove('moving');
+  const dropBase = _ => {
+    _.remove('dragstart');
+    _.remove('moving');
+    // _bHanging.remove('dragstart');
+    // _bHanging.remove('moving');
   };
 
   const dropCancel = (_, __) => {
-    dropBase();
-    if (_.dragStackStart) {
-      return {
-        dragStackCancel: _.dragStackStart
-      };
-    } else if (_.dragMove) {
-      return {
-        dragStackCancel: _.dragMove
-      };
+    dropBase(_);
+    let dragStackMove = _.apply(_ =>
+      _.dragStackStart || _.dragMove);
+
+    if (dragStackMove) {
+      _.set({
+        dragStackCancel: dragStackMove
+      });
     } else {
-      return {};
+      _.set({});
     }
+    return _;
   };
 
   const dropStack = (_, esDrop) => {
-    dropBase();
-    let dragStackMove = _.dragStackStart || _.dragMove;
+    dropBase(_);
+    let dragStackMove = _.apply(_ => 
+      _.dragStackStart || _.dragMove);
+
     if (dragStackMove) {
-      return {
+      _.set({
         dragStackDropStack: { drag: dragStackMove,
                               drop: esDrop }
-      };
+      });
     } else {
-      return {};
+      _.set({});
     }
+    return _;
   };
 
   return Bacon.update
-  ({}, [esDragStackStart, dragStackStart],
+  (new ExtraValues({}), [esDragStackStart, dragStackStart],
    [esDragMove, dragMove],
    [esDropCancel, dropCancel],
    [esDropStack, dropStack]);
   
 }
 
-function DrawerProperty(_bHanging, esInit, esDealOne1) {
-  let init = (_, cards) => {
-    _.init(cards);
-    return _; };
-  let dealOne1 = (_) => { 
-    let card = _.dealOne1();
-    console.log('add');
-    _bHanging.update('deal',
-                     { cards: [card] });
+const withExtra = key => _ => _.extra[key];
 
-    return _; };
+function ExtraValues(base) {
 
-  return Bacon.update(new SoliDrawDeck(),
-                      [esInit, init],
-                      [esDealOne1, dealOne1]);
-}
+  let extra = this.extra = {};
+  
+  this.base = base;
+
+  this.set = value => base = this.base = value;
+  this.apply = fn => fn(base);
+  this.applyExtra = (key, fn) => this.add(key, fn(base));
+
+  this.add = (key, value) => extra[key] = value;
+  this.remove = key => delete extra[key];
+
+};
 
 function HangingStateProperty(esHUpdate, esHRemove) {
   let update = (_, { update }) => {
@@ -345,14 +432,14 @@ function HangingStateProperty(esHUpdate, esHRemove) {
     
 }
 
-function HangingBus() {
+// function HangingBus() {
 
-  this.b = new Bacon.Bus();
+//   this.b = new Bacon.Bus();
 
-  this.update = (key, value) => {
-    this.b.push({ update: { key, value } });
-  };
-  this.remove = (key) => {
-    this.b.push({ remove: key });
-  };
-};
+//   this.update = (key, value) => {
+//     this.b.push({ update: { key, value } });
+//   };
+//   this.remove = (key) => {
+//     this.b.push({ remove: key });
+//   };
+// };

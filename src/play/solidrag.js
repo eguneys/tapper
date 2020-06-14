@@ -106,7 +106,7 @@ export default function Play(play, ctx, bs) {
 
     });
 
-    rsolitaire().pHanging.onValue(hanging => {
+    rsolitaire().esDragLive.onValue(hanging => {
       let { dragstart, dragcards, moving } = hanging;
 
       if (dragstart && !moving && dragcards) {
