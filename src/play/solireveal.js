@@ -87,15 +87,14 @@ export default function Play(play, ctx, bs) {
   };
 
   const listenSolitaire = () => {
-    play.rsolitaire().pFx('reveal').onValue(reveal => {
-      let { i, oReveal } = reveal;
+    play.rsolitaire().esTweens['reveal'].onValue(reveal => {
 
-      if (oReveal && isUndefined(i)) {
-        beginReveal(oReveal);
-      } else if (!isUndefined(i)) {
-        updateReveal(i);
-      } else {
+      if (reveal.initial) {
+        beginReveal(reveal);
+      } else if (reveal.end) {
         endReveal();
+      } else {
+        updateReveal(reveal.i);
       }
     });
   };

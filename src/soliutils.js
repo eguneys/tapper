@@ -1,3 +1,5 @@
+export const stackPlate = [0, 1, 2, 3, 4, 5, 6];
+
 export const isUndefined = n => n === undefined;
 
 export const isN = n => (n || n === 0) && !(n < 0);

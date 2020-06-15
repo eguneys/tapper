@@ -5,9 +5,13 @@ import FxBus from './rfxbus';
 import { makeEsTween } from './rtween';
 
 import { makeOneDeck } from './deck';
-import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
+import { isN, stackPlate, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
 
 import RSoliDealer from './rsolidealer';
+
+const fId = _ => _;
+const fMergeArgs = (_, __) => ({ ..._, ...__ });
+const fMergeStreams = (acc, _) => acc.merge(_);
 
 export default function RSolitaire(esDrags, esDrops) {
 
@@ -38,23 +42,6 @@ export default function RSolitaire(esDrags, esDrops) {
   let esDealOne1 = esDealOne.filter(_ => _.dealOne);
   let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
 
-  // let esDealOne = esDealCards.flatMapConcat(_ => 
-  //   Bacon.once({ dealOne: true, ..._ })
-  //     .concat(
-  //       prependWithFx({ dealOne2: true, ..._ },
-  //                     'dealOne'))
-  // );
-
-  // let esDealOne1 = esDealOne.filter(_ => _.dealOne);
-  // let esDealOne2 = esDealOne.filter(_ => _.dealOne2);
-
-  // let _bHanging = new HangingBus();
-
-  // let esHUpdate = _bHanging.b.filter(_ => _.update);
-  // let esHRemove = _bHanging.b.filter(_ => _.remove);
-
-  // let pHanging = HangingStateProperty(esHUpdate, esHRemove);
-
   let pDrawer = DrawerProperty(esInit, esDealOne1, esDealOne2);
 
   let esDealOne2WithCards = 
@@ -78,21 +65,6 @@ export default function RSolitaire(esDrags, esDrops) {
                :Bacon.never())
       .toEventStream();
 
-  // const prependSettleFx = (stackN, prepend) =>
-  //       initPrependWithFx('settle', {
-  //         oSettle: { stackN }
-  //       }, prepend, 100);
-
-  // let esDragStackCancel = pDragDrop
-  //     .flatMap(_ => {
-  //       return _.dragStackCancel?
-  //         prependSettleFx(_.dragStackCancel.stackN,
-  //                       withI(_.dragStackCancel, 
-  //                             _ => _.stackN)):
-  //       Bacon.never();
-  //     })
-  //     .toEventStream();
-
   // let esDragStackDropStack = pDragDrop
   //     .flatMap(_ => {
   //       return _.dragStackDropStack?
@@ -103,53 +75,142 @@ export default function RSolitaire(esDrags, esDrops) {
   //         Bacon.never();
   //     }).toEventStream();
 
+  let bStacks = stackPlate.map(_ => new SyncBus());
 
-  let esDragStackCancel = pDragDrop
+  const makeFxTween = (value, duration) => {
+    return Bacon.once({ tween: {
+      initial: true,
+      ...value } })
+      .concat(makeEsTween(duration)
+              .map(_ => ({ tween: {
+                i: _ }})))
+      .concat(Bacon.once({ tween: {
+        end: true
+      }}));
+  };
+
+
+  let esDragCardsEarly = bStacks.map(bStack =>
+    bStack
+      .bus
+      .map(_ => _.extra)
+      .filter(_ => _.dragcards)
+      .map(_ => ({ dragcards: _.dragcards }))
+      .toEventStream()
+  ).reduce(fMergeStreams)
+      .toProperty();
+
+  let esTDragStackCancel = pDragDrop
       .map(_ => _.base)
       .filter(_ => _.dragStackCancel)
       .map(_ => _.dragStackCancel)
-      .flatMap(
-        _ => withI(_, _ => _.stackN)
-
+      .flatMap(_ =>
+        makeFxTween({ stackN: _.stackN }, 100)
+          .concat(
+            Bacon.once({ action: withI(_, _ => _.stackN) }))
       ).toEventStream();
+
+  let esDragStackCancelSettleTween = esTDragStackCancel
+      .filter(_ => _.tween)
+      .map(_ => _.tween);
+
+  let esDragStackCancel = esTDragStackCancel
+      .filter(_ => _.action)
+      .map(_ => _.action);
 
   let esDragStackCancelWithCards =
       Bacon.when(
-        [esDragStackCancel, akdlj, fMergeArgs],
-        [esDragStackCancel, fId]);
+        [esDragStackCancel, esDragCardsEarly, fMergeArgs]);
 
-  let esDragStackDropStack = Bacon.never();
+  let esTDragStackDropStack = pDragDrop
+      .map(_ => _.base)
+      .filter(_ => _.dragStackDropStack)
+      .map(_ => _.dragStackDropStack)
+      .flatMap(_ => 
+        makeFxTween({ stackN: _.drop.stackN }, 100)
+          .concat(
+            Bacon.once({ action: withI(_, _ => _.drop.stackN) }))
+      ).toEventStream();
+
+  let esDragStackDropStackSettleTween = esTDragStackDropStack
+      .filter(_ => _.tween)
+      .map(_ => _.tween);
+
+
+  let esDragStackDropStack = esTDragStackDropStack
+      .filter(_ => _.action)
+      .map(_ => _.action);
+
+  let esDragStackDropStackWithCards =
+      Bacon.when([esDragStackDropStack, esDragCardsEarly, fMergeArgs]);
 
   let esStackDragStart = esDragStackStart;
-  let esStackDragCancel = esDragStackCancel;
-  let esStackDropStack = esDragStackDropStack;
+  let esStackDragCancel = esDragStackCancelWithCards;
+  let esStackDropStack = esDragStackDropStackWithCards;
 
   let esStackReveal = esStackDropStack
       .map(_ => withI(_.drag, _ => _.stackN));
 
-  let esStackRevealFxBegin = Bacon.never();
+  let esExtraRevealEarly = bStacks.map(bStack =>
+    bStack
+      .bus
+      .map(_ => _.extra)
+      .filter(_ => _.reveal)
+      .map(_ => _.reveal)
+      .toEventStream()
+  ).reduce(fMergeStreams)
+      .toProperty();
 
-  let esStackReveal2 = esStackRevealFxBegin.flatMap(_ => {
-    return initPrependWithFx('reveal', {
-      oReveal: _
-    }, withI(_, _ => _.stackN), 200);
-  }).toEventStream();
+  let esTRevealStack2 = esExtraRevealEarly
+      .flatMap(_ => 
+        makeFxTween(_, 200)
+          .concat(
+            Bacon.once({ action: withI(_, _ => _.stackN) }))
+      ).toEventStream();
 
-  const fxProperty = name => {
-    let esFxUpdate = bFx.filter(_ => _.update);
-    let esFxRemove = bFx.filter(_ => _.remove);
-    const filterName = (es, name) => es
-          .filter(_ => _.name === name);
+  let esRevealStack2 = esTRevealStack2
+      .filter(_ => _.action)
+      .map(_ => _.action);
 
-    return HangingStateProperty(filterName(esFxUpdate, name),
-                                filterName(esFxRemove, name));
+  let esRevealStackTween = esTRevealStack2
+      .filter(_ => _.tween)
+      .map(_ => _.tween);
+
+  let esStackReveal2 = esRevealStack2;
+
+  // let esStackRevealFxBegin = Bacon.never();
+  // let esStackReveal2 = esStackRevealFxBegin.flatMap(_ => {
+  //   return initPrependWithFx('reveal', {
+  //     oReveal: _
+  //   }, withI(_, _ => _.stackN), 200);
+  // }).toEventStream();
+
+  let esTweenSettle = [esDragStackCancelSettleTween,
+                       esDragStackDropStackSettleTween]
+      .reduce(fMergeStreams);
+
+  let esTweenReveal = esRevealStackTween;
+
+  this.esTweens = {
+    'settle': esTweenSettle,
+    'reveal': esTweenReveal
   };
 
-  let pFx = {
-    dealOne: fxProperty('dealOne'),
-    settle: fxProperty('settle'),
-    reveal: fxProperty('reveal')
-  };
+  // const fxProperty = name => {
+  //   let esFxUpdate = bFx.filter(_ => _.update);
+  //   let esFxRemove = bFx.filter(_ => _.remove);
+  //   const filterName = (es, name) => es
+  //         .filter(_ => _.name === name);
+
+  //   return HangingStateProperty(filterName(esFxUpdate, name),
+  //                               filterName(esFxRemove, name));
+  // };
+
+  // let pFx = {
+  //   dealOne: fxProperty('dealOne'),
+  //   settle: fxProperty('settle'),
+  //   reveal: fxProperty('reveal')
+  // };
   
 
   let essStack = {
@@ -168,38 +229,32 @@ export default function RSolitaire(esDrags, esDrops) {
   const stackProperty = n => 
         StackProperty(n, mapToI(essStack, n));
 
-  let pStacks = [
-    stackProperty(0),
-    stackProperty(1),
-    stackProperty(2),
-    stackProperty(3),
-    stackProperty(4),
-    stackProperty(5),
-    stackProperty(6),
-  ];
+  let pStacks = stackPlate.map(_ => stackProperty(_));
+
+  pStacks.map((_, i) => bStacks[i].assign(_));
+
+    
 
   let esDragCards = pStacks.map(pStack =>
     pStack
       .map(_ => _.extra)
       .filter(_ => _.dragcards)
       .toEventStream()
-  ).reduce((acc, _) => acc.merge(_));
+  ).reduce(fMergeStreams)
+      .toProperty();
 
   let esDragLive = pDragDrop.map(_ => _.extra)
       .toEventStream();
 
-  const fId = _ => _;
-  const fMergeArgs = (_, __) => ({ ..._, ...__ });
-
-  esDragLive = Bacon.when([esDragLive, esDragCards, fMergeArgs],
-                         [esDragLive, _ => _]);
-
+  esDragLive = Bacon.when([esDragLive, 
+                           esDragCards,
+                           fMergeArgs]);
 
   this.pStackN = n => pStacks[n].map(_ => _.base);
   this.pDrawer = pDrawer;
   this.esDragLive = esDragLive;
 
-  this.pFx = name => pFx[name];
+  // this.pFx = name => pFx[name];
 
   pDrawer.onValue();
   // pHanging.log();
@@ -234,39 +289,42 @@ function StackProperty(n, {
     return _;
   };
 
-  let dragCancel = (_, __) => {
-    console.log(__);
-    // let cards = hangingState.dragcards;
-    // _.add1(cards);
-    // _.cutInProgressCommit();
-    // _bHanging.remove('dragcards');
+  let dragCancel = (_, { dragcards }) => {
+    let cards = dragcards;
+    _.apply(_ => {
+      _.add1(cards);
+      _.cutInProgressCommit();
+    });
+    _.remove('dragcards');
     return _;
   };
 
-  let dropStack = (_, __, hangingState) => {
-    // let cards = hangingState.dragcards;
-    // _.add1(cards);
-    // _.cutInProgressCommit();
-    // _bHanging.remove('dragcards');
+  let dropStack = (_, { dragcards }) => {
+    let cards = dragcards;
+    _.apply(_ => {
+      _.add1(cards);
+    });
+    _.remove('dragcards');
     return _;
   };
 
   let reveal1 = (_) => {
-    if (!_.apply(_.canReveal())) {
+    _.apply(_ => _.cutInProgressCommit());
+
+    if (!_.apply(_ => _.canReveal())) {
       return _;
     }
-    let card = _.apply(_.reveal1());
-    // _bHanging.update('reveal', {
-    //   stackN: n,
-    //   card
-    // });
+    let card = _.apply(_ => _.reveal1());
+    _.add('reveal', { stackN: n, card });
     return _;
   };
 
-  let reveal2 = (_, __, hangingState) => {
-    // let { card } = hangingState.reveal;
-    // _bHanging.remove('reveal');
-    // _.add1([card]);
+  let reveal2 = (_, reveal) => {
+    let { card } = reveal;
+    _.remove('reveal');
+    _.apply(_ => {
+      _.add1([card]);
+    });
     return _;
   };
 
@@ -290,9 +348,6 @@ function DrawerProperty(esInit,
   let dealOne1 = (_) => { 
     _.applyExtra('dealcards',
                  _ => [_.dealOne1()]);
-
-    // _bHanging.update('deal',
-    //                  { cards: [card] });
 
     return _; };
 
@@ -324,7 +379,6 @@ function DragDropProperty(esDrags, esDrops) {
       .filter(_ => isN(_.stackN));
 
   const dragMove = (_, dragMove) => {
-    // _bHanging.update('moving', dragMove);
     _.add('moving', dragMove);
 
     let dragStackStart = _.apply(_ => _.dragStackStart);
@@ -339,7 +393,6 @@ function DragDropProperty(esDrags, esDrops) {
   };
 
   const dragStackStart = (_, dragStackStart) => {
-    // _bHanging.update('dragstart', dragStackStart);
     _.add('dragstart', dragStackStart);
 
 
@@ -353,8 +406,6 @@ function DragDropProperty(esDrags, esDrops) {
   const dropBase = _ => {
     _.remove('dragstart');
     _.remove('moving');
-    // _bHanging.remove('dragstart');
-    // _bHanging.remove('moving');
   };
 
   const dropCancel = (_, __) => {
@@ -430,6 +481,14 @@ function HangingStateProperty(esHUpdate, esHRemove) {
   return Bacon.update({}, [esHUpdate, update],
                       [esHRemove, remove]);
     
+}
+
+function SyncBus() {
+  let bus = this.bus = new Bacon.Bus();
+
+  this.assign = pBase => {
+    pBase.onValue(_ => bus.push(_));
+  };
 }
 
 // function HangingBus() {

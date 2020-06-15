@@ -51,6 +51,7 @@ export default function Play(play, ctx, bs) {
     if (i < 0.5) {
       dFront.container.scale(1.0-i*2, 1);
     } else {
+      dFront.scale(0);
       dBack.container.scale(i * 2.0 - 1.0, 1);
     }    
   };
@@ -59,6 +60,7 @@ export default function Play(play, ctx, bs) {
     if (i < 0.5) {
       dBack.container.scale(1.0-i*2, 1);
     } else {
+      dBack.container.scale(0, 1);
       dFront.container.scale(i * 2.0 - 1.0, 1);
     }
   };

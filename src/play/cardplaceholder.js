@@ -4,7 +4,7 @@ import { moveHandler, hitTest } from './util';
 
 export default function Play(play, ctx, bs) {
 
-  const { events } = ctx;
+  const { revents, events } = ctx;
 
   let { onBeginCard, onEndCard } = bs;
 
@@ -63,4 +63,35 @@ export default function Play(play, ctx, bs) {
   this.render = () => {
     this.container.render();
   };
+
+  const getHitCardWithDecay = pos => {
+
+    let b = container.bounds();
+    
+    if (hitTest(...pos, hitBounds)) {
+      
+      let decay = [-pos[0] + b.x,
+                   -pos[1] + b.y];
+
+      return {
+        decay
+      };
+    }
+    return null;
+  };
+
+  const inCardHitBounds = dragE => {
+    let pos =  dragE.epos;
+    let hD = getHitCardWithDecay(pos);
+    if (hD) {
+      return revents.once({
+        decay: hD.decay,
+        ...dragE
+      });
+    }
+    return revents.never;
+  };
+
+  this.drops = revents.drops
+    .flatMap(inCardHitBounds);
 }

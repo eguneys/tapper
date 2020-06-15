@@ -88,20 +88,14 @@ export default function Play(play, ctx, bs) {
 
   const listenSolitaire = () => {
     
-    rsolitaire().pFx('settle').onValue(_settle => {
-      let { settle } = _settle;
+    rsolitaire().esTweens['settle'].onValue(settle => {
 
-      if (!settle) {
+      if (settle.initial) {
+        beginSettle(settle);
+      } else if (settle.end) {
         endSettle();
-        return;
-      }
-
-      let { i, oSettle } = settle;
-
-      if (oSettle && isUndefined(i)) {
-        beginSettle(oSettle);
-      } else if (!isUndefined(i)) {
-        updateSettle(i);
+      } else {
+        updateSettle(settle.i);
       }
 
     });

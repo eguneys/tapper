@@ -82,32 +82,7 @@ function SoliStack(play, ctx, bs) {
   let dFronts = new CardStack(this, ctx, bs);
   let dBacks = new CardStack(this, ctx, bs);
 
-  let dPlaceholder = new CardPlaceholder(this, ctx, {
-    onBeginCard: () => {
-      if (!dFronts.empty()) {
-        return;
-      }
-      play.solitaire.userActionSelectStack(n);
-    },
-    onEndCard: () => {
-      if (!dFronts.empty()) {
-        return;
-      }
-      play.solitaire.userActionEndSelectStack(n);
-    },
-    ...bs
-  });
-
-  // let observeStack = play.solitaire.stackN(n);
-
-  // observeStack.subscribe(stack => {
-  //   let inProgress = stack.inProgress();
-  //   dFronts.init({ stack: stack.front, inProgress });
-  //   dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
-  //   if (!inProgress) {
-  //     extendCards(stack.hidden.length, stack.front.length);
-  //   }
-  // });
+  let dPlaceholder = new CardPlaceholder(this, ctx, bs);
 
   const extendCards = (backs, fronts) => {
     let nbCards = backs + fronts;
@@ -121,9 +96,9 @@ function SoliStack(play, ctx, bs) {
 
     // still a bug when there is one hidden card on the stack
     // calculate dFronts next card position for undo move
-    dBacks.render();
-    dFronts.render();
-    this.render();
+    // dBacks.render();
+    // dFronts.render();
+    // this.render();
   };
 
   this.highlight = dFronts.highlight;
@@ -161,9 +136,14 @@ function SoliStack(play, ctx, bs) {
 
   const insertN = _ => ({ ..._, stackN: n });
 
+  let esPlaceholderDrops = dPlaceholder.drops
+      .filter(_ => dFronts.empty() && dBacks.empty());
+
   this.clicks = dFronts.clicks.map(insertN);
   this.drags = dFronts.drags.map(insertN);
-  this.drops = dFronts.drops.map(insertN);
+  this.drops = dFronts.drops
+    .merge(esPlaceholderDrops)
+    .map(insertN);
 
   function listenSolitaire() {
 
