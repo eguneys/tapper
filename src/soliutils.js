@@ -130,7 +130,7 @@ export function SoliDrawDeck() {
   let inDrawing;
 
   let deck;
-  let showStack;
+  let showStack = [];
 
   this.init = (data) => {
     deck = data;
@@ -162,6 +162,11 @@ export function SoliDrawDeck() {
   };
 
   this.dealOne2 = (card) => {
+    showStack.push(card);
+  };
+
+  this.dealOne12 = () => {
+    let card = deck.pop();
     showStack.push(card);
   };
 

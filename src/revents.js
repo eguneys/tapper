@@ -66,8 +66,9 @@ export default function Revents (canvas) {
   });
 
   let drops = starts.flatMap(startE => {
-    return ends.first().map(endE => ({ ...startE,
-                                       ...endE }));
+    return ends.first()
+      .map(endE => ({ ...startE,
+                      ...endE }));
   });
 
   let clicks = starts.flatMap(startE => {

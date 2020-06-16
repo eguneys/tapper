@@ -107,17 +107,26 @@ export default function SolitaireView(play, ctx, pbs) {
 
   const fid = _ => _;
 
-  let eDrops = revents.when(
+  let esDrops = revents.when(
     [dStacks.drops, revents.drops, fid],
     [revents.drops, fid]
   );
 
-  let eDrags = revents.when(
+  let esDrags = revents.when(
+    [dDraw.esDrags, revents.drags, fid],
     [dStacks.drags, revents.drags, fid],
     [revents.drags, fid]
   );
 
-  rsolitaire = new RSolitaire(eDrags, eDrops);
+  let esDrawDeals = dDraw.esDeal;
+  let esDrawShuffle = dDraw.esShuffle;
+
+  rsolitaire = new RSolitaire({
+    esDrags,
+    esDrops,
+    esDrawDeals,
+    esDrawShuffle
+  });
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -147,6 +156,7 @@ export default function SolitaireView(play, ctx, pbs) {
     dStacks.init();
     dSoliDrag.init();
     dSoliReveal.init();
+    dDraw.init();
   };
 
   this.remove = () => {

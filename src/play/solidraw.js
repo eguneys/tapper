@@ -5,29 +5,19 @@ import CardStack from './cardstack';
 
 import { backCard, hiddenStacks } from '../cards';
 
-import { tapHandler2 } from './util';
+import { fEInBounds } from './rutil';
 
 export default function SoliDraw(play, ctx, bs) {
 
-  let solitaire = play.solitaire;
+  let rsolitaire = play.rsolitaire;
 
-  const { events, textures } = ctx;
+  const { revents, textures } = ctx;
 
   const mhud = textures['mhud'];
 
-  let dDeck = new CardStack(this, ctx, {
-    onBeginCard() {
-      solitaire.userActionDealDraw();
-    },
-    ...bs
-  });
+  let dDeck = new CardStack(this, ctx, bs);
 
-  let dDraw = new CardStack(this, ctx, {
-    onBeginCard(n, epos, decay) {
-      solitaire.userActionSelectDraw(epos, decay);
-    },
-    ...bs
-  });
+  let dDraw = new CardStack(this, ctx, bs);
 
   let overW = bs.card.width - bs.stackMargin;
 
@@ -58,7 +48,38 @@ export default function SoliDraw(play, ctx, bs) {
   this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
   this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 
-  solitaire.drawer.subscribe(drawer => {
+  // const observePSelection = ({ 
+  //   active,
+  //   drawN
+  // }) => {
+    
+  //   if (!drawN) {
+  //     return;
+  //   }
+
+  //   if (active) {
+  //     dDraw.highlightCards([0]);
+  //   } else {
+  //     dDraw.highlight(false);
+  //   }
+
+  // };
+
+  // solitaire.pSelection.subscribe(observePSelection);
+
+  this.init = (data) => {
+    listenSolitaire();
+  };
+
+  this.update = delta => {
+    this.container.update(delta);
+  };
+
+  this.render = () => {
+    this.container.render();
+  };
+
+  const initDrawer = (drawer) => {
     let nbDeck = drawer.nbDeck();
 
     if (nbDeck === 0) {
@@ -71,54 +92,22 @@ export default function SoliDraw(play, ctx, bs) {
     dDeck.extend(bs.deck.height);
 
     dDraw.init({ stack: drawer.showStack3() });
-  });
-
-  solitaire.fx('dealdraw').subscribe({
-    onBegin(card, resolve) {
-      resolve();
-    },
-    onEnd() {
-    }
-  });
-
-  const observePSelection = ({ 
-    active,
-    drawN
-  }) => {
-    
-    if (!drawN) {
-      return;
-    }
-
-    if (active) {
-      dDraw.highlightCards([0]);
-    } else {
-      dDraw.highlight(false);
-    }
-
   };
 
-  solitaire.pSelection.subscribe(observePSelection);
-
-  this.init = (data) => {};
-
-  const handleTapOver = tapHandler2({
-    onBegin() {
-      let isDrawEmpty = dDeck.empty();
-
-      if (isDrawEmpty) {
-        solitaire.userActionShuffle();
-      }
-    },
-    boundsFn: () => dOver.container.bounds()
-  }, events);
-
-  this.update = delta => {
-    handleTapOver();
-    this.container.update(delta);
+  const listenSolitaire = () => {
+    rsolitaire().pDrawer.onValue(initDrawer);
   };
 
-  this.render = () => {
-    this.container.render();
-  };
+  this.esShuffle = revents.clicks
+    .filter(fEInBounds(_ => _.epos, 
+                       () => dOver.container.bounds()))
+    .filter(_ => dDeck.empty())
+    .map(_ => true);
+
+  this.esDeal = dDeck.clicks;
+
+  const insertDrawN = _ => ({ ..._, drawN: true });
+
+  this.esDrags = dDraw.drags.map(insertDrawN);
+
 }
