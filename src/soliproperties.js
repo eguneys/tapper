@@ -28,7 +28,6 @@ export function DragDropProperty(esDrags, esDrops) {
 
   const dragMove = (_, dragMove) => {
     _.add('moving', dragMove);
-
     _.apply(_ => _.moving());
 
     return _;
@@ -168,7 +167,8 @@ export function DrawerProperty({
   esDealStack1,
   esDealStack2,
   esDeal,
-  esShuffle
+  esShuffle,
+  esDragStart,
 }) {
   let init = (_, cards) => {
 
@@ -200,12 +200,19 @@ export function DrawerProperty({
     return _;    
   };
 
+  let dragStart = _ => {
+    let cards = _.apply(_ => [_.draw1()]);
+    _.add('dragcards', cards);
+    return _;
+  };
+
   return Bacon.update(new ExtraValues(
     new SoliDrawDeck()
   ),
                       [esInit, init],
                       [esDeal, dealOne],
                       [esShuffle, shuffle],
+                      [esDragStart, dragStart],
                       [esDealStack2, dealStack2],
                       [esDealStack1, dealStack1]);
 }

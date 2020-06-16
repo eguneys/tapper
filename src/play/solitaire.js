@@ -112,11 +112,31 @@ export default function SolitaireView(play, ctx, pbs) {
     [revents.drops, fid]
   );
 
+
+  // let esDrags = revents.when(
+  //   [dDraw.esDrags, revents.drags, fid],
+  //   [dStacks.drags, revents.drags, fid],
+  //   [revents.drags, fid]
+  // );
+
+  // esDrags.log();
+
   let esDrags = revents.when(
     [dDraw.esDrags, revents.drags, fid],
-    [dStacks.drags, revents.drags, fid],
-    [revents.drags, fid]
+    [dStacks.drags, revents.drags, _ => ({
+      stack: 'stack' + _.initial,
+      ..._
+    })],
+    [revents.drags, _ => ({
+      stack: 'event' + _.initial,
+      ..._
+    })]
   );
+
+  // https://github.com/baconjs/bacon.js/issues/764
+  dStacks.drags.onValue();
+  // esDrags.log();
+  
 
   let esDrawDeals = dDraw.esDeal;
   let esDrawShuffle = dDraw.esShuffle;
