@@ -60,14 +60,86 @@ export default function RSolitaire({ esDrags,
 
   let esDrawDragStart = esDragDrawStart;
 
+  let bDrawer = new SyncBus();
+
+
+  let esTDragDrawCancel = pDragDrop
+      .map(_ => _.base)
+      .map(_ => _.state())
+      .filter(_ => _.cancel && _.cancel.draw)
+      .map(_ => _.cancel.draw)
+      .flatMap(_ => 
+        makeFxTween({ drawN: true }, 100)
+          .concat(
+            Bacon.once({ action: _.drawN }))
+      ).toEventStream();
+
+  let esDragDrawCancelSettleTween = esTDragDrawCancel
+      .filter(_ => _.tween)
+      .map(_ => _.tween);
+
+
+  let esDragDrawCancel = esTDragDrawCancel
+      .filter(_ => _.action)
+      .map(_ => _.action);  
+
+
+  let pDragCardsDrawEarly = bDrawer
+      .bus
+      .map(_ => _.extra)
+      .filter(_ => _.dragcards)
+      .map(_ => ({ dragcards: _.dragcards }))
+      .toProperty();
+
+  let esDragDrawCancelWithCards =
+      Bacon.when(
+        [esDragDrawCancel, pDragCardsDrawEarly, fMergeArgs]);
+
+  let esDrawDragCancel = esDragDrawCancelWithCards;
+
+  /*
+   * Drag Draw Drop Stack
+   */
+  let esTDragDrawDropStack = pDragDrop
+      .map(_ => _.base)
+      .map(_ => _.state())
+      .filter(_ => _.dropstack)
+      .map(_ => _.dropstack)
+      .filter(_ => _.drag.draw)
+      .flatMap(_ => 
+        makeFxTween({ stackN: _.drop.stackN }, 100)
+          .concat(
+            Bacon.once({ action: withI(_, _ => _.drop.stackN) }))
+      ).toEventStream();
+
+  let esDragDrawDropStackSettleTween = esTDragDrawDropStack
+      .filter(_ => _.tween)
+      .map(_ => _.tween);
+
+
+  let esDragDrawDropStack = esTDragDrawDropStack
+      .filter(_ => _.action)
+      .map(_ => _.action);
+
+  let esDragDrawDropStackWithCards =
+      Bacon.when([esDragDrawDropStack, 
+                  pDragCardsDrawEarly,
+                  fMergeArgs]);
+
+  let esDrawDragDrop = esDragDrawDropStack;
+
   let pDrawer = DrawerProperty({
     esInit, 
     esDealStack1,
     esDealStack2,
     esShuffle: esDrawShuffle,
     esDeal: esDrawDeal,
-    esDragStart: esDrawDragStart
+    esDragStart: esDrawDragStart,
+    esDragCancel: esDrawDragCancel,
+    esDragDrop: esDrawDragDrop
   });
+
+  bDrawer.assign(pDrawer);
   
   let esDealStack2WithCards = 
       esDealStack2.zip(pDrawer
@@ -88,7 +160,7 @@ export default function RSolitaire({ esDrags,
 
   let bStacks = stackPlate.map(_ => new SyncBus());
 
-  let esDragCardsEarly = bStacks.map(bStack =>
+  let pDragCardsEarly = bStacks.map(bStack =>
     bStack
       .bus
       .map(_ => _.extra)
@@ -123,13 +195,14 @@ export default function RSolitaire({ esDrags,
 
   let esDragStackCancelWithCards =
       Bacon.when(
-        [esDragStackCancel, esDragCardsEarly, fMergeArgs]);
+        [esDragStackCancel, pDragCardsEarly, fMergeArgs]);
 
   let esTDragStackDropStack = pDragDrop
       .map(_ => _.base)
       .map(_ => _.state())
       .filter(_ => _.dropstack)
       .map(_ => _.dropstack)
+      .filter(_ => _.drag.stack)
       .flatMap(_ => 
         makeFxTween({ stackN: _.drop.stackN }, 100)
           .concat(
@@ -147,14 +220,17 @@ export default function RSolitaire({ esDrags,
 
   let esDragStackDropStackWithCards =
       Bacon.when([esDragStackDropStack, 
-                  esDragCardsEarly,
+                  pDragCardsEarly,
                   fMergeArgs]);
 
   let esStackDragStart = esDragStackStart;
   let esStackDragCancel = esDragStackCancelWithCards;
-  let esStackDropStack = esDragStackDropStackWithCards;
+  let esStackDropStack = [
+    esDragStackDropStackWithCards,
+    esDragDrawDropStackWithCards
+  ].reduce(fMergeStreams);
 
-  let esStackReveal = esStackDropStack
+  let esStackReveal = esDragStackDropStackWithCards
       .map(_ => withI(_.drag.stack, _ => _.stackN));
 
   let esExtraRevealEarly = bStacks.map(bStack =>
@@ -184,8 +260,11 @@ export default function RSolitaire({ esDrags,
 
   let esStackReveal2 = esRevealStack2;
 
-  let esTweenSettle = [esDragStackCancelSettleTween,
-                       esDragStackDropStackSettleTween]
+  let esTweenSettle = [
+    esDragDrawCancelSettleTween,
+    esDragDrawDropStackSettleTween,
+    esDragStackCancelSettleTween,
+    esDragStackDropStackSettleTween]
       .reduce(fMergeStreams);
 
   let esTweenReveal = esRevealStackTween;
@@ -223,7 +302,13 @@ export default function RSolitaire({ esDrags,
       .toEventStream()
   ).reduce(fMergeStreams);
 
+  let esDragCardsDraw = pDrawer
+      .map(_ => _.extra)
+      .filter(_ => _.dragcards)
+      .toEventStream();
+
   let pDragCards = esDragCardsStack
+      .merge(esDragCardsDraw)
       .toProperty();
 
   let esDragLive = pDragDrop.map(_ => _.extra)

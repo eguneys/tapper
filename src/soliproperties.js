@@ -169,6 +169,8 @@ export function DrawerProperty({
   esDeal,
   esShuffle,
   esDragStart,
+  esDragCancel,
+  esDragDrop
 }) {
   let init = (_, cards) => {
 
@@ -202,7 +204,26 @@ export function DrawerProperty({
 
   let dragStart = _ => {
     let cards = _.apply(_ => [_.draw1()]);
+    console.log('draw', cards[0]);
     _.add('dragcards', cards);
+    return _;
+  };
+
+  let dragCancel = (_, { dragcards }) => {
+    let cards = dragcards;
+    console.log('cancel', cards[0]);
+    _.apply(_ => {
+      _.drawCancel1(cards[0]);
+    });
+    _.remove('dragcards');
+    return _;
+  };
+
+  let dragDrop = (_) => {
+    _.apply(_ => {
+      _.drawCommit1();
+    });
+    _.remove('dragcards');
     return _;
   };
 
@@ -213,6 +234,8 @@ export function DrawerProperty({
                       [esDeal, dealOne],
                       [esShuffle, shuffle],
                       [esDragStart, dragStart],
+                      [esDragCancel, dragCancel],
+                      [esDragDrop, dragDrop],
                       [esDealStack2, dealStack2],
                       [esDealStack1, dealStack1]);
 }
