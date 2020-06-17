@@ -66,6 +66,11 @@ export default function SoliDrag() {
       state = {};
       return;
     }
+    if (state.drag.hole) {
+      state.cancel = state.drag;
+      delete state.drag;
+      return;
+    }
     state.drophole = {
       drop,
       drag: state.drag

@@ -109,9 +109,15 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let esDrops = revents.when(
     [dStacks.drops, revents.drops, fid],
+    [dHoles.drops, revents.drops, fid],
     [revents.drops, fid]
   );
 
+
+  // dStacks.drops.log();
+  // dHoles.drops.log();
+  dHoles.drops.onValue();
+  //esDrops.log();
 
   // let esDrags = revents.when(
   //   [dDraw.esDrags, revents.drags, fid],
@@ -123,6 +129,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   let esDrags = revents.when(
     [dDraw.esDrags, revents.drags, fid],
+    [dHoles.drags, revents.drags, fid],
     [dStacks.drags, revents.drags, _ => ({
       stack: 'stack' + _.initial,
       ..._
@@ -135,6 +142,7 @@ export default function SolitaireView(play, ctx, pbs) {
 
   // https://github.com/baconjs/bacon.js/issues/764
   dStacks.drags.onValue();
+  dHoles.drags.onValue();
   // esDrags.log();
   
 
@@ -177,6 +185,7 @@ export default function SolitaireView(play, ctx, pbs) {
     dSoliDrag.init();
     dSoliReveal.init();
     dDraw.init();
+    dHoles.init();
   };
 
   this.remove = () => {

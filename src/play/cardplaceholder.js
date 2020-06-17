@@ -2,7 +2,7 @@ import AContainer from './acontainer';
 
 import { moveHandler, hitTest } from './util';
 
-export default function Play(play, ctx, bs) {
+export default function CardPlaceholder(play, ctx, bs) {
 
   const { revents, events } = ctx;
 
@@ -66,10 +66,18 @@ export default function Play(play, ctx, bs) {
 
   const getHitCardWithDecay = pos => {
 
-    let b = container.bounds();
-    
-    if (hitTest(...pos, hitBounds)) {
-      
+    let gp = container.globalPosition();
+
+    let hitBounds = {
+      x: gp.x,
+      y: gp.y,
+      ...cardBounds
+    };
+
+    let b = hitBounds;
+
+    if (hitTest(...pos, b)) {
+
       let decay = [-pos[0] + b.x,
                    -pos[1] + b.y];
 
@@ -80,8 +88,8 @@ export default function Play(play, ctx, bs) {
     return null;
   };
 
-  const inCardHitBounds = dragE => {
-    let pos =  dragE.epos;
+  const inCardHitBounds = (selectPos = _ => _.epos) => dragE => {
+    let pos =  selectPos(dragE);
     let hD = getHitCardWithDecay(pos);
     if (hD) {
       return revents.once({
@@ -92,6 +100,8 @@ export default function Play(play, ctx, bs) {
     return revents.never;
   };
 
+  this.drags = revents.drags
+    .flatMap(inCardHitBounds(_ => _.start));
   this.drops = revents.drops
-    .flatMap(inCardHitBounds);
+    .flatMap(inCardHitBounds());
 }

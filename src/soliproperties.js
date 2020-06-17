@@ -17,14 +17,22 @@ export function DragDropProperty(esDrags, esDrops) {
       .filter(_ => _.initial && 
               isN(_.stackN));
 
+  let esDragHoleStart = esDrags
+      .filter(_ => _.initial && 
+              isN(_.holeN));
+
   let esDragMove = esDrags
       .filter(_ => !_.initial);
 
   let esDropCancel = esDrops
-      .filter(_ => !isN(_.stackN));
+      .filter(_ => !isN(_.stackN) &&
+              !isN(_.holeN));
 
   let esDropStack = esDrops
       .filter(_ => isN(_.stackN));
+
+  let esDropHole = esDrops
+      .filter(_ => isN(_.holeN));
 
   const dragMove = (_, dragMove) => {
     _.add('moving', dragMove);
@@ -36,6 +44,15 @@ export function DragDropProperty(esDrags, esDrops) {
   const dragEmptyStart = (_) => {
     _.apply(_ => 
       _.dragEmptyStart());
+
+    return _;
+  };
+
+  const dragHoleStart = (_, dragHoleStart) => {
+    _.add('dragstart', dragHoleStart);
+
+    _.apply(_ => 
+      _.dragHoleStart(dragHoleStart));
 
     return _;
   };
@@ -79,15 +96,60 @@ export function DragDropProperty(esDrags, esDrops) {
     return _;
   };
 
+  const dropHole = (_, drop) => {
+    dropBase(_);
+
+    _.apply(_ => _.dropHole(drop));
+
+    return _;    
+  };
+
   return Bacon.update
   (new ExtraValues(new SoliDrag()),
    [esDragEmptyStart, dragEmptyStart],
    [esDragStackStart, dragStackStart],
    [esDragDrawStart, dragDrawStart],
+   [esDragHoleStart, dragHoleStart],
    [esDragMove, dragMove],
    [esDropCancel, dropCancel],
+   [esDropHole, dropHole],
    [esDropStack, dropStack]);
   
+}
+
+export function HoleProperty(n, {
+  esDragStart,
+  esDragCancel,
+  esDropHole,
+}) {
+  let dragStart = _ => {
+    let cards = _.apply(_ => [_.remove()]);
+    _.add('dragcards', cards);
+    return _;
+  };
+
+  let dragCancel = (_, { dragcards }) => {
+    let cards = dragcards[0];
+    _.apply(_ => {
+      _.add(cards);
+    });
+    _.remove('dragcards');
+    return _;
+  };
+
+  let dropHole = (_, { dragcards }) => {
+    let card = dragcards[0];
+    _.apply(_ => _.add(card));
+    return _;
+  };
+
+
+  return Bacon.update
+  (new ExtraValues(new SoliHole()),
+   [esDropHole, dropHole],
+   [esDragStart, dragStart],
+   [esDragCancel, dragCancel]
+  );
 }
 
 export function StackProperty(n, {
@@ -204,14 +266,12 @@ export function DrawerProperty({
 
   let dragStart = _ => {
     let cards = _.apply(_ => [_.draw1()]);
-    console.log('draw', cards[0]);
     _.add('dragcards', cards);
     return _;
   };
 
   let dragCancel = (_, { dragcards }) => {
     let cards = dragcards;
-    console.log('cancel', cards[0]);
     _.apply(_ => {
       _.drawCancel1(cards[0]);
     });

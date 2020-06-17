@@ -1,4 +1,5 @@
 export const stackPlate = [0, 1, 2, 3, 4, 5, 6];
+export const holePlate = [0, 1, 2, 3];
 
 export const isUndefined = n => n === undefined;
 
