@@ -291,6 +291,8 @@ export default function RSolitaire({ esDrags,
 
         let es = pDropStack
             .zip(pDragCardsEarly, (stack, { dragcards }) => {
+              // TODO add rules
+              return true;
               return stack.canAdd(dragcards);
             })
             .take(1)
@@ -396,38 +398,80 @@ export default function RSolitaire({ esDrags,
 
 
   /*
+   * Stack Remove Drag Cards
+   */
+
+  let esStackRemoveDragCards = [
+    esDragStackDropHole,
+    esDragStackDropStack,
+    esDragStackCancel,
+    esDragStackDropStackCancel
+  ].reduce(fMergeStreams);
+
+  /*
    * Stack Reveal
    */
 
-  let esStackReveal = [
+  let esStackRevealCandidate = [
     esDragStackDropStackWithCards,
     esDragStackDropHoleWithCards
   ]
       .reduce(fMergeStreams)
       .map(_ => withI(_.drag.stack, _ => _.stackN));
 
-  let esExtraRevealEarly = bStacks.map(bStack =>
-    bStack
-      .bus
-      .map(_ => _.extra)
-      .filter(_ => _.reveal)
-      .map(_ => _.reveal)
-      .toEventStream()
-  ).reduce(fMergeStreams)
-      .toProperty();
+  let esTStackReveal = esStackRevealCandidate.flatMap(_ => {
+    
+    let pRevealStack = pStackNEarly(_.i)
+        .map(_ => _.base);
 
-  let esTRevealStack2 = esExtraRevealEarly
-      .flatMap(_ => 
-        makeFxTween(_, 200)
-          .concat(
-            Bacon.once({ action: withI(_, _ => _.stackN) }))
-      ).toEventStream();
+    let es = pRevealStack
+        .map(_ => _.canReveal())
+        .take(1)
+        .flatMap(canReveal => {
+          if (canReveal) {
+            return Bacon.once({ reveal1: _ })
+              .concat(
+                makeFxTween(_, 200)
+                  .concat(
+                    Bacon.once({ reveal2: _ })
+                  )
+              );
+          } else {
+            return Bacon.never();
+          }
+        });
 
-  let esRevealStack2 = esTRevealStack2
-      .filter(_ => _.action)
-      .map(_ => _.action);
+    return Bacon.once({ revealrefresh: _ })
+      .concat(es);
+  });
 
-  let esRevealStackTween = esTRevealStack2
+
+
+  // let esExtraRevealEarly = bStacks.map(bStack =>
+  //   bStack
+  //     .bus
+  //     .map(_ => _.extra)
+  //     .filter(_ => _.reveal)
+  //     .map(_ => _.reveal)
+  //     .toEventStream()
+  // ).reduce(fMergeStreams)
+  //     .toProperty();
+  // let esTRevealStack2 = esExtraRevealEarly
+  //     .flatMap(_ => 
+  //       makeFxTween(_, 200)
+  //         .concat(
+  //           Bacon.once({ action: withI(_, _ => _.stackN) }))
+  //     ).toEventStream();
+
+  let esStackReveal = esTStackReveal
+      .filter(_ => _.reveal1)
+      .map(_ => _.reveal1);
+
+  let esRevealStack2 = esTStackReveal
+      .filter(_ => _.reveal2)
+      .map(_ => _.reveal2);
+
+  let esRevealStackTween = esTStackReveal
       .filter(_ => _.tween)
       .map(_ => _.tween);
 
@@ -442,6 +486,7 @@ export default function RSolitaire({ esDrags,
   let essStack = {
     esInit: demuxStacks(esInit),
     esRefresh: esDragStackDropRefresh,
+    esRemoveDragCards: demuxStacks(esStackRemoveDragCards),
     esStackDeal: esDealStack2WithCards,
     esStackDragStart,
     esStackDragCancel,

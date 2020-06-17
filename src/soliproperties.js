@@ -155,6 +155,7 @@ export function HoleProperty(n, {
 export function StackProperty(n, {
   esRefresh,
   esInit,
+  esRemoveDragCards,
   esStackDeal,
   esStackDragCancel,
   esStackDragStart,
@@ -168,6 +169,11 @@ export function StackProperty(n, {
   };
 
   let refresh = _ => {
+    return _;
+  };
+
+  let removeDragCards = _ => {
+    _.remove('dragcards');
     return _;
   };
 
@@ -192,7 +198,6 @@ export function StackProperty(n, {
       _.add1(cards);
       _.cutInProgressCommit();
     });
-    _.remove('dragcards');
     return _;
   };
 
@@ -201,23 +206,18 @@ export function StackProperty(n, {
     _.apply(_ => {
       _.add1(cards);
     });
-    _.remove('dragcards');
     return _;
   };
 
   let reveal1 = (_) => {
     _.apply(_ => _.cutInProgressCommit());
-
-    if (!_.apply(_ => _.canReveal())) {
-      return _;
-    }
     let card = _.apply(_ => _.reveal1());
     _.add('reveal', { stackN: n, card });
     return _;
   };
 
-  let reveal2 = (_, reveal) => {
-    let { card } = reveal;
+  let reveal2 = (_) => {
+    let { card } = _.extra['reveal'];
     _.remove('reveal');
     _.apply(_ => {
       _.add1([card]);
@@ -228,6 +228,7 @@ export function StackProperty(n, {
   return Bacon.update(new ExtraValues(new SoliStack()),
                       [esInit, init],
                       [esRefresh, refresh],
+                      [esRemoveDragCards, removeDragCards],
                       [esStackDeal, deal],
                       [esStackDragCancel, dragCancel],
                       [esStackDropStack, dropStack],
