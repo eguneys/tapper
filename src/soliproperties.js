@@ -153,6 +153,8 @@ export function HoleProperty(n, {
 }
 
 export function StackProperty(n, {
+  esRefresh,
+  esInit,
   esStackDeal,
   esStackDragCancel,
   esStackDragStart,
@@ -160,6 +162,14 @@ export function StackProperty(n, {
   esStackReveal,
   esStackReveal2
 }) {
+
+  let init = _ => {
+    return _;
+  };
+
+  let refresh = _ => {
+    return _;
+  };
 
   let dragStart = (_, { cardN }) => {
     let cards = _.apply(_ => _.cutInProgress(cardN));
@@ -216,6 +226,8 @@ export function StackProperty(n, {
   };
 
   return Bacon.update(new ExtraValues(new SoliStack()),
+                      [esInit, init],
+                      [esRefresh, refresh],
                       [esStackDeal, deal],
                       [esStackDragCancel, dragCancel],
                       [esStackDropStack, dropStack],

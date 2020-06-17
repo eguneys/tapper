@@ -244,6 +244,11 @@ export default function RSolitaire({ esDrags,
 
   let bStackN = n => bStacks[n].bus;
 
+  let pStacksEarly = bStacks
+      .map(_ => _.bus.toProperty());
+
+  let pStackNEarly = n => pStacksEarly[n];
+
   let pDragCardsEarly = bStacks.map(bStack =>
     bStack
       .bus
@@ -273,14 +278,6 @@ export default function RSolitaire({ esDrags,
       .filter(_ => _.action)
       .map(_ => _.action);
 
-  // wrong
-  // let esDragStackCancelWithCards =
-  //     esDragStackCancel.zip(esDragCardsEarly, fMergeArgs);
-
-  let esDragStackCancelWithCards =
-      Bacon.when(
-        [esDragStackCancel, pDragCardsEarly, fMergeArgs]);
-
   let esTDragStackDropStack = pDragDrop
       .map(_ => _.base)
       .map(_ => _.state())
@@ -288,14 +285,55 @@ export default function RSolitaire({ esDrags,
       .map(_ => _.dropstack)
       .filter(_ => _.drag.stack)
       .flatMap(_ => {
-        
-        return makeFxTween({ stackN: _.drop.stackN }, 100)
-          .concat(
-            Bacon.once({ action: withI(_, _ => _.drop.stackN) }));
+
+        let pDropStack = pStackNEarly(_.drop.stackN)
+            .map(_ => _.base);
+
+        let es = pDropStack
+            .zip(pDragCardsEarly, (stack, { dragcards }) => {
+              return stack.canAdd(dragcards);
+            })
+            .take(1)
+            .flatMap(canAdd => {
+              if (canAdd) {
+                return makeFxTween({ stackN: _.drop.stackN }, 100,
+                                   { drop: true})
+                  .concat(
+                    Bacon.once({ 
+                      action: withI(_,
+                                    _ => _.drop.stackN) }));
+
+              } else {
+                return makeFxTween({ 
+                  stackN: _.drag.stack.stackN
+                }, 100, { cancel: true })
+                  .concat(
+                    Bacon.once({ 
+                      cancel: withI(_,
+                                    _ => _.drag.stack.stackN)
+                    }));
+              }
+            });
+
+        return Bacon.once({ droprefresh: 
+                            withI({}, __ => _.drop.stackN) })
+          .concat(es);
       }).toEventStream();
 
+  let esDragStackDropRefresh = esTDragStackDropStack
+      .filter(_ => _.droprefresh)
+      .map(_ => _.droprefresh);
+
+  let esDragStackDropStackCancel = esTDragStackDropStack
+      .filter(_ => _.cancel)
+      .map(_ => _.cancel);
+
   let esDragStackDropStackSettleTween = esTDragStackDropStack
-      .filter(_ => _.tween)
+      .filter(_ => _.tween && _.drop)
+      .map(_ => _.tween);
+
+  let esDragStackDropStackCancelSettleTween = esTDragStackDropStack
+      .filter(_ => _.tween && _.cancel)
       .map(_ => _.tween);
 
 
@@ -307,6 +345,15 @@ export default function RSolitaire({ esDrags,
       Bacon.when([esDragStackDropStack, 
                   pDragCardsEarly,
                   fMergeArgs]);
+
+  // wrong
+  // let esDragStackCancelWithCards =
+  //     esDragStackCancel.zip(esDragCardsEarly, fMergeArgs);
+
+  let esDragStackCancelWithCards =
+      Bacon.when(
+        [esDragStackDropStackCancel, pDragCardsEarly, fMergeArgs],
+        [esDragStackCancel, pDragCardsEarly, fMergeArgs]);
 
   let esStackDragStart = esDragStackStart;
   let esStackDragCancel = esDragStackCancelWithCards;
@@ -386,7 +433,15 @@ export default function RSolitaire({ esDrags,
 
   let esStackReveal2 = esRevealStack2;
 
+  const demuxStacks = es => es.flatMap(_ => {
+    return stackPlate
+      .map(i => Bacon.once(withI({ cards: _ }, _ => i)))
+      .reduce(fMergeStreams);
+  });
+
   let essStack = {
+    esInit: demuxStacks(esInit),
+    esRefresh: esDragStackDropRefresh,
     esStackDeal: esDealStack2WithCards,
     esStackDragStart,
     esStackDragCancel,
@@ -502,6 +557,7 @@ export default function RSolitaire({ esDrags,
   this.esDragLive = esDragLive;
 
   let esTweenSettle = [
+    esDragStackDropStackCancelSettleTween,
     esDragHoleSettleTween,
     esDragHoleDropStackSettleTween,
     esDragDrawDropHoleSettleTween,
