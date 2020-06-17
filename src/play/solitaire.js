@@ -106,6 +106,11 @@ export default function SolitaireView(play, ctx, pbs) {
   const { revents } = ctx;
 
   const fid = _ => _;
+  const fMergeStreams = (acc, _) => acc.merge(_);
+
+  let esClicks = [
+    dStacks.clicks
+  ].reduce(fMergeStreams);
 
   let esDrops = revents.when(
     [dStacks.drops, revents.drops, fid],
@@ -150,6 +155,7 @@ export default function SolitaireView(play, ctx, pbs) {
   let esDrawShuffle = dDraw.esShuffle;
 
   rsolitaire = new RSolitaire({
+    esClicks,
     esDrags,
     esDrops,
     esDrawDeals,

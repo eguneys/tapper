@@ -79,6 +79,10 @@ export function SoliStack(hidden = [], front = []) {
 
   this.canReveal = () => front.length === 0 && hidden.length > 0;
 
+  this.canRevealCard = () => {
+    return this.canReveal()?hidden[hidden.length - 1]:null;
+  };
+
 }
 
 function canStackHoleAce(c1) {

@@ -13,6 +13,8 @@ import { DragDropProperty,
          HoleProperty
        } from './soliproperties';
 
+import { PSelectProperty } from './solipselect';
+
 import RSoliDealer from './rsolidealer';
 
 const fId = _ => _;
@@ -24,10 +26,12 @@ const withI = (obj, pullI) => ({
   ...obj
 });
 
-export default function RSolitaire({ esDrags, 
-                                     esDrops,
-                                     esDrawDeals,
-                                     esDrawShuffle }) {
+export default function RSolitaire({ 
+  esClicks,
+  esDrags, 
+  esDrops,
+  esDrawDeals,
+  esDrawShuffle }) {
 
   let pDragDrop = DragDropProperty(esDrags, esDrops);
   
@@ -66,6 +70,7 @@ export default function RSolitaire({ esDrags,
 
   let bDrawer = new SyncBus();
 
+  let bPersistSelect = new SyncBus();
 
   let esTDragDrawCancel = pDragDrop
       .map(_ => _.base)
@@ -425,13 +430,13 @@ export default function RSolitaire({ esDrags,
         .map(_ => _.base);
 
     let es = pRevealStack
-        .map(_ => _.canReveal())
+        .map(_ => _.canRevealCard())
         .take(1)
         .flatMap(canReveal => {
           if (canReveal) {
             return Bacon.once({ reveal1: _ })
               .concat(
-                makeFxTween(_, 200)
+                makeFxTween({ ..._, card: canReveal }, 200)
                   .concat(
                     Bacon.once({ reveal2: _ })
                   )
@@ -564,6 +569,26 @@ export default function RSolitaire({ esDrags,
 
   pHoles.map((_, i) => bHoles[i].assign(_));
 
+
+  let esStackClicks = esClicks
+      .filter(_ => isN(_.stackN));
+
+  let esPersistSelectStack = esStackClicks.map(_ => ({
+    stackN: _.stackN,
+    cardN: _.cardN
+  }));
+
+  let esPersistSelect = 
+      [esPersistSelectStack
+      ].reduce(fMergeStreams);
+
+  let esPersistDeselect = Bacon.never();
+
+  let pPersistSelect = PSelectProperty(esPersistSelect,
+                                       esPersistDeselect);
+
+  bPersistSelect.assign(pPersistSelect);
+
   let esDragCardsStack = pStacks.map(pStack =>
     pStack
       .map(_ => _.extra)
@@ -596,6 +621,9 @@ export default function RSolitaire({ esDrags,
                            pDragCards,
                            fMergeArgs]);
 
+
+  
+  this.pPSelect = pPersistSelect;
   this.pHoleN = n => pHoles[n].map(_ => _.base);
   this.pStackN = n => pStacks[n].map(_ => _.base);
   this.pDrawer = pDrawer.map(_ => _.base);

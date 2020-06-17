@@ -33,28 +33,29 @@ export default function SoliStacks(play, ctx, bs) {
   };
   initContainer();
 
-  const observePSelection = ({ 
-    active,
-    stackN,
-    cards }) => {
+  // const observePSelection = ({ 
+  //   active,
+  //   stackN,
+  //   cards }) => {
 
-      if (!isN(stackN)) {
-        return;
-      }
+  //     if (!isN(stackN)) {
+  //       return;
+  //     }
 
-      let dStack = this.dStackN(stackN);
+  //     let dStack = this.dStackN(stackN);
 
-      if (active) {
-        dStack.highlightCards(cards);
-      } else {
-        dStack.highlight(false);
-      }
-  };
+  //     if (active) {
+  //       dStack.highlightCards(cards);
+  //     } else {
+  //       dStack.highlight(false);
+  //     }
+  // };
 
-  this.solitaire.pSelection.subscribe(observePSelection);
+  // this.solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {
     dStacks.forEach(_ => _.init());
+    listenSolitaire();
   };
 
   this.update = delta => {
@@ -65,13 +66,45 @@ export default function SoliStacks(play, ctx, bs) {
     this.container.render();
   };
 
+  const initPSelection = ({
+    stackN,
+    cards,
+    previous: {
+      stackN: previousStackN
+    }
+  }) => {
+
+    if (!isN(stackN)) {
+      return;
+    }
+
+    let dStack = this.dStackN(stackN);
+    dStack.highlightCards(cards);
+
+    if (isN(previousStackN)) {
+      let dPrevious = this.dStackN(stackN);
+      dPrevious.highlight(false);
+    }
+  };
+
+  const listenSolitaire = () => {
+    this.rsolitaire().pPSelect.onValue(pSelect => {
+      if (pSelect) {
+        initPSelection(pSelect);
+      }
+    });
+    
+  };
+
+
   const { revents } = ctx;
 
   this.drags = dStacks.map(_ => _.drags)
     .reduce((acc, _) => acc.merge(_));
   this.drops = dStacks.map(_ => _.drops)
     .reduce((acc, _) => acc.merge(_));
-
+  this.clicks = dStacks.map(_ => _.clicks)
+    .reduce((acc, _) => acc.merge(_));
 
 }
 
