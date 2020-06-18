@@ -119,12 +119,27 @@ export function DragDropProperty(esDrags, esDrops) {
 
 export function HoleProperty(n, {
   esDragStart,
+  esHighlight,
+  esRemoveHighlight,
   esDragCancel,
   esDropHole,
 }) {
+
+  let highlight = (_) => {
+    _.add('highlight', true);
+    return _;
+  };
+
+  let removeHighlight = (_) => {
+    _.remove('highlight');
+    return _;
+  };
+
   let dragStart = _ => {
     let cards = _.apply(_ => [_.remove()]);
     _.add('dragcards', cards);
+    // TODO find a way to remove this
+    _.remove('highlight');
     return _;
   };
 
@@ -147,6 +162,8 @@ export function HoleProperty(n, {
   return Bacon.update
   (new ExtraValues(new SoliHole()),
    [esDropHole, dropHole],
+   [esHighlight, highlight],
+   [esRemoveHighlight, removeHighlight],
    [esDragStart, dragStart],
    [esDragCancel, dragCancel]
   );
@@ -308,6 +325,8 @@ export function DrawerProperty({
   let dragStart = _ => {
     let cards = _.apply(_ => [_.draw1()]);
     _.add('dragcards', cards);
+    // TODO find a way to remove this
+    _.remove('highlight');
     return _;
   };
 

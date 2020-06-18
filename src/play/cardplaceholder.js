@@ -104,4 +104,6 @@ export default function CardPlaceholder(play, ctx, bs) {
     .flatMap(inCardHitBounds(_ => _.start));
   this.drops = revents.drops
     .flatMap(inCardHitBounds());
+  this.clicks = revents.clicks
+    .flatMap(inCardHitBounds());
 }

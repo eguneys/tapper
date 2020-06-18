@@ -73,7 +73,17 @@ export default function Revents (canvas) {
 
   let clicks = starts.flatMap(startE => {
     return ends.first()
-      .takeUntil(moves.skip(2).take(1))
+      .takeUntil(moves
+                 .skipWhile(moveE => {
+                   let { start } = startE;
+                   let { epos } = moveE;
+
+                   let dist = v.distance(start, epos);
+
+                   return dist < dragMoveDistance;
+                 })
+                 // .skip(2)
+                 .take(1))
       .takeUntil(later(holdingPeriod));
   });
 

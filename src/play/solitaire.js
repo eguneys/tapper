@@ -111,11 +111,13 @@ export default function SolitaireView(play, ctx, pbs) {
   let esClicks = revents.when(
     [dStacks.clicks, revents.clicks, fid],
     [dDraw.esClicks, revents.clicks, fid],
+    [dHoles.clicks, revents.clicks, fid],
     [revents.clicks, fid]
   );
 
 
   // dStacks.clicks.onValue();
+  dHoles.clicks.onValue();
   dDraw.esClicks.onValue();
   // esClicks.log();
 

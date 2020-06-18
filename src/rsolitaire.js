@@ -93,6 +93,10 @@ export default function RSolitaire({
   ).reduce(fMergeStreams)
       .toProperty();
 
+  /*
+   * Persist Select Bus
+   */
+
   let bPersistSelect = new SyncBus();
 
   /*
@@ -100,7 +104,8 @@ export default function RSolitaire({
    */
   let esCancelClicks = esClicks
       .filter(_ => !isN(_.stackN) &&
-              !_.drawN);
+              !_.drawN &&
+              !isN(_.holeN));
 
   let esStackClicks = esClicks
       .filter(_ => isN(_.stackN));
@@ -147,6 +152,30 @@ export default function RSolitaire({
       .filter(_ => _.drawN)
       .toEventStream();
 
+  /*
+   * Hole Highlight
+   */
+
+  let esHoleHighlight = bPersistSelect
+      .bus
+      .filter(_ => _.value())
+      .map(_ => _.value())
+      .filter(_ => isN(_.holeN))
+      .map(_ => withI(_, _ => _.holeN))
+      .toEventStream();
+
+  let esHoleRemoveHighlight = bPersistSelect
+      .bus
+      .filter(_ => _.previous())
+      .map(_ => _.previous())
+      .filter(_ => isN(_.holeN))
+      .map(_ => withI(_, _ => _.holeN))
+      .toEventStream();
+
+  /*
+   * Draw Drag Cancel
+   */
+
   let esTDragDrawCancel = pDragDrop
       .map(_ => _.base)
       .map(_ => _.state())
@@ -182,7 +211,7 @@ export default function RSolitaire({
   let esDrawDragCancel = esDragDrawCancelWithCards;
 
   /*
-   * Drag Draw Drop Stack
+   * Draw Drag Drop Stack
    */
   let esTDragDrawDropStack = pDragDrop
       .map(_ => _.base)
@@ -212,7 +241,7 @@ export default function RSolitaire({
 
 
   /*
-   * Drag Draw Drop Hole
+   * Draw Drag Drop Hole
    */
   let esTDragDrawDropHole = pDragDrop
       .map(_ => _.base)
@@ -624,6 +653,8 @@ export default function RSolitaire({
   ].reduce(fMergeStreams);
 
   let essHole = {
+    esHighlight: esHoleHighlight,
+    esRemoveHighlight: esHoleRemoveHighlight,
     esDragStart: esHoleDragStart,
     esDragCancel: esHoleDragCancel,
     esDropHole: esHoleDropHole,
@@ -636,6 +667,8 @@ export default function RSolitaire({
   let pHoles = holePlate.map(_ => holeProperty(_));
 
   pHoles.map((_, i) => bHoles[i].assign(_));
+
+  // pHoles[0].map(_ => _.extra).log();
 
   /*
    *  Drag Live
@@ -699,9 +732,15 @@ export default function RSolitaire({
         drawN: true
       }));
 
+  let esPersistSelectHole = esHoleClicks
+      .map(_ => new PSelectValue({
+        holeN: _.holeN
+      }));
+
   let esPersistSelect = 
       [esPersistSelectStack,
-       esPersistSelectDraw
+       esPersistSelectDraw,
+       esPersistSelectHole
       ].reduce(fMergeStreams);
 
   let esPersistDeselect = [
@@ -714,6 +753,8 @@ export default function RSolitaire({
 
   bPersistSelect.assign(pPersistSelect);
 
+  // pPersistSelect.map(_ => _.value()).log();
+
   /*
    *  Exports
    */
@@ -722,6 +763,10 @@ export default function RSolitaire({
   this.pStackN = n => pStacks[n].map(_ => _.base);
   this.pDrawer = pDrawer.map(_ => _.base);
   this.esDragLive = esDragLive;
+
+  this.pHoleHighlightN = n => pHoles[n]
+    .map(_ => _.extra)
+    .map(_ => _.highlight);
 
   this.pStackHighlightN = n => pStacks[n]
     .map(_ => _.extra)

@@ -64,6 +64,8 @@ export default function SoliHoles(play, ctx, bs) {
     .reduce((acc, _) => acc.merge(_));
   this.drops = dHoles.map(_ => _.drops)
     .reduce((acc, _) => acc.merge(_));
+  this.clicks = dHoles.map(_ => _.clicks)
+    .reduce((acc, _) => acc.merge(_));
 }
 
 function SoliHole(play, ctx, bs) {
@@ -116,8 +118,6 @@ function SoliHole(play, ctx, bs) {
   };
   initContainer();
 
-  this.highlight = dTop.highlight;
-
   this.init = (data) => {
     listenSolitaire();
   };
@@ -128,6 +128,18 @@ function SoliHole(play, ctx, bs) {
 
   this.render = () => {
     this.container.render();
+  };
+
+  let hilt = dTop.highlight;
+
+  let highlight;
+
+  const updateHighlight = () => {
+    if (highlight) {
+      hilt(true);
+    } else {
+      hilt(false);
+    }    
   };
 
   const initHole = hole => {
@@ -145,12 +157,19 @@ function SoliHole(play, ctx, bs) {
   const listenSolitaire = () => {
     rsolitaire().pHoleN(n).onValue(hole => {
       initHole(hole);
+      updateHighlight();
+    });
+
+    rsolitaire().pHoleHighlightN(n).onValue(_highlight => {
+      highlight = _highlight;
+      updateHighlight();
     });
   };
 
   const insertN = _ => ({ ..._, holeN: n });
   this.drags = dPlaceholder.drags.map(insertN);
   this.drops = dPlaceholder.drops.map(insertN);
+  this.clicks = dPlaceholder.clicks.map(insertN);
 
   // this.drags.log();
   // this.drops.log();
