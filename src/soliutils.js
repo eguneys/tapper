@@ -22,6 +22,10 @@ export function SoliStack(hidden = [], front = []) {
 
   this.inProgress = () => inProgress;
 
+  this.cardsN = n => {
+    return front.slice(n, front.length);
+  };
+
   this.cutLast = () => front.pop();
 
   this.cut1 = n => front.splice(n, front.length - n);

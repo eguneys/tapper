@@ -66,33 +66,7 @@ export default function SoliStacks(play, ctx, bs) {
     this.container.render();
   };
 
-  const initPSelection = ({
-    stackN,
-    cards,
-    previous: {
-      stackN: previousStackN
-    }
-  }) => {
-
-    if (!isN(stackN)) {
-      return;
-    }
-
-    let dStack = this.dStackN(stackN);
-    dStack.highlightCards(cards);
-
-    if (isN(previousStackN)) {
-      let dPrevious = this.dStackN(stackN);
-      dPrevious.highlight(false);
-    }
-  };
-
   const listenSolitaire = () => {
-    this.rsolitaire().pPSelect.onValue(pSelect => {
-      if (pSelect) {
-        initPSelection(pSelect);
-      }
-    });
     
   };
 
@@ -134,10 +108,21 @@ function SoliStack(play, ctx, bs) {
     // this.render();
   };
 
-  this.highlight = dFronts.highlight;
-  this.highlightCards = dFronts.highlightCards;
   this.nextCardGlobalPosition = dFronts.nextCardGlobalPosition;
   this.lastCardGlobalPosition = dBacks.lastCardGlobalPosition;
+
+  let hilt = dFronts.highlight;
+  let hiltCards = dFronts.highlightCards;
+
+  let highlight;
+
+  const updateHighlight = () => {
+    if (highlight) {
+      hiltCards(highlight);
+    } else {
+      hilt(false);
+    }    
+  };
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -180,6 +165,11 @@ function SoliStack(play, ctx, bs) {
 
   function listenSolitaire() {
 
+    play.rsolitaire().pStackHighlightN(n).onValue(_highlight => {
+      highlight = _highlight;
+      updateHighlight();
+    });
+
     play.rsolitaire().pStackN(n).onValue(stack => {
       let inProgress = stack.inProgress();
       dFronts.init({ stack: stack.front, inProgress });
@@ -187,6 +177,7 @@ function SoliStack(play, ctx, bs) {
       if (!inProgress) {
         extendCards(stack.hidden.length, stack.front.length);
       }
+      updateHighlight();
     });
   }
 }

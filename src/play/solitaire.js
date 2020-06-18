@@ -108,9 +108,10 @@ export default function SolitaireView(play, ctx, pbs) {
   const fid = _ => _;
   const fMergeStreams = (acc, _) => acc.merge(_);
 
-  let esClicks = [
-    dStacks.clicks
-  ].reduce(fMergeStreams);
+  let esClicks = revents.when(
+    [dStacks.clicks, revents.clicks, fid],
+    [revents.clicks, fid]
+  );
 
   let esDrops = revents.when(
     [dStacks.drops, revents.drops, fid],

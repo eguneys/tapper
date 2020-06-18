@@ -13,7 +13,7 @@ import { DragDropProperty,
          HoleProperty
        } from './soliproperties';
 
-import { PSelectProperty } from './solipselect';
+import { PSelectProperty, PSelectValue } from './solipselect';
 
 import RSoliDealer from './rsolidealer';
 
@@ -70,7 +70,59 @@ export default function RSolitaire({
 
   let bDrawer = new SyncBus();
 
+
+  /*
+   * Bus Stack
+   */
+  let bStacks = stackPlate.map(_ => new SyncBus());
+
+  let bStackN = n => bStacks[n].bus;
+
+  let pStacksEarly = bStacks
+      .map(_ => _.bus.toProperty());
+
+  let pStackNEarly = n => pStacksEarly[n];
+
+  let pDragCardsEarly = bStacks.map(bStack =>
+    bStack
+      .bus
+      .map(_ => _.extra)
+      .filter(_ => _.dragcards)
+      .map(_ => ({ dragcards: _.dragcards }))
+      .toEventStream()
+  ).reduce(fMergeStreams)
+      .toProperty();
+
   let bPersistSelect = new SyncBus();
+
+  /*
+   * Clicks
+   */
+  let esCancelClicks = esClicks
+      .filter(_ => !isN(_.stackN));
+
+  let esStackClicks = esClicks
+      .filter(_ => isN(_.stackN));
+
+
+  /*
+   *  Stack Highlight
+   */
+  let esStackHighlightCardN = bPersistSelect
+      .bus
+      .filter(_ => _.value())
+      .map(_ => _.value())
+      .filter(_ => isN(_.stackN))
+      .map(_ => withI(_, _ => _.stackN))
+      .toEventStream();
+
+  let esStackRemoveHighlight = bPersistSelect
+      .bus
+      .filter(_ => _.previous())
+      .map(_ => _.previous())
+      .filter(_ => isN(_.stackN))
+      .map(_ => withI(_, _ => _.stackN))
+      .toEventStream();
 
   let esTDragDrawCancel = pDragDrop
       .map(_ => _.base)
@@ -244,25 +296,6 @@ export default function RSolitaire({
         withI(_,
               _ => _.stackN))
       .toEventStream();
-
-  let bStacks = stackPlate.map(_ => new SyncBus());
-
-  let bStackN = n => bStacks[n].bus;
-
-  let pStacksEarly = bStacks
-      .map(_ => _.bus.toProperty());
-
-  let pStackNEarly = n => pStacksEarly[n];
-
-  let pDragCardsEarly = bStacks.map(bStack =>
-    bStack
-      .bus
-      .map(_ => _.extra)
-      .filter(_ => _.dragcards)
-      .map(_ => ({ dragcards: _.dragcards }))
-      .toEventStream()
-  ).reduce(fMergeStreams)
-      .toProperty();
 
   let esTDragStackCancel = pDragDrop
       .map(_ => _.base)
@@ -482,6 +515,10 @@ export default function RSolitaire({
 
   let esStackReveal2 = esRevealStack2;
 
+  let esStackRefresh = [
+    esDragStackDropRefresh
+  ].reduce(fMergeStreams);
+
   const demuxStacks = es => es.flatMap(_ => {
     return stackPlate
       .map(i => Bacon.once(withI({ cards: _ }, _ => i)))
@@ -490,8 +527,10 @@ export default function RSolitaire({
 
   let essStack = {
     esInit: demuxStacks(esInit),
-    esRefresh: esDragStackDropRefresh,
+    esRefresh: esStackRefresh,
     esRemoveDragCards: demuxStacks(esStackRemoveDragCards),
+    esHighlightCardN: esStackHighlightCardN,
+    esRemoveHighlight: esStackRemoveHighlight,
     esStackDeal: esDealStack2WithCards,
     esStackDragStart,
     esStackDragCancel,
@@ -538,6 +577,10 @@ export default function RSolitaire({
                   pDragCardsHoleEarly,
                   fMergeArgs]);
 
+  /*
+   *  Drag Hole Start
+   */
+
   let esHoleDragStart = pDragDrop
       .map(_ => _.base)
       .map(_ => _.state())
@@ -569,25 +612,9 @@ export default function RSolitaire({
 
   pHoles.map((_, i) => bHoles[i].assign(_));
 
-
-  let esStackClicks = esClicks
-      .filter(_ => isN(_.stackN));
-
-  let esPersistSelectStack = esStackClicks.map(_ => ({
-    stackN: _.stackN,
-    cardN: _.cardN
-  }));
-
-  let esPersistSelect = 
-      [esPersistSelectStack
-      ].reduce(fMergeStreams);
-
-  let esPersistDeselect = Bacon.never();
-
-  let pPersistSelect = PSelectProperty(esPersistSelect,
-                                       esPersistDeselect);
-
-  bPersistSelect.assign(pPersistSelect);
+  /*
+   *  Drag Live
+   */
 
   let esDragCardsStack = pStacks.map(pStack =>
     pStack
@@ -622,10 +649,53 @@ export default function RSolitaire({
                            fMergeArgs]);
 
 
-  
+  /*
+   * All Drag Starts
+   */
+
+  let esAllDragStarts = [
+    esDrawDragStart,
+    esHoleDragStart,
+    esStackDragStart
+  ].reduce(fMergeStreams);
+
+  /*
+   * Persist Select
+   */
+
+  let esPersistSelectStack = esStackClicks
+      .map(_ => new PSelectValue({
+        stackN: _.stackN,
+        cardN: _.cardN
+      }));
+
+  let esPersistSelect = 
+      [esPersistSelectStack
+      ].reduce(fMergeStreams);
+
+  let esPersistDeselect = [
+    esCancelClicks,
+    esAllDragStarts
+  ].reduce(fMergeStreams);
+
+  let pPersistSelect = PSelectProperty(esPersistSelect,
+                                       esPersistDeselect);
+
+  bPersistSelect.assign(pPersistSelect);
+
+  pPersistSelect.map(_ => _.previous()).log();
+
+  /*
+   *  Exports
+   */
   this.pPSelect = pPersistSelect;
   this.pHoleN = n => pHoles[n].map(_ => _.base);
   this.pStackN = n => pStacks[n].map(_ => _.base);
+
+  this.pStackHighlightN = n => pStacks[n]
+    .map(_ => _.extra)
+    .map(_ => _.highlight);
+
   this.pDrawer = pDrawer.map(_ => _.base);
   this.esDragLive = esDragLive;
 

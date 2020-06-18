@@ -156,6 +156,8 @@ export function StackProperty(n, {
   esRefresh,
   esInit,
   esRemoveDragCards,
+  esHighlightCardN,
+  esRemoveHighlight,
   esStackDeal,
   esStackDragCancel,
   esStackDragStart,
@@ -177,9 +179,21 @@ export function StackProperty(n, {
     return _;
   };
 
+  let highlightCardN = (_, { cardN }) => {
+    let cards = _.apply(_ => _.cardsN(cardN));
+    _.add('highlight', cards);
+    return _;
+  };
+
+  let removeHighlight = (_) => {
+    _.remove('highlight');
+    return _;
+  };
+
   let dragStart = (_, { cardN }) => {
     let cards = _.apply(_ => _.cutInProgress(cardN));
     _.add('dragcards', cards);
+    _.remove('highlight');
     return _;
   };
 
@@ -229,6 +243,8 @@ export function StackProperty(n, {
                       [esInit, init],
                       [esRefresh, refresh],
                       [esRemoveDragCards, removeDragCards],
+                      [esHighlightCardN, highlightCardN],
+                      [esRemoveHighlight, removeHighlight],
                       [esStackDeal, deal],
                       [esStackDragCancel, dragCancel],
                       [esStackDropStack, dropStack],
