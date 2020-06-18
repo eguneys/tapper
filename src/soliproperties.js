@@ -255,6 +255,8 @@ export function StackProperty(n, {
 
 export function DrawerProperty({
   esInit,
+  esHighlight,
+  esRemoveHighlight,
   esDealStack1,
   esDealStack2,
   esDeal,
@@ -268,6 +270,16 @@ export function DrawerProperty({
     _.apply(_ => _.init(cards));
 
     return _; };
+
+  let highlight = (_) => {
+    _.add('highlight', true);
+    return _;
+  };
+
+  let removeHighlight = (_) => {
+    _.remove('highlight');
+    return _;
+  };
 
   let dealStack1 = (_) => { 
     _.applyExtra('dealcards',
@@ -320,6 +332,8 @@ export function DrawerProperty({
     new SoliDrawDeck()
   ),
                       [esInit, init],
+                      [esHighlight, highlight],
+                      [esRemoveHighlight, removeHighlight],
                       [esDeal, dealOne],
                       [esShuffle, shuffle],
                       [esDragStart, dragStart],

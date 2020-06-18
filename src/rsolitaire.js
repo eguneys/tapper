@@ -99,11 +99,17 @@ export default function RSolitaire({
    * Clicks
    */
   let esCancelClicks = esClicks
-      .filter(_ => !isN(_.stackN));
+      .filter(_ => !isN(_.stackN) &&
+              !_.drawN);
 
   let esStackClicks = esClicks
       .filter(_ => isN(_.stackN));
 
+  let esDrawClicks = esClicks
+      .filter(_ => isN(_.drawN));
+
+  let esHoleClicks = esClicks
+      .filter(_ => isN(_.holeN));
 
   /*
    *  Stack Highlight
@@ -122,6 +128,23 @@ export default function RSolitaire({
       .map(_ => _.previous())
       .filter(_ => isN(_.stackN))
       .map(_ => withI(_, _ => _.stackN))
+      .toEventStream();
+
+  /*
+   *  Draw Highlight
+   */
+  let esDrawHighlight = bPersistSelect
+      .bus
+      .filter(_ => _.value())
+      .map(_ => _.value())
+      .filter(_ => _.drawN)
+      .toEventStream();
+
+  let esDrawRemoveHighlight = bPersistSelect
+      .bus
+      .filter(_ => _.previous())
+      .map(_ => _.previous())
+      .filter(_ => _.drawN)
       .toEventStream();
 
   let esTDragDrawCancel = pDragDrop
@@ -224,6 +247,8 @@ export default function RSolitaire({
 
   let pDrawer = DrawerProperty({
     esInit, 
+    esHighlight: esDrawHighlight,
+    esRemoveHighlight: esDrawRemoveHighlight,
     esDealStack1,
     esDealStack2,
     esShuffle: esDrawShuffle,
@@ -669,8 +694,14 @@ export default function RSolitaire({
         cardN: _.cardN
       }));
 
+  let esPersistSelectDraw = esDrawClicks
+      .map(_ => new PSelectValue({
+        drawN: true
+      }));
+
   let esPersistSelect = 
-      [esPersistSelectStack
+      [esPersistSelectStack,
+       esPersistSelectDraw
       ].reduce(fMergeStreams);
 
   let esPersistDeselect = [
@@ -683,21 +714,22 @@ export default function RSolitaire({
 
   bPersistSelect.assign(pPersistSelect);
 
-  pPersistSelect.map(_ => _.previous()).log();
-
   /*
    *  Exports
    */
   this.pPSelect = pPersistSelect;
   this.pHoleN = n => pHoles[n].map(_ => _.base);
   this.pStackN = n => pStacks[n].map(_ => _.base);
+  this.pDrawer = pDrawer.map(_ => _.base);
+  this.esDragLive = esDragLive;
 
   this.pStackHighlightN = n => pStacks[n]
     .map(_ => _.extra)
     .map(_ => _.highlight);
 
-  this.pDrawer = pDrawer.map(_ => _.base);
-  this.esDragLive = esDragLive;
+  this.pDrawerHighlight = pDrawer
+    .map(_ => _.extra)
+    .map(_ => _.highlight);
 
   let esTweenSettle = [
     esDragStackDropStackCancelSettleTween,

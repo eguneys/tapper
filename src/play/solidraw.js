@@ -48,25 +48,6 @@ export default function SoliDraw(play, ctx, bs) {
   this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
   this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 
-  // const observePSelection = ({ 
-  //   active,
-  //   drawN
-  // }) => {
-    
-  //   if (!drawN) {
-  //     return;
-  //   }
-
-  //   if (active) {
-  //     dDraw.highlightCards([0]);
-  //   } else {
-  //     dDraw.highlight(false);
-  //   }
-
-  // };
-
-  // solitaire.pSelection.subscribe(observePSelection);
-
   this.init = (data) => {
     listenSolitaire();
   };
@@ -94,8 +75,18 @@ export default function SoliDraw(play, ctx, bs) {
     dDraw.init({ stack: drawer.showStack3() });
   };
 
+  const updateHighlight = (highlight) => {
+    if (highlight) {
+      dDraw.highlightCards([0]);
+    } else {
+      dDraw.highlight(false);
+    }
+  };
+
   const listenSolitaire = () => {
     rsolitaire().pDrawer.onValue(initDrawer);
+
+    rsolitaire().pDrawerHighlight.onValue(updateHighlight);
   };
 
   this.esShuffle = revents.clicks
@@ -109,5 +100,7 @@ export default function SoliDraw(play, ctx, bs) {
   const insertDrawN = _ => ({ ..._, drawN: true });
 
   this.esDrags = dDraw.drags.map(insertDrawN);
+
+  this.esClicks = dDraw.clicks.map(insertDrawN);
 
 }
