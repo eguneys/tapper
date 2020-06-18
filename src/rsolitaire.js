@@ -27,11 +27,20 @@ const withI = (obj, pullI) => ({
 });
 
 export default function RSolitaire({ 
+  esStarts,
   esClicks,
   esDrags, 
   esDrops,
   esDrawDeals,
   esDrawShuffle }) {
+
+  let esStartsStack = esStarts
+      .filter(_ => isN(_.stackN))
+      .map(_ => ({
+        stackN: _.stackN,
+        cardN: _.cardN
+      }));
+
 
   let pDragDrop = DragDropProperty(esDrags, esDrops);
   
@@ -341,6 +350,56 @@ export default function RSolitaire({
                        .map(_ => _.dealcards),
                        (_, cards) => ({ cards, ..._ }));
 
+
+  /*
+   * Move Persist Select
+   */
+
+  const makeEsMoveCards =
+        (src, dst) => {
+
+          let { stackN: srcStackN,
+                cardN: srcCardN } = src;
+
+          let { stackN: dstStackN } = dst;
+
+          return Bacon.once({ 
+            moveCut: withI(src, _ => _.stackN) })
+            .concat(Bacon.once({
+              moveAdd: withI(dst, _ => _.stackN)
+            }));
+         };
+
+  let pMovePersistSelectStack = 
+      esStartsStack.flatMap(startStack => {
+        let es = Bacon.combineWith(bPersistSelect, fId)
+            .flatMap(persistSelect => {
+              return makeEsMoveCards(persistSelect, startStack);
+            });
+
+        return es;
+      });
+
+  let esMoveStackDragStart = pMovePersistSelectStack
+      .filter(_ => _.moveAdd)
+      .map(_ => _.moveAdd)
+      .toEventStream()
+      .log();
+
+  let esMoveStackDrop = pMovePersistSelectStack
+      .filter(_ => _.moveCut)
+      .map(_ => _.moveCut)
+      .toEventStream();
+
+
+  let esMoveStackDropWithCards =
+      Bacon.when([esMoveStackDrop, 
+                  pDragCardsEarly,
+                  fMergeArgs]);
+
+  /*
+   * Drag Stack Start
+   */
   let esDragStackStart = pDragDrop
       .map(_ => _.base)
       .map(_ => _.state())
@@ -449,9 +508,13 @@ export default function RSolitaire({
         [esDragStackDropStackCancel, pDragCardsEarly, fMergeArgs],
         [esDragStackCancel, pDragCardsEarly, fMergeArgs]);
 
-  let esStackDragStart = esDragStackStart;
+  let esStackDragStart = [
+    esDragStackStart,
+    // esMoveStackDragStart
+  ].reduce(fMergeStreams);
   let esStackDragCancel = esDragStackCancelWithCards;
   let esStackDropStack = [
+    esMoveStackDropWithCards,
     esDragStackDropStackWithCards,
     esDragDrawDropStackWithCards,
     esDragHoleDropStackWithCards
@@ -536,24 +599,6 @@ export default function RSolitaire({
     return Bacon.once({ revealrefresh: _ })
       .concat(es);
   });
-
-
-
-  // let esExtraRevealEarly = bStacks.map(bStack =>
-  //   bStack
-  //     .bus
-  //     .map(_ => _.extra)
-  //     .filter(_ => _.reveal)
-  //     .map(_ => _.reveal)
-  //     .toEventStream()
-  // ).reduce(fMergeStreams)
-  //     .toProperty();
-  // let esTRevealStack2 = esExtraRevealEarly
-  //     .flatMap(_ => 
-  //       makeFxTween(_, 200)
-  //         .concat(
-  //           Bacon.once({ action: withI(_, _ => _.stackN) }))
-  //     ).toEventStream();
 
   let esStackReveal = esTStackReveal
       .filter(_ => _.reveal1)
@@ -743,6 +788,12 @@ export default function RSolitaire({
        esPersistSelectHole
       ].reduce(fMergeStreams);
 
+  const fFalse = _ => false;
+
+  esPersistSelect = Bacon.when(
+    [esPersistSelect, esMoveStackDragStart, fId],
+    [esPersistSelect, fFalse]).filter(Boolean).log();
+
   let esPersistDeselect = [
     esCancelClicks,
     esAllDragStarts
@@ -753,7 +804,6 @@ export default function RSolitaire({
 
   bPersistSelect.assign(pPersistSelect);
 
-  // pPersistSelect.map(_ => _.value()).log();
 
   /*
    *  Exports

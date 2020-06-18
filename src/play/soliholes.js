@@ -60,12 +60,16 @@ export default function SoliHoles(play, ctx, bs) {
     this.container.render();
   };
 
+  const fMergeStreams = (acc, _) => acc.merge(_);
+
   this.drags = dHoles.map(_ => _.drags)
-    .reduce((acc, _) => acc.merge(_));
+    .reduce(fMergeStreams);
   this.drops = dHoles.map(_ => _.drops)
-    .reduce((acc, _) => acc.merge(_));
+    .reduce(fMergeStreams);
   this.clicks = dHoles.map(_ => _.clicks)
-    .reduce((acc, _) => acc.merge(_));
+    .reduce(fMergeStreams);
+  this.starts = dHoles.map(_ => _.starts)
+    .reduce(fMergeStreams);
 }
 
 function SoliHole(play, ctx, bs) {
@@ -170,6 +174,7 @@ function SoliHole(play, ctx, bs) {
   this.drags = dPlaceholder.drags.map(insertN);
   this.drops = dPlaceholder.drops.map(insertN);
   this.clicks = dPlaceholder.clicks.map(insertN);
+  this.starts = dPlaceholder.starts.map(insertN);
 
   // this.drags.log();
   // this.drops.log();

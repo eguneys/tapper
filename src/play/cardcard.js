@@ -137,6 +137,7 @@ export default function CardCard(play, ctx, bs) {
 
   let inHitBounds = _ => hitTest(..._.start, container.bounds());
   let insertN = _ => ({ ..._, n });
+  this.starts = revents.starts.filter(inHitBounds).map(insertN);
   this.clicks = revents.clicks.filter(inHitBounds).map(insertN);
   this.drags = revents.drags.filter(inHitBounds).map(insertN);
   this.drops = revents.drops.filter(inHitBounds).map(insertN);

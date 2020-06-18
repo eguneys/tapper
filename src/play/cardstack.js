@@ -223,6 +223,8 @@ export default function CardStack(play, ctx, bs) {
     return null;
   };
 
+  this.starts = revents.starts
+    .flatMap(inCardHitBounds());
   this.clicks = revents.clicks
     .flatMap(inCardHitBounds());
   this.drags = revents.drags

@@ -207,6 +207,11 @@ export function StackProperty(n, {
     return _;
   };
 
+  let cut1 = (_, { cardN }) => {
+    let cards = _.apply(_ => _.cutInProgress(cardN));
+    return _;
+  };
+
   let dragStart = (_, { cardN }) => {
     let cards = _.apply(_ => _.cutInProgress(cardN));
     _.add('dragcards', cards);

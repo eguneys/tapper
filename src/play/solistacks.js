@@ -79,6 +79,8 @@ export default function SoliStacks(play, ctx, bs) {
     .reduce((acc, _) => acc.merge(_));
   this.clicks = dStacks.map(_ => _.clicks)
     .reduce((acc, _) => acc.merge(_));
+  this.starts = dStacks.map(_ => _.starts)
+    .reduce((acc, _) => acc.merge(_));
 
 }
 
@@ -157,6 +159,7 @@ function SoliStack(play, ctx, bs) {
   let esPlaceholderDrops = dPlaceholder.drops
       .filter(_ => dFronts.empty() && dBacks.empty());
 
+  this.starts = dFronts.starts.map(insertN);
   this.clicks = dFronts.clicks.map(insertN);
   this.drags = dFronts.drags.map(insertN);
   this.drops = dFronts.drops
