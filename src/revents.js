@@ -4,7 +4,11 @@ import { Bus, never, later, fromEvent } from 'baconjs';
 
 import * as Bacon from 'baconjs';
 
+import { makeId } from './util';
+
 export default function Revents (canvas) {
+
+  const makeMouseActionId = makeId("ma-");
 
   const dragMoveDistance = 20;
   const holdingPeriod = 600;
@@ -25,6 +29,7 @@ export default function Revents (canvas) {
     const pos = eventPosition(canvas, e);
 
     return {
+      id: makeMouseActionId(),
       button: e.button,
       start: pos,
       epos: pos
@@ -84,7 +89,10 @@ export default function Revents (canvas) {
                  })
                  // .skip(2)
                  .take(1))
-      .takeUntil(later(holdingPeriod));
+      .takeUntil(later(holdingPeriod)).map(_ => ({
+        id: startE.id,
+        ..._
+      }));
   });
 
   let holds = starts.flatMap(startE => {

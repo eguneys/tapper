@@ -27,6 +27,7 @@ const withI = (obj, pullI) => ({
 });
 
 export default function RSolitaire({ 
+  esEnds,
   esStarts,
   esClicks,
   esDrags, 
@@ -37,10 +38,10 @@ export default function RSolitaire({
   let esStartsStack = esStarts
       .filter(_ => isN(_.stackN))
       .map(_ => ({
+        id: _.id,
         stackN: _.stackN,
         cardN: _.cardN
       }));
-
 
   let pDragDrop = DragDropProperty(esDrags, esDrops);
   
@@ -107,6 +108,8 @@ export default function RSolitaire({
    */
 
   let bPersistSelect = new SyncBus();
+
+  let pBPersistSelect = bPersistSelect.bus.toProperty();
 
   /*
    * Clicks
@@ -364,38 +367,68 @@ export default function RSolitaire({
           let { stackN: dstStackN } = dst;
 
           return Bacon.once({ 
-            moveCut: withI(src, _ => _.stackN) })
+            moveCut: withI({ id: dst.id, 
+                             ...src }, _ => _.stackN) })
             .concat(Bacon.once({
               moveAdd: withI(dst, _ => _.stackN)
             }));
          };
 
-  let pMovePersistSelectStack = 
+  let esTMovePersistSelectStack = 
       esStartsStack.flatMap(startStack => {
-        let es = Bacon.combineWith(bPersistSelect, fId)
+        let es = pBPersistSelect
+            .take(1)
             .flatMap(persistSelect => {
+              if (!persistSelect.value()) {
+                return Bacon.never();
+              }
               return makeEsMoveCards(persistSelect, startStack);
             });
-
-        return es;
+        return Bacon.once({ xpersistrefresh: true })
+          .concat(es);
       });
 
-  let esMoveStackDragStart = pMovePersistSelectStack
+  let esMoveStackDragStart = esTMovePersistSelectStack
       .filter(_ => _.moveAdd)
       .map(_ => _.moveAdd)
-      .toEventStream()
-      .log();
+      .toEventStream();
 
-  let esMoveStackDrop = pMovePersistSelectStack
+  let esMoveStackDrop = esTMovePersistSelectStack
       .filter(_ => _.moveCut)
       .map(_ => _.moveCut)
       .toEventStream();
+
+  let esPersistRefresh = esTMovePersistSelectStack
+      .filter(_ => _.persistrefresh);
+
+  let pMoveStackDragStartActionId = esMoveStackDragStart
+      .map(_ => _.id)
+      .toProperty();
 
 
   let esMoveStackDropWithCards =
       Bacon.when([esMoveStackDrop, 
                   pDragCardsEarly,
                   fMergeArgs]);
+
+  /*
+   *  Skip On Move Cards
+   */
+
+
+  let esMoveCards = Bacon.when(
+    [esMoveStackDragStart, esStarts, _ => true],
+    [esStarts, _ => false]);
+
+  let pSkipOnMoveCards = esMoveCards.toProperty();
+
+  // pSkipOnMoveCards.log();
+
+  // esMoveStackDragStart.log();
+  // esMoveCards.log();
+
+  //pSkipOnMoveCards.log();
+  // esMoveCards.log();
 
   /*
    * Drag Stack Start
@@ -713,8 +746,6 @@ export default function RSolitaire({
 
   pHoles.map((_, i) => bHoles[i].assign(_));
 
-  // pHoles[0].map(_ => _.extra).log();
-
   /*
    *  Drag Live
    */
@@ -768,17 +799,20 @@ export default function RSolitaire({
 
   let esPersistSelectStack = esStackClicks
       .map(_ => new PSelectValue({
+        id: _.id,
         stackN: _.stackN,
         cardN: _.cardN
       }));
 
   let esPersistSelectDraw = esDrawClicks
       .map(_ => new PSelectValue({
+        id: _.id,
         drawN: true
       }));
 
   let esPersistSelectHole = esHoleClicks
       .map(_ => new PSelectValue({
+        id: _.id,
         holeN: _.holeN
       }));
 
@@ -788,19 +822,33 @@ export default function RSolitaire({
        esPersistSelectHole
       ].reduce(fMergeStreams);
 
-  const fFalse = _ => false;
 
-  esPersistSelect = Bacon.when(
-    [esPersistSelect, esMoveStackDragStart, fId],
-    [esPersistSelect, fFalse]).filter(Boolean).log();
+  let esPersistSelectWhenOk = 
+      Bacon.when([esPersistSelect,
+                  pSkipOnMoveCards,
+                  (_, skip) => {
+                    if (skip) {
+                      return false;
+                    }
+                    return _;
+                  }]).filter(Boolean);
+
+  // TODO: Ask why skip while doesn't work
+  // esPersistSelectWhenOk = esPersistSelect
+  //   .skipWhile(pSkipOnMoveCards);
+
+  // esPersistSelectWhenOk.log();
+  pSkipOnMoveCards.log();
 
   let esPersistDeselect = [
     esCancelClicks,
     esAllDragStarts
   ].reduce(fMergeStreams);
 
-  let pPersistSelect = PSelectProperty(esPersistSelect,
-                                       esPersistDeselect);
+  let pPersistSelect = PSelectProperty(
+    esPersistRefresh,
+    esPersistSelectWhenOk,
+    esPersistDeselect);
 
   bPersistSelect.assign(pPersistSelect);
 

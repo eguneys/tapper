@@ -2,9 +2,15 @@ import * as Bacon from 'baconjs';
 
 import {isN } from './soliutils';
 
-export function PSelectProperty(esSelect,
-                                esDeselect) {
+export function PSelectProperty(
+  esRefresh,
+  esSelect,
+  esDeselect) {
   
+  let refresh = _ => {
+    return _;
+  };
+
   let deselect = _ => {
     _.deselect();
     return _;
@@ -16,6 +22,7 @@ export function PSelectProperty(esSelect,
   };
 
   return Bacon.update(new PSelect(),
+                      [esRefresh, refresh],
                       [esDeselect, deselect],
                       [esSelect, select]);
 }
@@ -52,12 +59,14 @@ function PSelect() {
 
 
 export function PSelectValue({
+  id,
   stackN,
   cardN,
   drawN,
   holeN
 }) {
   
+  this.id = id;
   this.stackN = stackN;
   this.cardN = cardN;
   this.drawN = drawN;
@@ -75,6 +84,7 @@ export function PSelectValue({
     } else if (isN(holeN)) {
       return holeN === value.holeN;
     }
+    return false;
   };
 
 }
