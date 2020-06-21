@@ -73,6 +73,8 @@ export default function GSolitaire() {
   const actionReset = () => {
     isRunning = true;
 
+    undoer.set(_ => []);
+
     stacks.forEach(_ =>
       _.mutate(_ => _.clear()));
 
@@ -125,7 +127,12 @@ export default function GSolitaire() {
    */
 
   const actionDealDraw = async () => {
+
     let card = effectDealDraw();
+
+    if (!card) {
+      drawer.apply(_ => _.debug());
+    }
 
     await fx('dealdraw').begin(card);
 
@@ -134,6 +141,7 @@ export default function GSolitaire() {
     effectUndoPush(async () => {
       await actionUndoDealDraw(card);
     });
+
   };
 
   const effectDrawerDraw = () => {
@@ -338,8 +346,6 @@ export default function GSolitaire() {
    * Undo Actions
    */
 
-  let userUndosQueue = serialPromise();
-
   let i = 0;
   const actionUndos = async () => {
     let canUndo = undoer.apply(_ => _.length > 0);
@@ -446,17 +452,6 @@ export default function GSolitaire() {
   const actionUndoShuffleDraw = async () => {
     drawer.mutate(_ => _.undoShuffle());
   };
-
-
-  /*
-   *  Undo Action
-   */
-
-  const actionUndo = () => {
-    userUndosQueue(actionUndos);    
-  };
-
-
 
   /*
    * Settle Stack
@@ -816,6 +811,11 @@ export default function GSolitaire() {
       return;
     }
 
+    // select empty placeholder
+    if (!isN(cardN)) {
+      return;
+    }
+
     let cards = effectStackCutInProgress(stackN, cardN);
 
     effectActiveSelectStack(stackN, cards);
@@ -1018,7 +1018,7 @@ export default function GSolitaire() {
   };
 
   this.userActionUndo = async () => {
-    await actionUndo();
+    await userActionsQueue(actionUndos);
   };
   
 }

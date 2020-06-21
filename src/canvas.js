@@ -11,7 +11,9 @@ export default function Canvas(element) {
       desiredHeight;
 
   desiredHeight = displayHeight;
-  desiredWidth = desiredHeight * desiredAspectRatio;
+  desiredWidth = Math.max(displayWidth,
+                          desiredHeight *
+                          desiredAspectRatio);
 
   if (desiredWidth > displayWidth) {
     desiredWidth = displayWidth;

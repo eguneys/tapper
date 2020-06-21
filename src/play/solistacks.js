@@ -80,7 +80,11 @@ function SoliStack(play, ctx, bs) {
   let dPlaceholder = new CardPlaceholder(this, ctx, bs);
 
   this.getHitCardForEpos = epos => {
-    let res = dFronts.getHitCardForEpos(epos);
+    let res = [dFronts, dPlaceholder].
+        reduce((acc, _) => 
+          acc ? acc : _.getHitCardForEpos(epos)
+          , null);
+
     if (res) {
       res.stackN = n;
     }

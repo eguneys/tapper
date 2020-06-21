@@ -9,6 +9,14 @@ export default function Observable(instance) {
 
   this.apply = (getter) => getter(instance);
 
+  this.set = (mutation) => {
+    instance = mutation(instance);
+
+    subs.forEach(_ => _(instance));
+
+    return instance;
+  };
+
   this.mutate = (mutation) => {
     let res = mutation(instance);
 
@@ -21,8 +29,8 @@ export default function Observable(instance) {
 
   this.unsubscribe = (fn) => subs.splice(subs.indexOf(fn), 1);
 
-  this.log = () => {
-    this.subscribe(_ => console.log(_));
+  this.log = (fn = _ => _) => {
+    this.subscribe(_ => console.log(fn(_)));
   };
 }
 
