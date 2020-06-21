@@ -210,8 +210,6 @@ export default function GSolitaire() {
     });
   };
 
-  persistSelection.log();
-
   const effectPersistSelectStack = (_stackN, cards) => {
     let cardN = stackN(_stackN)
         .apply(_ => 
@@ -313,7 +311,6 @@ export default function GSolitaire() {
       return _.remove();
     });
   };
-
 
   /*
    * Undo Effect
@@ -620,6 +617,108 @@ export default function GSolitaire() {
       effectPersistSelectHole(holeN, cards);
     }
   };
+
+  /*
+   *  Move Cards
+   */
+
+  const actionMoveCardsDrawStack = async(dstStackN) => {
+    let card = effectDrawerDraw(),
+        cards = [card];
+    
+    await fx('move').begin({
+      srcDrawN: true,
+      dstStackN,
+      cards
+    });
+
+    effectDrawerCommitDraw();
+
+    effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      await actionUndoStackSrcDraw(dstStackN, card);
+    });
+  };
+
+  const actionMoveCardsHoleStack = async(srcHoleN, dstStackN) => {
+
+    let card = effectHoleRemove(srcHoleN),
+        cards = [card];
+    
+    await fx('move').begin({
+      srcHoleN,
+      dstStackN,
+      cards
+    });
+
+    effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      actionUndoStackSrcHole(srcHoleN, dstStackN, cards);
+    });
+  };
+
+  const actionMoveCardsStackStack = async (srcStackN, dstStackN, cardN) => {
+
+    let cards = effectStackCut1(srcStackN, cardN);
+
+    let pReveal = actionRevealStack(srcStackN),
+        pMove = fx('move').begin({
+          srcStackN,
+          dstStackN,
+          cards
+        });
+
+    let revealCard = await pReveal;
+    await pMove;
+
+    effectStackAdd1(dstStackN, cards);
+
+    effectUndoPush(async () => {
+      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+    });    
+  };
+
+  const actionMoveCardsDrawHole = async (dstHoleN) => {
+    let card = effectDrawerDraw(),
+        cards = [card];
+
+    await fx('move').begin({
+      srcDrawN: true,
+      dstHoleN,
+      cards
+    });
+
+    effectDrawerCommitDraw();
+
+    effectHoleAdd(dstHoleN, card);
+
+    effectUndoPush(async () => {
+      await actionUndoHoleSrcDraw(dstHoleN, card);
+    });
+  };
+
+  const actionMoveCardsStackHole = async (srcStackN, dstHoleN) => {
+    let card = effectStackCutLast(srcStackN),
+        cards = [card];
+
+    let pReveal = actionRevealStack(srcStackN),
+        pMove = fx('move').begin({
+          srcStackN,
+          dstHoleN,
+          cards
+        });
+
+    let revealCard = await pReveal;
+    await pMove;
+
+    effectHoleAdd(dstHoleN, card);
+
+    effectUndoPush(async () => {
+      await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);
+    });
+  };
   
 
   /*
@@ -672,8 +771,51 @@ export default function GSolitaire() {
    * Select/Drop Stack
    */
 
-  const actionSelectStack = orig => {
+  const actionPersistSelectStack = async (stackN, cardN) => {
+    let persistSelected = persistSelection
+        .apply(_ => _.active);
+
+    if (persistSelected) {
+      let { stackN: persistStackN,
+            cardN,
+            holeN: persistHoleN,
+            drawN: persistDrawN,
+            cards } = persistSelection.apply(_ => _);
+
+      if (isN(persistStackN) && 
+          persistStackN !== stackN &&
+          canSettleStack(stackN, cards)) {
+
+        effectPersistSelectEnd();
+        
+        await actionMoveCardsStackStack(persistStackN, stackN, cardN);
+        return true;
+      } else if (isN(persistHoleN) && canSettleStack(stackN, cards)) {
+
+        effectPersistSelectEnd();
+
+        await actionMoveCardsHoleStack(persistHoleN, stackN);
+        return true;
+      } else if (persistDrawN && canSettleStack(stackN, cards)) {
+        effectPersistSelectEnd();
+
+        await actionMoveCardsDrawStack(stackN);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const actionSelectStack = async orig => {
     let { stackN, cardN } = orig;
+
+    let persistResult = 
+        await actionPersistSelectStack(stackN, cardN);
+
+    if (persistResult) {
+      return;
+    }
+
     let cards = effectStackCutInProgress(stackN, cardN);
 
     effectActiveSelectStack(stackN, cards);
@@ -707,8 +849,43 @@ export default function GSolitaire() {
    * Select/Drop Hole
    */
 
+  const actionPersistSelectHole = async (holeN) => {
+    let persistSelected = persistSelection
+        .apply(_ => _.active);
+
+    if (persistSelected) {
+      let { stackN: persistStackN,
+            drawN: persistDrawN,
+            cardN,
+            cards } = persistSelection.apply(_ => _);
+
+      if (isN(persistStackN) &&
+          canSettleHole(holeN, cards)) {
+
+        effectPersistSelectEnd();
+
+        await actionMoveCardsStackHole(persistStackN, holeN);
+        return true;
+      } else if (persistDrawN &&
+                 canSettleHole(holeN, cards)) {
+        effectPersistSelectEnd();
+
+        await actionMoveCardsDrawHole(holeN);
+        return true;
+      }
+    }
+    return false;
+  };
+
   const actionSelectHole = async (orig) => {
     let { holeN } = orig;
+
+    let persistResult = 
+        await actionPersistSelectHole(holeN);
+
+    if (persistResult) {
+      return;
+    }
 
     if (!askHoleRemove(holeN)) {
       return;
