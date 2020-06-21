@@ -35,24 +35,24 @@ export default function SoliHoles(play, ctx, bs) {
   };
   initContainer();
 
-  // const observePSelection = ({ 
-  //   active,
-  //   holeN }) => {
-      
-  //     if (!isN(holeN)) {
-  //       return;
-  //     }
+  const observePSelection = ({ 
+    active,
+    holeN }) => {
 
-  //     let dHole = this.dHoleN(holeN);
+      if (!isN(holeN)) {
+        return;
+      }
 
-  //     if (active) {
-  //       dHole.highlight(true);
-  //     } else {
-  //       dHole.highlight(false);
-  //     }
-  // };
+      let dHole = this.dHoleN(holeN);
 
-  // this.solitaire.pSelection.subscribe(observePSelection);
+      if (active) {
+        dHole.highlight(true);
+      } else {
+        dHole.highlight(false);
+      }
+  };
+
+  this.gsolitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {
     

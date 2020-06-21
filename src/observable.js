@@ -20,6 +20,10 @@ export default function Observable(instance) {
   this.subscribe = (fn) => subs.push(fn);
 
   this.unsubscribe = (fn) => subs.splice(subs.indexOf(fn), 1);
+
+  this.log = () => {
+    this.subscribe(_ => console.log(_));
+  };
 }
 
 export function PromiseObservable() {

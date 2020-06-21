@@ -39,25 +39,24 @@ export default function SoliStacks(play, ctx, bs) {
       , null);
   };
 
-  // const observePSelection = ({ 
-  //   active,
-  //   stackN,
-  //   cards }) => {
+  const observePSelection = ({ 
+    active,
+    stackN,
+    cards }) => {
+      if (!isN(stackN)) {
+        return;
+      }
 
-  //     if (!isN(stackN)) {
-  //       return;
-  //     }
+      let dStack = this.dStackN(stackN);
 
-  //     let dStack = this.dStackN(stackN);
+      if (active) {
+        dStack.highlightCards(cards);
+      } else {
+        dStack.highlight(false);
+      }
+  };
 
-  //     if (active) {
-  //       dStack.highlightCards(cards);
-  //     } else {
-  //       dStack.highlight(false);
-  //     }
-  // };
-
-  // this.solitaire.pSelection.subscribe(observePSelection);
+  this.gsolitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 

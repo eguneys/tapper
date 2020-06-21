@@ -85,24 +85,24 @@ export default function SoliDraw(play, ctx, bs) {
     }
   });
 
-  // const observePSelection = ({ 
-  //   active,
-  //   drawN
-  // }) => {
+  const observePSelection = ({ 
+    active,
+    drawN
+  }) => {
     
-  //   if (!drawN) {
-  //     return;
-  //   }
+    if (!drawN) {
+      return;
+    }
 
-  //   if (active) {
-  //     dDraw.highlightCards([0]);
-  //   } else {
-  //     dDraw.highlight(false);
-  //   }
+    if (active) {
+      dDraw.highlightCards([0]);
+    } else {
+      dDraw.highlight(false);
+    }
 
-  // };
+  };
 
-  // solitaire.pSelection.subscribe(observePSelection);
+  gsolitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 

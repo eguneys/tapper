@@ -210,6 +210,8 @@ export default function GSolitaire() {
     });
   };
 
+  persistSelection.log();
+
   const effectPersistSelectStack = (_stackN, cards) => {
     let cardN = stackN(_stackN)
         .apply(_ => 
@@ -503,7 +505,8 @@ export default function GSolitaire() {
 
     effectStackAdd1(stackN, cards);
 
-    // call this before persist select stack because of highlight
+    // call this before persist select stack
+    // because of highlight
     effectStackCutInProgressCommit(stackN);
 
     if (!hasMoved) {
@@ -793,13 +796,14 @@ export default function GSolitaire() {
       await actionDragDrawDrop(dest);
     } else if (isN(holeN)) {
       await actionDragHoleDrop(dest);
+    } else {
+      effectPersistSelectEnd();
     }
 
     activeSelection.mutate(_ => {
       _.activeEnding = false;
     });
     effectActiveDeselect();
-    effectPersistSelectEnd();
   };
 
   /* 
@@ -833,7 +837,7 @@ export default function GSolitaire() {
   };
 
   this.userActionShuffle = async () => {
-    await actionShuffleDraw();
+    await userActionsQueue(actionShuffleDraw);
   };
 
   this.userActionUndo = async () => {
