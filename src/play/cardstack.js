@@ -75,6 +75,39 @@ export default function CardStack(play, ctx, bs) {
     cards.forEach((n, i) => this.highlightCard(dCards.length - 1 - i));
   };
 
+  const getHitCardForEpos = epos => {
+    let iCardExtend = iExtend.value();
+
+    let hitCard = dCards.find((dCard, i) => {
+      let lastCard = i === (dCards.length - 1);
+
+      let b = dCard.container.bounds();
+
+      let handleBounds = {
+        x: b.x,
+        y: b.y,
+        width: b.width,
+        height: lastCard?b.height:iCardExtend
+      };
+      return hitTest(epos[0], epos[1], handleBounds);
+    });
+
+    if (hitCard) {
+      let b = hitCard.container.bounds();
+      let decay = [-epos[0] + b.x,
+                   -epos[1] + b.y];
+
+      
+      return {
+        cardN: hitCard.n(),
+        decay
+      };
+    }
+    return null;
+  };
+
+  this.getHitCardForEpos = getHitCardForEpos;
+
   const handleMove = moveHandler({
     onBegin(epos) {
       let iCardExtend = iExtend.value();

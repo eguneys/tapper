@@ -6,7 +6,10 @@ import AContainer from './acontainer';
 
 import CardBackground from './cardbackground';
 
+import GSolitaire from '../gsolitaire';
 import Solitaire from '../solitaire';
+
+import SoliSoul from './solisoul';
 import SoliHoles from './soliholes';
 import SoliStacks from './solistacks';
 import SoliDraw from './solidraw';
@@ -75,7 +78,10 @@ export default function SolitaireView(play, ctx, pbs) {
     };
   })();
 
+  let gsolitaire = this.gsolitaire = new GSolitaire();
   let solitaire = this.solitaire = new Solitaire();
+
+  let dSoul = new SoliSoul(this, ctx, bs);
 
   let dBg = new CardBackground(this, ctx, bs);
 
@@ -98,8 +104,22 @@ export default function SolitaireView(play, ctx, pbs) {
   this.dDrawN = dDraw.dDrawN;
   this.dDraw = dDraw;
 
+  this.getHitKeyForEpos = epos => {
+
+    let res = [dStacks, 
+               dDraw,
+               dHoles]
+        .reduce((acc, hitTarget) =>
+          acc ? acc : hitTarget.getHitKeyForEpos(epos),
+        null);
+
+    return res;
+  };
+
   let container = this.container = new AContainer();
   const initContainer = () => {
+
+    container.addChild(dSoul);
 
     container.addChild(dBg);
 
@@ -122,7 +142,8 @@ export default function SolitaireView(play, ctx, pbs) {
   initContainer();
 
   this.init = (data) => {
-    solitaire.init();
+    gsolitaire.userInit();
+    // solitaire.init();
   };
 
   this.remove = () => {

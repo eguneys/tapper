@@ -8,6 +8,7 @@ import { isN } from '../soliutils';
 
 export default function SoliHoles(play, ctx, bs) {
 
+  this.gsolitaire = play.gsolitaire;
   this.solitaire = play.solitaire;
 
   let dHoles = [
@@ -19,6 +20,12 @@ export default function SoliHoles(play, ctx, bs) {
 
   this.dHoleN = n => dHoles[n];
 
+  this.getHitKeyForEpos = epos => {
+    return dHoles.reduce((acc, dStack) =>
+      acc ? acc : dStack.getHitCardForEpos(epos)
+      , null);
+  };
+
   let container = this.container = new AContainer();
   const initContainer = () => {
     dHoles.forEach((dHole, i) => {
@@ -28,24 +35,24 @@ export default function SoliHoles(play, ctx, bs) {
   };
   initContainer();
 
-  const observePSelection = ({ 
-    active,
-    holeN }) => {
+  // const observePSelection = ({ 
+  //   active,
+  //   holeN }) => {
       
-      if (!isN(holeN)) {
-        return;
-      }
+  //     if (!isN(holeN)) {
+  //       return;
+  //     }
 
-      let dHole = this.dHoleN(holeN);
+  //     let dHole = this.dHoleN(holeN);
 
-      if (active) {
-        dHole.highlight(true);
-      } else {
-        dHole.highlight(false);
-      }
-  };
+  //     if (active) {
+  //       dHole.highlight(true);
+  //     } else {
+  //       dHole.highlight(false);
+  //     }
+  // };
 
-  this.solitaire.pSelection.subscribe(observePSelection);
+  // this.solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {
     
@@ -62,6 +69,7 @@ export default function SoliHoles(play, ctx, bs) {
 
 function SoliHole(play, ctx, bs) {
 
+  let gsolitaire = play.gsolitaire;
   let solitaire = play.solitaire;
 
   const { textures } = ctx;
@@ -79,21 +87,21 @@ function SoliHole(play, ctx, bs) {
     texture: mcards['highlight']
   });
 
-  let dPlaceholder = new CardPlaceholder(this, ctx, {
-    onBeginCard(epos, decay) {
-      solitaire.userActionSelectHole(n, epos, decay);
-    },
-    onEndCard() {
-      solitaire.userActionEndSelectHole(n);
-    },
-    ...bs
-  });
+  let dPlaceholder = new CardPlaceholder(this, ctx, bs);
 
   let dTop = new CardCard(this, ctx, bs);
 
   this.nextCardGlobalPosition = () => {
     let { x, y } = dTop.container.globalPosition();
     return [x, y];
+  };
+
+  this.getHitCardForEpos = epos => {
+    let res = dPlaceholder.getHitCardForEpos(epos);
+    if (res) {
+      res.holeN = n;
+    }
+    return res;
   };
 
   let container = this.container = new AContainer();
@@ -109,7 +117,7 @@ function SoliHole(play, ctx, bs) {
   };
   initContainer();
 
-  solitaire.holeN(n).subscribe(hole => {
+  gsolitaire.holeN(n).subscribe(hole => {
     let top = hole.top();
     if (top) {
       dHighlight.visible(false);

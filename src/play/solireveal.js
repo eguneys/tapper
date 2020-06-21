@@ -25,7 +25,7 @@ export default function Play(play, ctx, bs) {
     }
   });
 
-  play.solitaire.fx('reveal').subscribe({
+  play.gsolitaire.fx('reveal').subscribe({
     onBegin({ stackN, card }, resolve) {
       let dStack = play.dStackN(stackN);
       let pos = dStack.lastCardGlobalPosition();
@@ -40,7 +40,7 @@ export default function Play(play, ctx, bs) {
     }
   });
 
-  play.solitaire.fx('unreveal').subscribe({
+  play.gsolitaire.fx('unreveal').subscribe({
     onBegin({ stackN, card }, resolve) {
       let dStack = play.dStackN(stackN);
       let pos = dStack.lastCardGlobalPosition();

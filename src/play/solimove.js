@@ -10,7 +10,7 @@ export default function SoliMove(play, ctx, bs) {
 
   let dMove = new CardStack(this, ctx, bs);
 
-  this.solitaire = play.solitaire;
+  this.gsolitaire = play.gsolitaire;
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -63,7 +63,7 @@ export default function SoliMove(play, ctx, bs) {
     }
   });
 
-  this.solitaire.fx('move').subscribe({
+  this.gsolitaire.fx('move').subscribe({
     onBegin(oMove, resolve) {
 
       dMove.init({ stack: oMove.cards });

@@ -7,7 +7,7 @@ import AIconText from './aicontext';
 
 export default function SoliSideBar(play, ctx, pbs) {
 
-  let solitaire = play.solitaire;
+  let solitaire = play.gsolitaire;
 
   const { textures } = ctx;
   

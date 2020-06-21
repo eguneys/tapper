@@ -5,16 +5,12 @@ import * as v from '../vec2';
 import { iPolPlus } from './util2';
 import { isN } from '../soliutils';
 
-export default function Play(play, ctx, bs) {
+export default function SoliDrag(play, ctx, bs) {
 
+  let gsolitaire = this.gsolitaire = play.gsolitaire;
   let solitaire = this.solitaire = play.solitaire;
 
-  let dDragStack = new CardStack(this, ctx, {
-    onBeginCard() {
-      solitaire.userActionDoubleTapStack();
-    },
-    ...bs
-  });
+  let dDragStack = new CardStack(this, ctx, bs);
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -22,15 +18,16 @@ export default function Play(play, ctx, bs) {
   };
   initContainer();
 
-  this.solitaire.bSelection.subscribe(({ cards }) => {
+  this.gsolitaire.bSelection.subscribe(({ cards }) => {
     dDragStack.init({ stack: cards });
     dDragStack.highlight(true);
   });
 
-  this.solitaire.aSelection.subscribe(({ active, epos, decay }) => {
-    if (!active) {
+  this.gsolitaire.aSelection.subscribe(({ active, activeEnding, epos, decay }) => {
+    if (!active || activeEnding || !decay) {
       return;
     }
+
     dDragStack.container.move(epos[0] + decay[0],
                               epos[1] + decay[1]);
   });
@@ -66,7 +63,7 @@ export default function Play(play, ctx, bs) {
     }
   });
 
-  this.solitaire.fx('settle').subscribe({
+  this.gsolitaire.fx('settle').subscribe({
     onBegin(oSettle, resolve) {
       iSettle.begin(oSettle, resolve);
     },

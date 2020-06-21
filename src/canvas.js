@@ -5,8 +5,22 @@ export default function Canvas(element) {
   let displayWidth = element.clientWidth,
       displayHeight = element.clientHeight;
 
-  this.width = displayWidth;
-  this.height = displayHeight;
+  let desiredAspectRatio = 16 / 9;
+
+  let desiredWidth,
+      desiredHeight;
+
+  desiredHeight = displayHeight;
+  desiredWidth = desiredHeight * desiredAspectRatio;
+
+  if (desiredWidth > displayWidth) {
+    desiredWidth = displayWidth;
+    desiredHeight = desiredWidth / desiredAspectRatio;
+  }
+
+
+  this.width = desiredWidth;
+  this.height = desiredHeight;
   this.aspect = this.width / this.height;
 
   const app = this.app = new PIXI.Application({

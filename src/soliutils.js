@@ -1,3 +1,6 @@
+export const stackPlate = [0, 1, 2, 3, 4, 5, 6];
+export const holePlate = [0, 1, 2, 3];
+
 export const isN = n => (n || n === 0) && !(n < 0);
 
 const canStack = (c1, c2) => 

@@ -9,6 +9,7 @@ import { tapHandler2 } from './util';
 
 export default function SoliDraw(play, ctx, bs) {
 
+  let gsolitaire = play.gsolitaire;
   let solitaire = play.solitaire;
 
   const { events, textures } = ctx;
@@ -17,17 +18,12 @@ export default function SoliDraw(play, ctx, bs) {
 
   let dDeck = new CardStack(this, ctx, {
     onBeginCard() {
-      solitaire.userActionDealDraw();
+      gsolitaire.userActionDealDraw();
     },
     ...bs
   });
 
-  let dDraw = new CardStack(this, ctx, {
-    onBeginCard(n, epos, decay) {
-      solitaire.userActionSelectDraw(epos, decay);
-    },
-    ...bs
-  });
+  let dDraw = new CardStack(this, ctx, bs);
 
   let overW = bs.card.width - bs.stackMargin;
 
@@ -58,7 +54,15 @@ export default function SoliDraw(play, ctx, bs) {
   this.deckGlobalPosition = dDeck.lastCardGlobalPosition;
   this.showGlobalPosition = dDraw.nextCardGlobalPosition;
 
-  solitaire.drawer.subscribe(drawer => {
+  this.getHitKeyForEpos = epos => {
+    let res = dDraw.getHitCardForEpos(epos);
+    if (res) {
+      res.drawN = true;
+    }
+    return res;
+  };
+
+  gsolitaire.drawer.subscribe(drawer => {
     let nbDeck = drawer.nbDeck();
 
     if (nbDeck === 0) {
@@ -73,7 +77,7 @@ export default function SoliDraw(play, ctx, bs) {
     dDraw.init({ stack: drawer.showStack3() });
   });
 
-  solitaire.fx('dealdraw').subscribe({
+  gsolitaire.fx('dealdraw').subscribe({
     onBegin(card, resolve) {
       resolve();
     },
@@ -81,24 +85,24 @@ export default function SoliDraw(play, ctx, bs) {
     }
   });
 
-  const observePSelection = ({ 
-    active,
-    drawN
-  }) => {
+  // const observePSelection = ({ 
+  //   active,
+  //   drawN
+  // }) => {
     
-    if (!drawN) {
-      return;
-    }
+  //   if (!drawN) {
+  //     return;
+  //   }
 
-    if (active) {
-      dDraw.highlightCards([0]);
-    } else {
-      dDraw.highlight(false);
-    }
+  //   if (active) {
+  //     dDraw.highlightCards([0]);
+  //   } else {
+  //     dDraw.highlight(false);
+  //   }
 
-  };
+  // };
 
-  solitaire.pSelection.subscribe(observePSelection);
+  // solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 
@@ -107,7 +111,7 @@ export default function SoliDraw(play, ctx, bs) {
       let isDrawEmpty = dDeck.empty();
 
       if (isDrawEmpty) {
-        solitaire.userActionShuffle();
+        gsolitaire.userActionShuffle();
       }
     },
     boundsFn: () => dOver.container.bounds()

@@ -57,14 +57,6 @@ export default function CardGameView(play, ctx, pbs) {
   let dSolitaire = new SolitaireView(this, ctx, bs);
   let dSoliSideBar = new SoliSideBar(dSolitaire, ctx, bs);
 
-  let aiSolitaire = new SolitaireAi(cardGame, dSolitaire.solitaire);
-
-  const aiMap = {
-    'solitaire': aiSolitaire,
-    'spider': aiSolitaire,
-    'freecell': aiSolitaire
-  };
-
   const dViewMap = {
     'menu': [dMenu, null],
     'solitaire': [dSolitaire, dSoliSideBar],
@@ -77,9 +69,6 @@ export default function CardGameView(play, ctx, pbs) {
     container.c.addChild(dGameContainer);
     
     container.addChild(dBar);
-
-    container.addChild(dAiControl);
-    dAiControl.container.move(bs.bar.x, bs.bar.y + 150);
   };
 
   initContainer();
@@ -116,19 +105,6 @@ export default function CardGameView(play, ctx, pbs) {
     let sideView = dView[1];
     if (sideView) {
       sideView.container.move(bs.bar.x, bs.bar.y);
-    }
-
-    if (lastAi) {
-      lastAi.userActionStop();
-    }
-
-    if (!menu) {
-      let ai = aiMap[game];
-
-      ai.userActionStart();
-      lastAi = ai;
-    } else {
-      lastAi = undefined;
     }
   });
 

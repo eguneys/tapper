@@ -8,6 +8,7 @@ import CardCard from './cardcard';
 
 export default function SoliDeal(play, ctx, bs) {
 
+  this.gsolitaire = play.gsolitaire;
   this.solitaire = play.solitaire;
 
   let dCards = new CardCard(this, ctx, bs);
@@ -53,9 +54,7 @@ export default function SoliDeal(play, ctx, bs) {
     }
   });
 
-  let observeDeal = this.solitaire.fx('deal');
-
-  observeDeal.subfun((oDeal, resolve) => {
+  this.gsolitaire.fx('deal').subfun((oDeal, resolve) => {
     iDeal.begin(oDeal, resolve);
   });
 

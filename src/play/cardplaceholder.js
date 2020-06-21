@@ -21,6 +21,28 @@ export default function Play(play, ctx, bs) {
 
   this.init = (data) => {};
 
+  this.getHitCardForEpos = epos => {
+    let pos = container.globalPosition();
+
+    let hitBounds = {
+      x: pos.x,
+      y: pos.y,
+      ...cardBounds
+    };
+    
+    if (hitTest(...epos, hitBounds)) {
+      
+      let decay = [-epos[0] + hitBounds.x,
+                   -epos[1] + hitBounds.y];
+
+      return {
+        decay
+      };
+    }
+    return null;
+  };
+
+
   let hitBounds;
 
   let handleMove = moveHandler({

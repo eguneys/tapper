@@ -40,6 +40,7 @@ export function moveHandler2({ onBegin,
   const runMoving = 'moving';
   const runEnd = 'end';
 
+  let runningArgs;
   let running = runEnd;
 
   let startPos;
@@ -52,6 +53,7 @@ export function moveHandler2({ onBegin,
         callMaybe(onBegin, epos);
         startPos = epos;
         running = runBegin;
+        runningArgs = epos;
       } else if (running === runBegin) {
         let dist = v.distance(startPos, epos);
         if (dist > threshold) {
@@ -59,10 +61,11 @@ export function moveHandler2({ onBegin,
         }
       } else {
         callMaybe(onMove, epos);
+        runningArgs = epos;
       }
      } else {
       if (running === runBegin || running === runMoving) {
-        callMaybe(onEnd, running);
+        callMaybe(onEnd, runningArgs);
       }
        running = runEnd;
     }

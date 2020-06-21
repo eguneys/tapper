@@ -9,6 +9,7 @@ import { isN } from '../soliutils';
 
 export default function SoliStacks(play, ctx, bs) {
 
+  this.gsolitaire = play.gsolitaire;
   this.solitaire = play.solitaire;
 
   let dStacks = [
@@ -32,25 +33,31 @@ export default function SoliStacks(play, ctx, bs) {
   };
   initContainer();
 
-  const observePSelection = ({ 
-    active,
-    stackN,
-    cards }) => {
-
-      if (!isN(stackN)) {
-        return;
-      }
-
-      let dStack = this.dStackN(stackN);
-
-      if (active) {
-        dStack.highlightCards(cards);
-      } else {
-        dStack.highlight(false);
-      }
+  this.getHitKeyForEpos = epos => {
+    return dStacks.reduce((acc, dStack) =>
+      acc ? acc : dStack.getHitCardForEpos(epos)
+      , null);
   };
 
-  this.solitaire.pSelection.subscribe(observePSelection);
+  // const observePSelection = ({ 
+  //   active,
+  //   stackN,
+  //   cards }) => {
+
+  //     if (!isN(stackN)) {
+  //       return;
+  //     }
+
+  //     let dStack = this.dStackN(stackN);
+
+  //     if (active) {
+  //       dStack.highlightCards(cards);
+  //     } else {
+  //       dStack.highlight(false);
+  //     }
+  // };
+
+  // this.solitaire.pSelection.subscribe(observePSelection);
 
   this.init = (data) => {};
 
@@ -67,62 +74,19 @@ function SoliStack(play, ctx, bs) {
 
   let { n } = bs;
 
-  let dFronts = new CardStack(this, ctx, {
-    onBeginCard: (nCard, epos, decay) => {
-      play.solitaire.userActionSelectStack(n, nCard, epos, decay);
-    },
-    onEndCard: (nCard) => {
-      play.solitaire.userActionEndSelectStack(n);
-    },
-    ...bs
-  });
+  let dFronts = new CardStack(this, ctx, bs);
 
   let dBacks = new CardStack(this, ctx, bs);
 
-  let dPlaceholder = new CardPlaceholder(this, ctx, {
-    onBeginCard: () => {
-      if (!dFronts.empty()) {
-        return;
-      }
-      play.solitaire.userActionSelectStack(n);
-    },
-    onEndCard: () => {
-      if (!dFronts.empty()) {
-        return;
-      }
-      play.solitaire.userActionEndSelectStack(n);
-    },
-    ...bs
-  });
+  let dPlaceholder = new CardPlaceholder(this, ctx, bs);
 
-  let observeStack = play.solitaire.stackN(n);
-
-  observeStack.subscribe(stack => {
-    let inProgress = stack.inProgress();
-    dFronts.init({ stack: stack.front, inProgress });
-    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
-    if (!inProgress) {
-      extendCards(stack.hidden.length, stack.front.length);
+  this.getHitCardForEpos = epos => {
+    let res = dFronts.getHitCardForEpos(epos);
+    if (res) {
+      res.stackN = n;
     }
-  });
-
-  const extendCards = (backs, fronts) => {
-    let nbCards = backs + fronts;
-    let extend = bs.stacks.height / (nbCards + 3);
-
-    let extendBacks = extend * backs,
-        extendFronts = extend * (fronts + 3);
-
-    dBacks.extend(extendBacks);
-    dFronts.extend(extendFronts);
-
-    // still a bug when there is one hidden card on the stack
-    // calculate dFronts next card position for undo move
-    dBacks.render();
-    dFronts.render();
-    this.render();
+    return res;
   };
-
   this.highlight = dFronts.highlight;
   this.highlightCards = dFronts.highlightCards;
   this.nextCardGlobalPosition = dFronts.nextCardGlobalPosition;
@@ -153,4 +117,34 @@ function SoliStack(play, ctx, bs) {
     renderFront();
     this.container.render();
   };
+
+  const extendCards = (backs, fronts) => {
+    let nbCards = backs + fronts;
+    let extend = bs.stacks.height / (nbCards + 3);
+
+    let extendBacks = extend * backs,
+        extendFronts = extend * (fronts + 3);
+
+    dBacks.extend(extendBacks);
+    dFronts.extend(extendFronts);
+
+    // still a bug when there is one hidden card on the stack
+    // calculate dFronts next card position for undo move
+    dBacks.render();
+    dFronts.render();
+    this.render();
+  };
+
+  const initStack = stack => {
+    let inProgress = stack.inProgress();
+    dFronts.init({ stack: stack.front, inProgress });
+    dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
+    if (!inProgress) {
+      extendCards(stack.hidden.length, stack.front.length);
+    }
+  };
+
+  play.gsolitaire.stackN(n).subscribe(initStack);
+
+  // play.solitaire.stackN(n).subscribe(initStack);
 }
