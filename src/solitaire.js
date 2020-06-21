@@ -1009,8 +1009,7 @@ export default function Solitaire() {
   };
 
   const findHoleCanAddCard = (card) => {
-    return holes.findIndex(_ => _.apply(_ => _.canAdd([card])));    
-  };
+    return holes.findIndex(_ => _.apply(_ => _.canAdd([card])));     };
 
 
   let actionLoops = [

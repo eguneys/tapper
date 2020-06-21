@@ -983,6 +983,48 @@ export default function GSolitaire() {
     effectActiveDeselect();
   };
 
+  /*
+   * Action Double Click
+   */
+  const actionDoubleClick = async dest => {
+    let { stackN: _stackN, drawN } = dest;
+
+
+    let { 
+      activeEnding,
+      active } = activeSelection.apply(fId);
+
+    if (active || activeEnding) {
+      return;
+    }
+
+    if (isN(_stackN)) {
+
+      let card = stackN(_stackN).apply(_ => _.topCard());
+
+      let _holeN = findHoleCanAddCard(card);
+
+      if (isN(_holeN)) {
+        await actionMoveCardsStackHole(_stackN, _holeN);
+      }
+
+    } else if (drawN) {
+      let card = drawer.apply(_ => _.topCard());
+      let _holeN = findHoleCanAddCard(card);
+
+      if (isN(_holeN)) {
+        await actionMoveCardsDrawHole(_holeN);
+      }
+    }    
+  };
+
+  const findHoleCanAddCard = (card) => {
+    return holes
+      .findIndex(_ => 
+        _.apply(_ => _.canAdd([card])));
+  };
+
+
   /* 
    * Queue User Actions
    */
@@ -1004,13 +1046,17 @@ export default function GSolitaire() {
   this.userActionDragStart = async (orig) => {
     await actionDragStart(orig);
   };
-
+  
   this.userActionDragMove = async (epos) => {
     await actionDragMove(epos);
   };
 
   this.userActionDragEnd = async (dest) => {
     await actionDragEnd(dest);
+  };
+
+  this.userActionDoubleClick = async (dest) => {
+    await actionDoubleClick(dest);
   };
 
   this.userActionShuffle = async () => {
