@@ -908,9 +908,9 @@ export default function GSolitaire() {
     let { stackN: dstStackN } = dest;
 
     if (isN(dstStackN) && canSettleStack(dstStackN, cards)) {
-      return await actionSettleStackSrcHole(holeN, dstStackN, cards);
+      await actionSettleStackSrcHole(holeN, dstStackN, cards);
     } else {
-      return await actionSettleHoleCancel(holeN, cards, hasMoved);
+      await actionSettleHoleCancel(holeN, cards, hasMoved);
     }    
   };
 
@@ -995,12 +995,19 @@ export default function GSolitaire() {
       active } = activeSelection.apply(fId);
 
     if (active || activeEnding) {
+      console.log('still active');
       return;
     }
 
     if (isN(_stackN)) {
 
       let card = stackN(_stackN).apply(_ => _.topCard());
+
+      // no card for empty stack
+      if (!card) {
+        console.log('no card');
+        return;
+      }
 
       let _holeN = findHoleCanAddCard(card);
 

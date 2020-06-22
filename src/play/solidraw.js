@@ -58,6 +58,8 @@ export default function SoliDraw(play, ctx, bs) {
     let res = dDraw.getHitCardForEpos(epos);
     if (res) {
       res.drawN = true;
+    } else {
+      dDraw.getHitCardForEpos(epos);
     }
     return res;
   };

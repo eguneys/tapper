@@ -4,16 +4,32 @@ import { moveHandler2 } from './util';
 
 export default function Play(play, ctx, bs) {
 
-  let doubleClickThreshold = 1000;
+  let doubleClickThreshold = 300;
 
   let gsolitaire = play.gsolitaire;
 
   const { events } = ctx;
 
+  let pLastDrop = Promise.resolve();
   let lastEnd;
 
   const handleMove = moveHandler2({
     onBegin(epos) {
+      let nowEnd = Date.now();
+      if (lastEnd) {
+        if (nowEnd - lastEnd < doubleClickThreshold) {
+          pLastDrop.then(() => {
+            let dest = play.getHitKeyForEpos(epos);
+            if (dest) {
+              gsolitaire.userActionDoubleClick(dest);
+            }
+          });
+          lastEnd = null;
+          return;
+        }
+      }
+      lastEnd = nowEnd;
+
       let orig = play.getHitKeyForEpos(epos);
       gsolitaire.userActionDragStart({
         epos,
@@ -25,22 +41,9 @@ export default function Play(play, ctx, bs) {
     },
     onEnd(epos) {
       let dest = play.getHitKeyForEpos(epos);
-      let pEnd = gsolitaire.userActionDragEnd({
+      pLastDrop = gsolitaire.userActionDragEnd({
         epos,
         ...dest
-      });
-
-      pEnd.then(() => {
-        let nowEnd = Date.now();
-        if (lastEnd) {
-          if (nowEnd - lastEnd < doubleClickThreshold) {
-            if (dest) {
-              gsolitaire.userActionDoubleClick(dest);
-            }
-            lastEnd = null;
-          }
-        }
-        lastEnd = nowEnd;
       });
     }
   }, events);

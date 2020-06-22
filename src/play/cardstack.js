@@ -50,6 +50,9 @@ export default function CardStack(play, ctx, bs) {
       this.extend(bs.stacks.height);
     }
     this.highlight(false);
+
+    // calculate bounds for hit testing
+    this.render();
   };
 
   this.extend = (eHeight) => {
@@ -78,6 +81,9 @@ export default function CardStack(play, ctx, bs) {
   const getHitCardForEpos = epos => {
     let iCardExtend = iExtend.value();
 
+    let bss = dCards.map(_ => _.container.bounds());
+
+
     let hitCard = dCards.find((dCard, i) => {
       let lastCard = i === (dCards.length - 1);
 
@@ -93,6 +99,7 @@ export default function CardStack(play, ctx, bs) {
     });
 
     if (hitCard) {
+      let gp = hitCard.container.globalPosition();
       let b = hitCard.container.bounds();
       let decay = [-epos[0] + b.x,
                    -epos[1] + b.y];
