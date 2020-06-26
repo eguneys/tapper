@@ -4,14 +4,8 @@ export default function CardGame() {
 
   let view = this.view = observable({});
 
-  let ai = this.ai = observable({});
-
   this.init = () => {
     actionReset();
-  };
-
-  this.userActionAiPlay = () => {
-    effectAiPlayToggle();
   };
 
   this.userActionSelectGame = (game) => {
@@ -26,20 +20,15 @@ export default function CardGame() {
     
   };
 
-  const actionReset = () => {
+  const actionReset = async () => {
     effectViewMenu();
+    effectViewMenubar(false);
     effectViewGame('solitaire');
-    effectAiPlayToggle();
-    return Promise.resolve();
   };
 
-  const effectAiPlayToggle = () => {
-    ai.mutate(_ => {
-      if (_.play === 'play') {
-        _.play = 'pause';
-      } else {
-        _.play = 'play';
-      }
+  const effectViewMenubar = (visible) => {
+    view.mutate(_ => {
+      _.menubar = visible;
     });
   };
 

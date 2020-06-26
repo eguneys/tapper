@@ -50,8 +50,6 @@ export default function CardGameView(play, ctx, pbs) {
 
   let dMenu = new CardGameMenu(this, ctx, bs);
 
-  let dAiControl = new CardAiControl(this, ctx, bs);
-
   let dGameContainer = dContainer();
 
   let dSolitaire = new SolitaireView(this, ctx, bs);

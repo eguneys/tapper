@@ -6,20 +6,40 @@
 - [ ] Main menu
    - [x] game selection
    - [ ] Settings
+     - [ ] Solitaire
+       - [ ] Cards Per Draw
+            - [ ] 1 Card no reshuffle
+            - [ ] 1 Card
+            - [ ] 3 Cards
+     - [ ] Spider
+       - [ ] # Suits
+         - [ ] 1 Suit
+         - [ ] 2 Suits
+         - [ ] 4 Suits
+     - [ ] General
+       - [ ] Show tutorial
+         - [ ] Spider
+         - [ ] Solitaire
+         - [ ] Freecell
 - [ ] Continue game from last position
 - [ ] New game starts a new game
 - [ ] 
 
 ### Solitaire Issues
 * Bugs
-- [ ] Same suit ace appeared
+- [ ] After double click the behind card stays selected
+- [x] Same suit ace appeared
 
 * Features
-- [ ] 3 deal game
+- [ ] Save progress on unload and continue on resume
+- [ ] Deal Options
+  - [ ] 1 deal no reshuffle
+  - [ ] 1 deal 
+  - [ ] 3 deal
 - [ ] Animations
   - [ ] Place hole animation
   - [ ] End game animation
-  - [ ] Move cards animation
+  - [x] Move cards animation
 - [ ] Side bar
   - [ ] Score
   - [x] New game
