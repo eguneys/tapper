@@ -30,22 +30,32 @@
          height: 100vh;
          margin: auto;
      }
-
-     @font-face {
-         font-family: 'fipps';
-         src: url("../assets/images/Fipps-Regular.otf");
-     }
     </style>
+    <script src="../assets/vendor/webfontloader.js"></script>
 </head>
 <body>
   <section>
+
     <div id="app"></div>
 
   </section>
 
   <script>
 
-   Tetris(document.getElementById('app'), {});
+
+   WebFont.load({
+     custom: {
+       families: ['fipps'],
+       urls: ['../assets/images/fonts.css']
+     },
+     active: e => {
+       init();
+     }
+   });
+
+   function init() {
+     Tetris(document.getElementById('app'), {});
+   }
    
   </script>
 

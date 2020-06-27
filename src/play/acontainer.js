@@ -23,11 +23,23 @@ export default function aContainer() {
     container.position.set(x, y);
   };
 
+  this.moveY = (y) => {
+    container.position.y = y;
+  };
+
+  this.moveX = (x) => {
+    container.position.x = x;
+  };
+
+  this.alpha = (alpha) => container.alpha = alpha;
+
   this.scale = (x, y) => container.scale.set(x, y);
 
   this.pivot = (x, y) => container.pivot.set(x, y);
 
   this.visible = (visible) => container.visible = visible;
+
+  this.mask = mask => container.mask = mask;
 
   this.update = (delta) => {
     this.each(_ => _.update(delta));

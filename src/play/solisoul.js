@@ -2,7 +2,9 @@ import AContainer from './acontainer';
 
 import { moveHandler2 } from './util';
 
-export default function Play(play, ctx, bs) {
+export default function SoliSoul(play, ctx, bs) {
+
+  let cardGame = play.cardGame;
 
   let doubleClickThreshold = 300;
 
@@ -55,8 +57,16 @@ export default function Play(play, ctx, bs) {
     
   };
 
+  let popupOpenDontHandleMoves = false;
+
+  cardGame.oHamburger.subscribe(({ open }) => {
+    popupOpenDontHandleMoves = open;
+  });
+  
   this.update = delta => {
-    handleMove(delta);
+    if (!popupOpenDontHandleMoves) {
+      handleMove(delta);
+    }
     this.container.update(delta);
   };
 

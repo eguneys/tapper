@@ -3,6 +3,7 @@ import { rect } from '../dquad/geometry';
 import { dContainer } from '../asprite';
 import AContainer from './acontainer';
 import ASprite from './asprite';
+import AAnimated from './aanimated';
 import AText from './atext';
 
 import { tapHandler } from './util';
@@ -14,8 +15,6 @@ export default function CardGameBar(play, ctx, pbs) {
   const { events, textures } = ctx;
 
   const mhud = textures['mhud'];
-
-  let { onMenuTap, onBackTap } = pbs;
 
   let bs = (() => {
 
@@ -58,10 +57,17 @@ export default function CardGameBar(play, ctx, pbs) {
 
   })();
 
-  let dMenu = new ASprite(this, ctx, {
+  let mmenu = mhud['menu'];
+
+  let dHamburger = new AAnimated(this, ctx, {
     width: bs.icon.width,
     height: bs.icon.height,
-    texture: mhud['menu']
+    animations: {
+      'openclose': {
+        textures: mmenu['close'],
+        duration: 200
+      }
+    }
   });
 
   let dInGameContainer = dContainer();
@@ -77,8 +83,8 @@ export default function CardGameBar(play, ctx, pbs) {
 
   let container = this.container = new AContainer();
   const initContainer = () => {
-    dMenu.container.move(bs.menu.x, bs.menu.y);
-    container.addChild(dMenu);
+    dHamburger.container.move(bs.menu.x, bs.menu.y);
+    container.addChild(dHamburger);
 
     container.c.addChild(dInGameContainer);
 
@@ -96,7 +102,7 @@ export default function CardGameBar(play, ctx, pbs) {
     'freecell': 'FREE\nCELL'
   };
 
-  cardGame.view.subscribe(view => {
+  cardGame.oView.subscribe(view => {
     if (view.game) {
       dInGameContainer.visible = true;
       dGameText.setText(gameNames[view.game]);
@@ -105,13 +111,31 @@ export default function CardGameBar(play, ctx, pbs) {
     }
   });
 
+  cardGame.oHamburger.subscribe(({ open }) => {
+    if (open) {
+      dHamburger.smoothplay('openclose', 1);
+    } else {
+      dHamburger.smoothplay('openclose', 0);
+    }
+  });
+
   this.init = (data) => {};
 
+  const onMenuTap = () => {
+    cardGame.userActionSelectMenuBar();
+  };
+
+  const onBackTap = () => {
+    cardGame.userActionSelectBack();
+  };
+
   const handleMenuTap = tapHandler(onMenuTap, events,
-                                   () => dMenu.container.bounds());
+                                   () => 
+                                   dHamburger.container.bounds());
 
   const handleBackTap = tapHandler(onBackTap, events,
-                                   () => dBack.container.bounds());
+                                   () =>
+                                   dBack.container.bounds());
 
   this.update = delta => {
     handleMenuTap(delta);

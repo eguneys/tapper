@@ -78,6 +78,7 @@ export default function SolitaireView(play, ctx, pbs) {
     };
   })();
 
+  let cardGame = this.cardGame = play.cardGame;
   let gsolitaire = this.gsolitaire = new GSolitaire();
   let solitaire = this.solitaire = new Solitaire();
 

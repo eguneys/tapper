@@ -1,3 +1,4 @@
+import { objForeach } from '../util2';
 import { rect } from '../dquad/geometry';
 
 import { dContainer } from '../asprite';
@@ -7,6 +8,7 @@ import AContainer from './acontainer';
 import CardGame from '../cardgame';
 import SolitaireAi from '../aisolitaire';
 
+import CardGameHome from './cardgamehome';
 import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
 import SolitaireView from './solitaire';
@@ -25,7 +27,7 @@ export default function CardGameView(play, ctx, pbs) {
     let barWidth = width * 0.09,
         barHeight = height * 0.4,
         boundsMargin = width * 0.01;
-
+    
     let bar = rect(width - barWidth, 
                    barHeight,
                    barWidth, 
@@ -38,17 +40,11 @@ export default function CardGameView(play, ctx, pbs) {
     };
   })();
 
-  let dBar = new CardGameBar(this, ctx, {
-    onMenuTap() {
-      cardGame.userActionSelectMenuBar();
-    },
-    onBackTap() {
-      cardGame.userActionSelectBack();
-    },
-    ...bs
-  });
+  let dBar = new CardGameBar(this, ctx, bs);
 
-  let dMenu = new CardGameMenu(this, ctx, bs);
+  let dPopupMenu = new CardGameMenu(this, ctx, bs);
+
+  let dHome = new CardGameHome(this, ctx, bs);
 
   let dGameContainer = dContainer();
 
@@ -56,7 +52,7 @@ export default function CardGameView(play, ctx, pbs) {
   let dSoliSideBar = new SoliSideBar(dSolitaire, ctx, bs);
 
   const dViewMap = {
-    'menu': [dMenu, null],
+    'home': [dHome, null],
     'solitaire': [dSolitaire, dSoliSideBar],
     'spider': [dSolitaire, dSoliSideBar],
     'freecell': [dSolitaire, dSoliSideBar]
@@ -67,6 +63,8 @@ export default function CardGameView(play, ctx, pbs) {
     container.c.addChild(dGameContainer);
     
     container.addChild(dBar);
+
+    container.addChild(dPopupMenu);
   };
 
   initContainer();
@@ -75,13 +73,13 @@ export default function CardGameView(play, ctx, pbs) {
 
   let lastAi;
 
-  cardGame.view.subscribe(view => {
-    let { menu, game } = view;
+  cardGame.oView.subscribe(view => {
+    let { home, game } = view;
 
     let dView;
 
-    if (menu) {
-      dView = dViewMap['menu'];
+    if (home) {
+      dView = dViewMap['home'];
     } else {
       dView = dViewMap[game];
     }
@@ -107,7 +105,13 @@ export default function CardGameView(play, ctx, pbs) {
   });
 
   this.init = (data) => {
-    cardGame.init();
+    let { optionsStore } = ctx;
+
+    cardGame.init({
+      options: optionsStore.getOptions()
+    });
+
+    bindOptionsHandlers(optionsStore, cardGame);
   };
 
   this.update = delta => {
@@ -117,4 +121,15 @@ export default function CardGameView(play, ctx, pbs) {
   this.render = () => {
     this.container.render();
   };
+}
+
+function bindOptionsHandlers(optionsStore, cardGame) {
+  
+  objForeach
+  (cardGame.oOptions.showTutorial, (key, o) => {
+    o.subscribe(value => {
+      optionsStore.setShowTutorial(key, value);
+    });
+  });
+  
 }

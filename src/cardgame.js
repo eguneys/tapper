@@ -1,11 +1,23 @@
+import { objForeach } from './util2';
 import { pobservable, observable } from './observable';
 
 export default function CardGame() {
 
-  let view = this.view = observable({});
+  let oView = this.oView = observable({});
 
-  this.init = () => {
+  let oHamburger = this.oHamburger = observable({});
+
+  let oOptions = this.oOptions = {
+    showTutorial: {
+      spider: observable(false),
+      solitaire: observable(false),
+      freecell: observable(false)
+    }
+  };
+
+  this.init = (data) => {
     actionReset();
+    actionSetOptions(data.options);
   };
 
   this.userActionSelectGame = (game) => {
@@ -13,35 +25,56 @@ export default function CardGame() {
   };
 
   this.userActionSelectBack = () => {
-    effectViewMenu();
+    effectViewHome();
+  };
+
+  const fId = _ => _;
+  const fToggle = _ => !_;
+
+  this.userActionOptionShowTutorialCheck = key => {
+    let option = oOptions.showTutorial[key];
+    option.set(fToggle);
+    let value = option.apply(fId);
+
+    
+
   };
 
   this.userActionSelectMenuBar = () => {
-    
+    let open = oHamburger.apply(_ => _.open);
+    effectHamburger(!open);
+  };
+
+  const actionSetOptions = (options) => {
+    let { showTutorial } = options;
+
+    objForeach(showTutorial, (key, value) => {
+      oOptions.showTutorial[key].set(_ => value);
+    });
   };
 
   const actionReset = async () => {
-    effectViewMenu();
-    effectViewMenubar(false);
+    effectViewHome();
+    effectHamburger(true);
     effectViewGame('solitaire');
   };
 
-  const effectViewMenubar = (visible) => {
-    view.mutate(_ => {
-      _.menubar = visible;
+  const effectHamburger = (open) => {
+    oHamburger.mutate(_ => {
+      _.open = open;
     });
   };
 
   const effectViewGame = (game) => {
-    view.mutate(_ => {
-      _.menu = false;
+    oView.mutate(_ => {
+      _.home = false;
       _.game = game;
     });
   };
 
-  const effectViewMenu = () => {
-    view.mutate(_ => {
-      _.menu = true;
+  const effectViewHome = () => {
+    oView.mutate(_ => {
+      _.home = true;
       _.game = false;
     });
   };

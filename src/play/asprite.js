@@ -3,7 +3,8 @@ import { sprite } from '../asprite';
 
 export default function ASprite(play, ctx, bs) {
 
-  let { x, y, width, height, texture } = bs;
+  let { x, y, width, height, 
+        texture } = bs;
   
   let dBody = sprite(texture);
 
@@ -40,6 +41,10 @@ export default function ASprite(play, ctx, bs) {
     dBody.texture = texture;
   };
 
+  this.rotation = (angle) => {
+    dBody.rotation = angle;
+  };
+
   this.anchor = (x) => {
     dBody.anchor.set(x, x);
   };
@@ -48,7 +53,15 @@ export default function ASprite(play, ctx, bs) {
     dBody.visible = visible;
   };
 
-  this.size = (w, h) => {
+  this.height = (h) => {
+    if (height === h) {
+      return;
+    }
+    height = h;
+    setSize();
+  };
+
+  this.size = (w, h = height) => {
     if (width === w && height === h) {
       return;
     }
@@ -56,6 +69,14 @@ export default function ASprite(play, ctx, bs) {
     width = w;
     height = h;
     setSize();
+  };
+
+  this.y = (_y) => {
+    if (y === _y) {
+      return;
+    }
+    y = _y;
+    setPosition();
   };
 
   this.move = (_x, _y) => {

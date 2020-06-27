@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import sprites from './sprites';
 
+import OptionsStore from './optionsstore';
 import Config from './config';
 import Canvas from './canvas';
 import Events from './events';
@@ -25,6 +26,7 @@ export function app(element, options) {
     .add('greenbg', aBase('greenbg.png'))
     .add('mcards', aBase('cards.png'))
     .add('mhud', aBase('hud.png'))
+    .add('mhud2', aBase('hud2.png'))
     .add('mbg', aBase('bg.png'))
     .add('mletters', aBase('letters.png'))
     .add('fletters', aBase('fletters.png'))
@@ -43,7 +45,10 @@ export function app(element, options) {
 
       canvas.bindResize();
 
+      const optionsStore = new OptionsStore();
+
       const ctx = {
+        optionsStore,
         canvas,
         config,
         textures,

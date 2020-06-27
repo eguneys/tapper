@@ -9,11 +9,22 @@ export default function sprites(resources) {
   const fT = atlas =>
         (x, y, w, h) => frameTexture(texture(atlas), x, y, w, h);
 
-  const mall = fT('mall');
-  const mhud = fT('mhud');
-  const mtapper = fT('mtapper');
+  const aT = atlas =>
+        (x, y, w, h, count, by) =>
+        animationTextures(texture(atlas), x, y, w, h, count, by);
+
+  const sT = atlas =>
+        (x, y, w, h) => slice9(texture(atlas), x, y, w, h);
 
   const mcards = fT('mcards');
+
+  const mhud = fT('mhud');
+  const mhudAnimation = aT('mhud');
+  const mhudSlice = sT('mhud');
+
+  const mhud2 = fT('mhud2');
+  const mhud2Animation = aT('mhud2');
+  const mhud2Slice = sT('mhud2');
 
   return {
     'fletters': fletters(texture('fletters'), json('flettersjson')),
@@ -22,18 +33,34 @@ export default function sprites(resources) {
     'pkerning': json('plettersjson'),
     'greenbg': texture('greenbg'),
     'mbg': texture('mbg'),
-    'mall': all(mall),
     'mcards': cards(mcards),
-    'mhud': hud(mhud)
+    'mhud': hud(mhud, mhudAnimation, mhudSlice),
+    'mhud2': hud2(mhud2, mhud2Animation, mhud2Slice)
   };
 }
 
-const hud = (mhud) => {
+const hud2 = (mhud, mhudAnimation, mslice) => {
   return {
+    checkbox: mhudAnimation(0, 0, 128, 64, 2),
+  };
+};
+
+const hud = (mhud, mhudAnimation, mslice) => {
+  return {
+    'menubg9': mslice(48, 0, 16, 16),
     'menubg': mhud(48, 0, 48),
     'undo': mhud(0, 0, 32),
     'over': mhud(0, 32, 32),
-    'menu': mhud(0, 32 * 2, 32),
+    'menu': {
+      idle: mhudAnimation(0, 32 * 2, 32, 32, 1, 1),
+      open: mhudAnimation(0, 32 * 2, 32, 32, 6, 1),
+      close: mhudAnimation(32 * 5, 32 * 2, 32, 32, 6, -1),
+    },
+    checkbox: {
+      onoff: mhudAnimation(0, 32 * 6, 64, 32, 2),
+      off: mhud(0, 32 * 6, 64, 32),
+      on: mhud(64, 32 * 6, 64, 32)
+    },
     'back': mhud(0, 32 * 3, 32),
     'pause': mhud(0, 32 * 4, 32),
     'play': mhud(0, 32 * 5, 32)
@@ -129,11 +156,15 @@ const frameTexture = (texture, x, y, w, h = w) => {
   return t;
 };
 
-const animationTextures = (textures, rName, frames) => {
+const animationTextures = (baseTexture, x, y, w, h, count, by = 1) => {
   let res = [];
-  for (let i = 0; i < frames; i++) {
-    let name = rName.replace('%', i);
-    res.push(textures[name]);
+  for (let i = 0; i < count; i++) {
+    let frame = frameTexture(baseTexture, 
+                             x + i * by * w,
+                             y,
+                             w,
+                             h);
+    res.push(frame);
   }
   return res;
 };

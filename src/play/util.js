@@ -50,7 +50,7 @@ export function moveHandler2({ onBegin,
     if (current) {
       let { epos } = current;
       if (running === runEnd) {
-        callMaybe(onBegin, epos);
+        callMaybe(onBegin, epos, current);
         startPos = epos;
         running = runBegin;
         runningArgs = epos;
@@ -60,7 +60,7 @@ export function moveHandler2({ onBegin,
           running = runMoving;
         }
       } else {
-        callMaybe(onMove, epos);
+        callMaybe(onMove, epos, current);
         runningArgs = epos;
       }
      } else {
