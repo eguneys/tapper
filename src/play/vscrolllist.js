@@ -65,6 +65,12 @@ export default function VScrollList(play, ctx, bs) {
                     0);
 
     maxScrollY = viewHeight - allHeight;
+
+    if (maxScrollY >= 0) {
+      dScrollbar.visible(false);
+    } else {
+      dScrollbar.visible(true);
+    }
   };
   initContainer();
 
@@ -78,10 +84,18 @@ export default function VScrollList(play, ctx, bs) {
       scrollY = 0;
 
   const scroll = y => {
+    if (maxScrollY >= 0) {
+      return;
+    }
+
     bufferScrollY = y;
   };
 
   const commitScroll = () => {
+    if (maxScrollY >= 0) {
+      return;
+    }
+
     scrollY += bufferScrollY;
     bufferScrollY = 0;
 

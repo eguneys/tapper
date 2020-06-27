@@ -73,14 +73,7 @@ export default function CardGameMenu(play, ctx, pbs) {
     width: bs.menuInside.width,
     height: bs.menuInside.height,
     contents: [
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-      new OptionShowTutorial(this, ctx, bs),
-
+      new OptionShowTutorial(this, ctx, bs)
     ]
   });
 
