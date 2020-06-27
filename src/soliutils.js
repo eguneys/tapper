@@ -1,3 +1,4 @@
+import * as ou from './optionutils';
 import { writeStack, readStack } from './fen';
 
 export const stackPlate = [0, 1, 2, 3, 4, 5, 6];
@@ -153,8 +154,30 @@ export function SoliDrawDeck() {
   
   let inDrawing;
 
-  let deck;
-  let showStack;
+  let deck = [];
+  let showStack = [];
+
+  let cardsPerDraw,
+      noReshuffle;
+
+  this.options = (options) => {
+    let { cardsPerDraw: _cardsPerDraw } = options;
+
+    switch (_cardsPerDraw) {
+    case ou.oneCardNoReshuffle:
+      cardsPerDraw = 1;
+      noReshuffle = true;
+      break;
+    case ou.oneCard:
+      cardsPerDraw = 1;
+      noReshuffle = false;
+      break;
+    case ou.threeCards:
+    default:
+      cardsPerDraw = 3;
+      noReshuffle = false;
+    }
+  };
 
   this.init = (data) => {
     deck = data;
@@ -162,6 +185,10 @@ export function SoliDrawDeck() {
   };
 
   this.nbDeck = () => deck.length;
+
+  this.canShuffle = () => {
+    return !noReshuffle;
+  };
 
   this.shuffle2 = (cards) => {
     deck = cards.reverse();

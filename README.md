@@ -31,6 +31,7 @@
 - [x] Same suit ace appeared
 
 * Features
+- [ ] X sign when no reshuffle on over sprite
 - [x] Save progress on unload and continue on resume
 - [ ] Deal Options
   - [ ] 1 deal no reshuffle

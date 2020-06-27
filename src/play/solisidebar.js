@@ -62,11 +62,13 @@ export default function SoliSideBar(play, ctx, pbs) {
     label: 'SCORE'
   });
 
+  let { optionsStore } = ctx;
   let dNewGame = new ALabelText(this, ctx, {
     label: " NEW\nGAME",
     size: bs.newGame.height,
     onTap() {
-      solitaire.userActionNewGame();
+      let options = optionsStore.solitaire();
+      solitaire.userActionNewGame(options);
     }
   });
 

@@ -49,8 +49,9 @@ export default function GSolitaire() {
 
   let deck = makeOneDeck();
 
+  // TODO unify in one place
   /*
-   *  Write state
+   *  Read Write state
    */
   const writeState = () => {
     const applyWrite = _ => _.apply(fId).write();
@@ -84,13 +85,13 @@ export default function GSolitaire() {
   };
 
 
-  this.userActionNewGame = async () => {
-    await this.userInit({});
+  this.userActionNewGame = async (options) => {
+    await this.userInit({options});
   };
 
   this.userInit = async (data) => {
     await actionCancel();
-    await actionReset();
+    await actionReset(data.options);
 
     if (data.play) {
       await actionResume(data.play);
@@ -112,7 +113,7 @@ export default function GSolitaire() {
     }
   };
 
-  const actionReset = () => {
+  const actionReset = (options) => {
     isRunning = true;
 
     undoer.set(_ => []);
@@ -122,6 +123,8 @@ export default function GSolitaire() {
 
     holes.forEach(_ =>
       _.mutate(_ => _.clear()));
+
+    drawer.mutate(_ => _.options(options));
   };
 
   const actionResume = async play => {
@@ -782,6 +785,12 @@ export default function GSolitaire() {
    */
 
   const actionShuffleDraw = async () => {
+    let canShuffle = drawer.apply(_ => _.canShuffle());
+
+    if (!canShuffle) {
+      return;
+    }
+
     let cards = drawer.mutate(_ => _.shuffle1());
 
     drawer.mutate(_ => _.shuffle2(cards));

@@ -1,3 +1,4 @@
+import * as ou from '../../optionutils';
 import { objMap } from '../../util2';
 import AContainer from '../acontainer';
 import Fipps from '../fippstext';
@@ -44,9 +45,9 @@ export default function SoliCardsPerDraw(play, ctx, bs) {
   };
 
   let dOptionsMap = {
-    onecardnoreshuffle: '1 card no reshuffle',
-    onecard: '1 card',
-    threecards: '3 cards'
+    [ou.oneCardNoReshuffle]: '1 card no reshuffle',
+    [ou.oneCard]: '1 card',
+    [ou.threeCards]: '3 cards'
   };
 
   let dOptions = objMap(dOptionsMap,

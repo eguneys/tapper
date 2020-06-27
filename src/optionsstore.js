@@ -1,3 +1,4 @@
+import * as ou from './optionutils';
 import { objMap } from './util2';
 import Storage from './storage';
 
@@ -11,7 +12,7 @@ export default function OptionsStore() {
 
   let solitaire = {
     cardsPerDraw: new Storage('solitaire.cardPerDraw',
-                              'onecardnoreshuffle')
+                              ou.oneCard)
   };
 
   this.getOptions = () => {
@@ -21,6 +22,12 @@ export default function OptionsStore() {
       solitaire:
       objMap(solitaire, (_, storage) => storage.apply())
     };
+  };
+
+  this.solitaire = () => {
+    return objMap(solitaire,
+                  (_, storage) => 
+                  storage.apply());
   };
 
   this.setSolitaireCardsPerDraw = (value) => {
