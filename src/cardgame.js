@@ -12,6 +12,9 @@ export default function CardGame() {
       spider: observable(false),
       solitaire: observable(false),
       freecell: observable(false)
+    },
+    solitaire: {
+      cardsPerDraw: observable(null)
     }
   };
 
@@ -34,10 +37,10 @@ export default function CardGame() {
   this.userActionOptionShowTutorialCheck = key => {
     let option = oOptions.showTutorial[key];
     option.set(fToggle);
-    let value = option.apply(fId);
+  };
 
-    
-
+  this.userActionOptionSoliCardsPerDraw = key => {
+    oOptions.solitaire.cardsPerDraw.set(_ => key);
   };
 
   this.userActionSelectMenuBar = () => {
@@ -46,11 +49,17 @@ export default function CardGame() {
   };
 
   const actionSetOptions = (options) => {
-    let { showTutorial } = options;
+    let { showTutorial,
+          solitaire 
+        } = options;
 
     objForeach(showTutorial, (key, value) => {
       oOptions.showTutorial[key].set(_ => value);
     });
+
+    oOptions.solitaire
+      .cardsPerDraw
+      .set(_ => solitaire.cardsPerDraw);
   };
 
   const actionReset = async () => {

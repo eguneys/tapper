@@ -8,6 +8,7 @@ import ASprite from './asprite';
 
 import VScrollList from './vscrolllist';
 import OptionShowTutorial from './options/showtutorial';
+import OptionSoliCardsPerDraw from './options/solicardsperdraw';
 
 export default function CardGameMenu(play, ctx, pbs) {
 
@@ -51,9 +52,14 @@ export default function CardGameMenu(play, ctx, pbs) {
                         checkboxWidth,
                         checkboxWidth * 0.5);
 
+    let selectWidth = checkboxWidth * 0.5;
+    let select = rect(0, 0, selectWidth,
+                      selectWidth);
+
     return {
       uiMargin,
       checkbox,
+      select,
       menuInside,
       menu,
       width,
@@ -68,14 +74,58 @@ export default function CardGameMenu(play, ctx, pbs) {
     height: bs.menu.height,
     texture: mcards.front
   });
+  
+  let gameOptions = () => [
+    new OptionShowTutorial(this, ctx, bs)
+  ];
 
   let dOptionsContainer = new VScrollList(this, ctx, {
     width: bs.menuInside.width,
     height: bs.menuInside.height,
     contents: [
-      new OptionShowTutorial(this, ctx, bs)
+      ...gameOptions()
     ]
   });
+
+  let dOptionsSolitaireContainer = new VScrollList(this, ctx, {
+    width: bs.menuInside.width,
+    height: bs.menuInside.height,
+    contents: [
+      new OptionSoliCardsPerDraw(this, ctx, bs),
+      ...gameOptions()
+    ]
+  });
+
+  let dOptionsSpiderContainer = new VScrollList(this, ctx, {
+    width: bs.menuInside.width,
+    height: bs.menuInside.height,
+    contents: [
+      ...gameOptions()
+    ]
+  });
+
+  let dOptionsFreecellContainer = new VScrollList(this, ctx, {
+    width: bs.menuInside.width,
+    height: bs.menuInside.height,
+    contents: [
+      ...gameOptions()
+    ]
+  });
+
+  const allOptionsContainers = [
+    dOptionsContainer,
+    dOptionsSpiderContainer,
+    dOptionsSolitaireContainer,
+    dOptionsFreecellContainer,
+  ];
+
+  let dOptionsGames = {
+    'spider': dOptionsSpiderContainer,
+    'freecell': dOptionsFreecellContainer,
+    'solitaire': dOptionsSolitaireContainer
+  };
+
+  let dCurrentOptionsContainer;
 
   let container = this.container = new AContainer();
   const initContainer = () => {
@@ -84,13 +134,31 @@ export default function CardGameMenu(play, ctx, pbs) {
     dBg.move(bs.menu.x, bs.menu.y);
     container.addChild(dBg);
 
-    dOptionsContainer
-      .container
-      .move(bs.menuInside.x,
-            bs.menuInside.y);
-    container.addChild(dOptionsContainer);
+    allOptionsContainers.forEach(_ => 
+        _.container
+        .move(bs.menuInside.x,
+              bs.menuInside.y)
+    );
   };
   initContainer();
+
+  const setOptionsContainer = dO => {
+    if (dCurrentOptionsContainer) {
+      container.removeChild(dCurrentOptionsContainer);
+    }
+    container.addChild(dO);
+    dCurrentOptionsContainer = dO;
+  };
+
+  this.cardGame.oView.subscribe(view => {
+    let { home, game } = view;
+
+    if (home) {
+      setOptionsContainer(dOptionsContainer);
+    } else {
+      setOptionsContainer(dOptionsGames[game]);
+    }
+  });
 
   this.cardGame.oHamburger.subscribe(({ open }) => {
     smoothopen(open);

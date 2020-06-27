@@ -125,7 +125,6 @@ export default function VScrollList(play, ctx, bs) {
       let inBounds = hitTest(...epos, bounds);
 
       scrolling = inBounds;
-      console.log(scrolling);
     },
     onMove(epos, { dpos }) {
       if (scrolling) {
@@ -156,7 +155,7 @@ export default function VScrollList(play, ctx, bs) {
     vContents.container.moveY(contentsY);
 
 
-    const ratioY = Math.abs(contentsY) / allHeight;
+    const ratioY = -1 * contentsY / allHeight;
 
     let barY = viewHeight * ratioY;
     dScrollbar.y(barY);

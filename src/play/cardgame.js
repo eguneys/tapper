@@ -131,5 +131,13 @@ function bindOptionsHandlers(optionsStore, cardGame) {
       optionsStore.setShowTutorial(key, value);
     });
   });
+
+  cardGame
+    .oOptions
+    .solitaire
+    .cardsPerDraw
+    .subscribe(value => {
+      optionsStore.setSolitaireCardsPerDraw(value);
+    });
   
 }

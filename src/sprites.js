@@ -61,6 +61,9 @@ const hud = (mhud, mhudAnimation, mslice) => {
       off: mhud(0, 32 * 6, 64, 32),
       on: mhud(64, 32 * 6, 64, 32)
     },
+    select: {
+      onoff: mhudAnimation(0, 32 * 7, 32, 32, 2)
+    },
     'back': mhud(0, 32 * 3, 32),
     'pause': mhud(0, 32 * 4, 32),
     'play': mhud(0, 32 * 5, 32)

@@ -15,12 +15,21 @@ export default function aContainer() {
     opContainer.removeChild(component.container.c);
   };
 
+  this.hcenter = width => {
+    let centerX = width * 0.5 - this.bounds().width * 0.5;
+    this.moveX(centerX);
+  };
+
   this.bounds = () => container.getBounds();
 
   this.globalPosition = () => container.getGlobalPosition();
 
   this.move = (x, y) => {
     container.position.set(x, y);
+  };
+
+  this.moveX = x => {
+    container.position.x = x;
   };
 
   this.moveY = (y) => {

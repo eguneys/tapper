@@ -9,11 +9,22 @@ export default function OptionsStore() {
     freecell: new Storage('showTutorial.freecell', true)
   };
 
+  let solitaire = {
+    cardsPerDraw: new Storage('solitaire.cardPerDraw',
+                              'onecardnoreshuffle')
+  };
+
   this.getOptions = () => {
     return {
       showTutorial: 
-      objMap(showTutorial, (_, storage) => storage.boolean())
+      objMap(showTutorial, (_, storage) => storage.boolean()),
+      solitaire:
+      objMap(solitaire, (_, storage) => storage.apply())
     };
+  };
+
+  this.setSolitaireCardsPerDraw = (value) => {
+    solitaire.cardsPerDraw.apply(value);
   };
 
   this.setShowTutorial = (key, value) => {
