@@ -16,14 +16,13 @@
          - [ ] 1 Suit
          - [ ] 2 Suits
          - [ ] 4 Suits
-     - [ ] General
-       - [ ] Show tutorial
-         - [ ] Spider
-         - [ ] Solitaire
-         - [ ] Freecell
-- [ ] Continue game from last position
-- [ ] New game starts a new game
-- [ ] 
+     - [x] General
+       - [x] Show tutorial
+         - [x] Spider
+         - [x] Solitaire
+         - [x] Freecell
+- [x] Continue game from last position
+- [x] New game starts a new game
 
 ### Solitaire Issues
 * Bugs
@@ -38,9 +37,11 @@
   - [x] 1 deal 
   - [x] 3 deal
 - [ ] Animations
-  - [ ] Place hole animation
-  - [ ] End game animation
-  - [x] Move cards animation
+  - [ ] Shift cards on draw
+  - [ ] Draw card
+  - [ ] Place hole
+  - [ ] End game
+  - [x] Move cards
 - [ ] Side bar
   - [ ] Score
   - [x] New game

@@ -9,6 +9,7 @@ import CardBackground from './cardbackground';
 import GSolitaire from '../gsolitaire';
 import Solitaire from '../solitaire';
 
+import SoliTutorial from './solitutorial';
 import SoliSoul from './solisoul';
 import SoliHoles from './soliholes';
 import SoliStacks from './solistacks';
@@ -63,8 +64,25 @@ export default function SolitaireView(play, ctx, pbs) {
     let bar = rect(width - barWidth, barHeight,
                    barWidth,
                    height - barHeight - boundsMargin * 2.0);
+
+    let text = {
+      p: width * 0.03,
+      h1: width * 0.05,
+    };
+
+    let uiMargin = width * 0.02;
+
+    let tutorialWidth = width * 0.8,
+        tutorialHeight = height * 0.6;
+    let tutorial = rect(width * 0.5 - tutorialWidth * 0.5,
+                        height * 0.5 - tutorialHeight * 0.5,
+                        tutorialWidth,
+                        tutorialHeight);
     
     return {
+      tutorial,
+      uiMargin,
+      text,
       deck,
       stackMargin,
       cMargin,
@@ -81,6 +99,8 @@ export default function SolitaireView(play, ctx, pbs) {
   let cardGame = this.cardGame = play.cardGame;
   let gsolitaire = this.gsolitaire = new GSolitaire();
   let solitaire = this.solitaire = new Solitaire();
+
+  let dTutorial = new SoliTutorial(this, ctx, bs);
 
   let dSoul = new SoliSoul(this, ctx, bs);
 
@@ -139,6 +159,8 @@ export default function SolitaireView(play, ctx, pbs) {
 
     container.addChild(dSoliDrag);
 
+    container.addChild(dTutorial);
+    dTutorial.container.center(bs.width, bs.height);
   };
   initContainer();
 

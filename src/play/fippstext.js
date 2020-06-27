@@ -4,9 +4,13 @@ import { text } from '../asprite';
 export default function FippsText(play, ctx, bs) {
 
   let dText = text(bs.label, { 
-    fontFamily: 'fipps',
+    fontFamily: bs.fontFamily || 'fipps',
     fontSize: bs.size,
-    align: bs.align });
+    fill: bs.fill || 0x000000,
+    align: bs.align,
+    wordWrap: bs.wordWrap,
+    wordWrapWidth: bs.wordWrapWidth
+  });
 
   let container = this.container = new AContainer();
   const initContainer = () => {

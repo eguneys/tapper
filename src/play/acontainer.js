@@ -15,9 +15,19 @@ export default function aContainer() {
     opContainer.removeChild(component.container.c);
   };
 
+  this.vcenter = height => {
+    let centerY = height * 0.5 - this.bounds().height * 0.5;
+    this.moveY(centerY);
+  };
+
   this.hcenter = width => {
     let centerX = width * 0.5 - this.bounds().width * 0.5;
     this.moveX(centerX);
+  };
+
+  this.center = (width, height) => {
+    this.hcenter(width);
+    this.vcenter(height);
   };
 
   this.bounds = () => container.getBounds();
