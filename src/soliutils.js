@@ -205,12 +205,27 @@ export function SoliDrawDeck() {
     deck = [];
   };
 
-  this.dealOne1 = () => {
-    return deck.pop();
+  this.dealOnlyOne = () => {
+    return [deck.pop()];
   };
 
-  this.dealOne2 = (card) => {
-    showStack.push(card);
+  this.dealOne1 = () => {
+    let res = [];
+    for (let i = 0; i < cardsPerDraw; i++) {
+
+      if (deck.length === 0) {
+        break;
+      }
+
+      res.push(deck.pop());
+
+    }
+
+    return res;
+  };
+
+  this.dealOne2 = (cards) => {
+    cards.forEach(_ => showStack.push(_));
   };
 
   this.undealOne = () => {

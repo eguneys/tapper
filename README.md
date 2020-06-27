@@ -6,11 +6,11 @@
 - [ ] Main menu
    - [x] game selection
    - [ ] Settings
-     - [ ] Solitaire
-       - [ ] Cards Per Draw
-            - [ ] 1 Card no reshuffle
-            - [ ] 1 Card
-            - [ ] 3 Cards
+     - [x] Solitaire
+       - [x] Cards Per Draw
+            - [x] 1 Card no reshuffle
+            - [x] 1 Card
+            - [x] 3 Cards
      - [ ] Spider
        - [ ] # Suits
          - [ ] 1 Suit
@@ -33,10 +33,10 @@
 * Features
 - [ ] X sign when no reshuffle on over sprite
 - [x] Save progress on unload and continue on resume
-- [ ] Deal Options
-  - [ ] 1 deal no reshuffle
-  - [ ] 1 deal 
-  - [ ] 3 deal
+- [x] Deal Options
+  - [x] 1 deal no reshuffle
+  - [x] 1 deal 
+  - [x] 3 deal
 - [ ] Animations
   - [ ] Place hole animation
   - [ ] End game animation

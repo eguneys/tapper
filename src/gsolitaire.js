@@ -151,8 +151,7 @@ export default function GSolitaire() {
   const actionDealCard = async (oDeal) => {
     let { i, hidden } = oDeal;
 
-    let card = drawer.mutate(_ => _.dealOne1()),
-        cards = [card];
+    let cards = drawer.mutate(_ => _.dealOnlyOne());
 
     await fx('deal').begin({
       stackN: i,
@@ -177,18 +176,14 @@ export default function GSolitaire() {
 
   const actionDealDraw = async () => {
 
-    let card = effectDealDraw();
+    let cards = effectDealDraw();
 
-    if (!card) {
-      drawer.apply(_ => _.debug());
-    }
+    await fx('dealdraw').begin(cards);
 
-    await fx('dealdraw').begin(card);
-
-    drawer.mutate(_ => _.dealOne2(card));
+    drawer.mutate(_ => _.dealOne2(cards));
 
     actionPushUndoAndSaveState(async () => {
-      await actionUndoDealDraw(card);
+      await actionUndoDealDraw(cards);
     });
 
   };

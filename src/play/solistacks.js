@@ -140,6 +140,7 @@ function SoliStack(play, ctx, bs) {
 
   const initStack = stack => {
     let inProgress = stack.inProgress();
+
     dFronts.init({ stack: stack.front, inProgress });
     dBacks.init({ stack: hiddenStacks[stack.hidden.length], inProgress });
     if (!inProgress) {
