@@ -104,15 +104,16 @@ export default function CardGameView(play, ctx, pbs) {
     }
   });
 
+  let { optionsStore } = ctx;
+
   this.init = (data) => {
-    let { optionsStore } = ctx;
 
     cardGame.init({
       options: optionsStore.getOptions()
     });
-
-    bindOptionsHandlers(optionsStore, cardGame);
   };
+
+  bindOptionsHandlers(optionsStore, cardGame);
 
   this.update = delta => {
     this.container.update(delta);

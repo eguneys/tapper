@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js';
 import sprites from './sprites';
 
 import OptionsStore from './optionsstore';
+import PlayStore from './playstore';
+
 import Config from './config';
 import Canvas from './canvas';
 import Events from './events';
@@ -45,9 +47,11 @@ export function app(element, options) {
 
       canvas.bindResize();
 
-      const optionsStore = new OptionsStore();
+      const optionsStore = new OptionsStore(),
+            playStore = new PlayStore();
 
       const ctx = {
+        playStore,
         optionsStore,
         canvas,
         config,

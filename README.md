@@ -31,7 +31,7 @@
 - [x] Same suit ace appeared
 
 * Features
-- [ ] Save progress on unload and continue on resume
+- [x] Save progress on unload and continue on resume
 - [ ] Deal Options
   - [ ] 1 deal no reshuffle
   - [ ] 1 deal 

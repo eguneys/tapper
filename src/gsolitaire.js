@@ -29,6 +29,8 @@ export default function GSolitaire() {
 
   let persistSelection = this.pSelection = observable({});
 
+  let oSaveState = this.oSaveState = observable(null);
+
   let dealer = new SoliDeal();
 
   let fxs = {
@@ -47,14 +49,54 @@ export default function GSolitaire() {
 
   let deck = makeOneDeck();
 
-  this.userActionNewGame = async () => {
-    await actionCancel();
-    await this.userInit();
+  /*
+   *  Write state
+   */
+  const writeState = () => {
+    const applyWrite = _ => _.apply(fId).write();
+
+    let eStacks = stacks.map(applyWrite);
+    let eHoles = holes.map(applyWrite);
+    let eDrawer = applyWrite(drawer);
+
+    return `${eStacks.join('!')} ${eHoles.join('!')} ${eDrawer}`;
   };
 
-  this.userInit = async () => {
+  const readState = (play) => {
+    const mutateRead = (_, state) => 
+          _.mutate(_ => 
+            _.read(state));
+
+    let [eStacks, eHoles, eDrawer] = play.split(' ');
+
+    eStacks = eStacks.split('!');
+    eHoles = eHoles.split('!');
+
+    eStacks.forEach((eStack, i) => {
+      mutateRead(stackN(i), eStack);
+    });
+
+    eHoles.forEach((eHole, i) => {
+      mutateRead(holeN(i), eHole);
+    });
+
+    mutateRead(drawer, eDrawer);    
+  };
+
+
+  this.userActionNewGame = async () => {
+    await this.userInit({});
+  };
+
+  this.userInit = async (data) => {
+    await actionCancel();
     await actionReset();
-    await actionDealCards();
+
+    if (data.play) {
+      await actionResume(data.play);
+    } else {
+      await actionDealCards();
+    }
   };
 
   let isRunning;
@@ -80,6 +122,10 @@ export default function GSolitaire() {
 
     holes.forEach(_ =>
       _.mutate(_ => _.clear()));
+  };
+
+  const actionResume = async play => {
+    readState(play);
   };
 
   const actionDealCards = async () => {
@@ -138,7 +184,7 @@ export default function GSolitaire() {
 
     drawer.mutate(_ => _.dealOne2(card));
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoDealDraw(card);
     });
 
@@ -328,6 +374,21 @@ export default function GSolitaire() {
   };
 
   /*
+   * Save State Effect
+   */
+  const effectSaveState = (state) => {
+    oSaveState.set(_ => state);
+  };
+
+  const actionPushUndoAndSaveState = undo => {
+    effectUndoPush(undo);
+
+    let state = writeState();
+
+    effectSaveState(state);
+  };
+
+  /*
    * Stack Hole Permissions
    */
 
@@ -467,7 +528,7 @@ export default function GSolitaire() {
 
     let revealCard = await actionRevealStack(srcStackN);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);
     });
   };
@@ -483,7 +544,7 @@ export default function GSolitaire() {
 
     let revealCard = await actionRevealStack(srcStackN);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
     });
   };
@@ -544,7 +605,7 @@ export default function GSolitaire() {
 
     effectHoleAdd(dstHoleN, card);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoHoleSrcDraw(dstHoleN, card);
     });
   };
@@ -562,7 +623,7 @@ export default function GSolitaire() {
 
     effectStackAdd1(dstStackN, cards);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoStackSrcDraw(dstStackN, card);
     });
   };
@@ -594,7 +655,7 @@ export default function GSolitaire() {
 
     effectStackAdd1(dstStackN, cards);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       actionUndoStackSrcHole(holeN, dstStackN, cards);
     });
   };
@@ -631,7 +692,7 @@ export default function GSolitaire() {
 
     effectStackAdd1(dstStackN, cards);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoStackSrcDraw(dstStackN, card);
     });
   };
@@ -649,7 +710,7 @@ export default function GSolitaire() {
 
     effectStackAdd1(dstStackN, cards);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       actionUndoStackSrcHole(srcHoleN, dstStackN, cards);
     });
   };
@@ -670,7 +731,7 @@ export default function GSolitaire() {
 
     effectStackAdd1(dstStackN, cards);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
     });    
   };
@@ -689,7 +750,7 @@ export default function GSolitaire() {
 
     effectHoleAdd(dstHoleN, card);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoHoleSrcDraw(dstHoleN, card);
     });
   };
@@ -710,7 +771,7 @@ export default function GSolitaire() {
 
     effectHoleAdd(dstHoleN, card);
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);
     });
   };
@@ -725,7 +786,7 @@ export default function GSolitaire() {
 
     drawer.mutate(_ => _.shuffle2(cards));
 
-    effectUndoPush(async () => {
+    actionPushUndoAndSaveState(async () => {
       await actionUndoShuffleDraw();
     });
   };

@@ -36,7 +36,7 @@ const colorsBySuit = {
   'clubs': 'black'
 };
 
-const makeCard = (suit, rank) => ({
+export const makeCard = (suit, rank) => ({
   sRank: solitaireIndexByRank[rank],
   color: colorsBySuit[suit],
   suit,

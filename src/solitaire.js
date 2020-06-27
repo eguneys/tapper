@@ -1,5 +1,10 @@
 import { makeOneDeck } from './deck';
-import { isN, SoliStack, SoliHole, SoliDrawDeck } from './soliutils';
+import { stackPlate, 
+         holePlate,
+         isN,
+         SoliStack,
+         SoliHole,
+         SoliDrawDeck } from './soliutils';
 import SoliDeal from './solideal';
 
 import { pobservable, observable } from './observable';
@@ -10,22 +15,8 @@ const pDelay = d => {
 
 export default function Solitaire() {
 
-  let stacks = [
-    observable(new SoliStack()),
-    observable(new SoliStack()),
-    observable(new SoliStack()),
-    observable(new SoliStack()),
-    observable(new SoliStack()),
-    observable(new SoliStack()),
-    observable(new SoliStack())
-  ];
-
-  let holes = [
-    observable(new SoliHole()),
-    observable(new SoliHole()),
-    observable(new SoliHole()),
-    observable(new SoliHole())
-  ];
+  let stacks = stackPlate.map(_ => observable(new SoliStack()));
+  let holes = holePlate.map(_ => observable(new SoliHole()));
 
   let undoer = this.undoer = observable([]);
 

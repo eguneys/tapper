@@ -1,3 +1,5 @@
+import { writeStack, readStack } from './fen';
+
 export const stackPlate = [0, 1, 2, 3, 4, 5, 6];
 export const holePlate = [0, 1, 2, 3];
 
@@ -77,6 +79,21 @@ export function SoliStack(hidden = [], front = []) {
 
   this.canReveal = () => front.length === 0 && hidden.length > 0;
 
+
+  this.write = () => {
+    let eFront = writeStack(this.front);
+    let eHidden = writeStack(this.hidden);
+
+    return `${eFront};${eHidden}`;
+  };
+
+  this.read = (e) => {
+    let [eFront, eHidden] = e.split(';');
+
+    front = this.front = readStack(eFront);
+    hidden = this.hidden = readStack(eHidden);
+  };
+
 }
 
 function canStackHoleAce(c1) {
@@ -121,6 +138,14 @@ export function SoliHole(cards = []) {
 
   this.isDone = () => {
     return false;
+  };
+
+  this.write = () => {
+    return writeStack(cards);
+  };
+
+  this.read = (e) => {
+    cards = readStack(e);
   };
 }
 
@@ -194,4 +219,17 @@ export function SoliDrawDeck() {
     return showStack.slice(takeLast, showStack.length);
   };
 
+  this.write = () => {
+    const eDeck = writeStack(deck),
+          eShow = writeStack(showStack);
+
+    return `${eDeck};${eShow}`;    
+  };
+
+  this.read = (e) => {
+    let [eDeck, eShow] = e.split(';');
+
+    deck = readStack(eDeck);
+    showStack = readStack(eShow);
+  };
 }

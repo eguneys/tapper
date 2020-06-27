@@ -142,10 +142,17 @@ export default function SolitaireView(play, ctx, pbs) {
   };
   initContainer();
 
+  let { playStore } = ctx;
+
   this.init = (data) => {
-    gsolitaire.userInit();
-    // solitaire.init();
+    gsolitaire.userInit({
+      play: playStore.play('solitaire')
+    });
   };
+
+  gsolitaire.oSaveState.subscribe(state => {
+    playStore.play('solitaire', state);
+  });
 
   this.remove = () => {
     solitaire.remove();

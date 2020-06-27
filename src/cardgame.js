@@ -64,7 +64,7 @@ export default function CardGame() {
 
   const actionReset = async () => {
     effectViewHome();
-    effectHamburger(true);
+    effectHamburger(false);
     effectViewGame('solitaire');
   };
 
