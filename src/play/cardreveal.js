@@ -4,7 +4,7 @@ import CardCard from './cardcard';
 
 import { backCard } from '../cards';
 
-export default function Play(play, ctx, bs) {
+export default function CardReveal(play, ctx, bs) {
 
   let dFront = new CardCard(this, ctx, bs);
   let dBack = new CardCard(this, ctx, bs);

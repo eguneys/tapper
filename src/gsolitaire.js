@@ -34,6 +34,8 @@ export default function GSolitaire(cardGame) {
 
   let oShowTutorial = this.oShowTutorial = observable(null);
 
+  let oGameReset = this.oGameReset = observable(null);
+
   let dealer = new SoliDeal();
 
   let holler = new SoliHoller();
@@ -115,7 +117,8 @@ export default function GSolitaire(cardGame) {
   const actionCancel = async () => {
     isRunning = false;
     await actionCancelFxs();
-    await pDelay(0);
+    // wait for deal/holl animations to cancel
+    await pDelay(300);
   };
 
   const actionCancelFxs = async () => {
@@ -136,6 +139,8 @@ export default function GSolitaire(cardGame) {
       _.mutate(_ => _.clear()));
 
     drawer.mutate(_ => _.options(options));
+
+    oGameReset.set(fId);
   };
 
   const actionResume = async play => {
@@ -332,7 +337,7 @@ export default function GSolitaire(cardGame) {
         break;
       }
 
-      await pDelay(100 + Math.random() * 200);
+      await pDelay(50 + Math.random() * 200);
       await actionHollCard(_holeN);
     }
   };

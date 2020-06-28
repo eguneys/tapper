@@ -33,6 +33,10 @@ export default function CardTrailEffect(play, ctx, bs) {
   let vPosition;
 
   this.init = (data) => {
+
+    pTrail.each(_ => container.removeChild(_));
+    pTrail.releaseAll();
+
     let { card: _card, orig, dest } = data;
 
     card = _card;
@@ -86,7 +90,9 @@ export default function CardTrailEffect(play, ctx, bs) {
 
   this.render = () => {
 
-    dCard.container.move(...vPosition);
+    if (vPosition) {
+      dCard.container.move(...vPosition);
+    }
 
     this.container.render();
   };

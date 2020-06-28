@@ -37,6 +37,11 @@ export default function SoliHoller(play, ctx, bs) {
     });
   });
 
+  gsolitaire.oGameReset.subscribe(card => {
+    dCards.each(_ => container.removeChild(_));
+    dCards.releaseAll();
+  });
+
   this.update = delta => {
     this.container.update(delta);
   };
