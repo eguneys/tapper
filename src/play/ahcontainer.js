@@ -2,11 +2,9 @@ import AContainer from './acontainer';
 
 export default function AHContanier(play, ctx, bs) {
 
-  let { contents, gap = 0 } = bs;
+  let { contents = [], gap = 0 } = bs;
 
-  let container = this.container = new AContainer();
-  const initContainer = () => {
-    
+  const placeContents = () => {
     let offsetX = 0;
 
     contents.forEach(_ => {
@@ -16,9 +14,23 @@ export default function AHContanier(play, ctx, bs) {
       let bounds = _.container.bounds();
       offsetX += bounds.width + gap;
     });
+  };
 
+  let container = this.container = new AContainer();
+  const initContainer = () => {
+    placeContents();
   };
   initContainer();
+
+  this.contents = (_contents) => {
+
+    contents
+      .forEach(_ =>
+        container.removeChild(_));
+    
+    contents = _contents;
+    placeContents();
+  };
 
   this.init = (data) => {
     

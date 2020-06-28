@@ -73,9 +73,9 @@ export default function SolitaireView(play, ctx, pbs) {
     let uiMargin = width * 0.02;
 
     let tutorialWidth = width * 0.8,
-        tutorialHeight = height * 0.6;
-    let tutorial = rect(width * 0.5 - tutorialWidth * 0.5,
-                        height * 0.5 - tutorialHeight * 0.5,
+        tutorialHeight = height * 0.9;
+    let tutorial = rect(0,
+                        0,
                         tutorialWidth,
                         tutorialHeight);
     
@@ -97,7 +97,7 @@ export default function SolitaireView(play, ctx, pbs) {
   })();
 
   let cardGame = this.cardGame = play.cardGame;
-  let gsolitaire = this.gsolitaire = new GSolitaire();
+  let gsolitaire = this.gsolitaire = new GSolitaire(cardGame);
   let solitaire = this.solitaire = new Solitaire();
 
   let dTutorial = new SoliTutorial(this, ctx, bs);

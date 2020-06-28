@@ -18,9 +18,18 @@ export default function FippsText(play, ctx, bs) {
   };
   initContainer();
 
-  this.init = (data) => {
-    
+
+  let label = bs.label;
+
+  this.text = (text) => {
+    if (label === text) {
+      return;
+    } 
+    label = text;
+    dText.text = label;
   };
+
+  this.init = (data) => {};
 
   this.update = delta => {
     this.container.update(delta);

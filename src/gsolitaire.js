@@ -13,7 +13,7 @@ const pDelay = d => {
   return new Promise(resolve => setTimeout(resolve, d));
 };
 
-export default function GSolitaire() {
+export default function GSolitaire(cardGame) {
   
 
   let stacks = stackPlate.map(_ => observable(new SoliStack()));
@@ -30,6 +30,8 @@ export default function GSolitaire() {
   let persistSelection = this.pSelection = observable({});
 
   let oSaveState = this.oSaveState = observable(null);
+
+  let oShowTutorial = this.oShowTutorial = observable(null);
 
   let dealer = new SoliDeal();
 
@@ -823,6 +825,10 @@ export default function GSolitaire() {
                canSettleHole(dstHoleN, cards)) {
       await actionSettleHoleSrcDraw(dstHoleN, cards);
     } else {
+
+      if (isN(dstStackN) || isN(dstHoleN)) {
+        actionMaybeShowTutorial();
+      }
       await actionSettleDrawCancel(cards, hasMoved);
     }
   };
@@ -906,6 +912,9 @@ export default function GSolitaire() {
       await actionSettleStack(stackN, dstStackN, cards);
       effectStackCutInProgressCommit(stackN);
     } else {
+      if (isN(dstStackN) || isN(dstHoleN)) {
+        actionMaybeShowTutorial();
+      }
       await actionSettleStackCancel(stackN, cards, hasMoved);
     }
   };
@@ -975,6 +984,9 @@ export default function GSolitaire() {
     if (isN(dstStackN) && canSettleStack(dstStackN, cards)) {
       await actionSettleStackSrcHole(holeN, dstStackN, cards);
     } else {
+      if (isN(dstStackN)) {
+        actionMaybeShowTutorial();
+      }
       await actionSettleHoleCancel(holeN, cards, hasMoved);
     }    
   };
@@ -1096,6 +1108,25 @@ export default function GSolitaire() {
         _.apply(_ => _.canAdd([card])));
   };
 
+
+  /*
+   * Show Tutorial
+   */
+  const actionMaybeShowTutorial = () => {
+    let showTutorial = cardGame
+        .oOptions
+        .showTutorial
+        .solitaire
+        .apply(fId);
+
+    if (showTutorial) {
+      effectShowTutorial();
+    }
+  };
+
+  const effectShowTutorial = () => {
+    oShowTutorial.set(fId);
+  };
 
   /* 
    * Queue User Actions

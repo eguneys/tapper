@@ -13,7 +13,9 @@ export default function Play(play, ctx, bs) {
 
   let dLabel = new Fipps(this, ctx, {
     label: bs.label,
-    size: bs.width * 0.2
+    fontFamily: bs.fontFamily,
+    fill: bs.fill,
+    size: bs.size || bs.height * 0.4
   });
 
   let dBoth = new AHContainer(this, ctx, {

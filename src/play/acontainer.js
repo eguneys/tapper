@@ -15,9 +15,9 @@ export default function aContainer() {
     opContainer.removeChild(component.container.c);
   };
 
-  this.vcenter = height => {
+  this.vcenter = (height, yOffset = 0) => {
     let centerY = height * 0.5 - this.bounds().height * 0.5;
-    this.moveY(centerY);
+    this.moveY(centerY + yOffset);
   };
 
   this.hcenter = width => {
@@ -25,9 +25,25 @@ export default function aContainer() {
     this.moveX(centerX);
   };
 
-  this.center = (width, height) => {
-    this.hcenter(width);
-    this.vcenter(height);
+  this.right = width => {
+    let rightX = width - this.bounds().width;
+    this.moveX(rightX);
+  };
+
+  this.center = (width, height, xOffset, yOffset) => {
+    this.hcenter(width, xOffset);
+    this.vcenter(height, yOffset);
+  };
+
+  let active = true;
+  this.hideStopUpdate = () => {
+    active = false;
+    this.visible(false);
+  };
+
+  this.showStartUpdate = () => {
+    active = true;
+    this.visible(true);
   };
 
   this.bounds = () => container.getBounds();
@@ -61,10 +77,16 @@ export default function aContainer() {
   this.mask = mask => container.mask = mask;
 
   this.update = (delta) => {
+    if (!active) {
+      return;
+    }
     this.each(_ => _.update(delta));
   };
 
   this.render = () => {
+    if (!active) {
+      return;
+    }
     this.each(_ => _.render());
   };
 

@@ -1,5 +1,6 @@
 import AContainer from './acontainer';
 import ATutorial from './atutorial';
+import AFadingContent from './afadingcontent';
 
 export default function SoliTutorial(play, ctx, bs) {
 
@@ -17,6 +18,9 @@ export default function SoliTutorial(play, ctx, bs) {
 
   const text6 = `If you get stuck, tap the deck in the upper-left corner to draw more cards. You can deal it again by tapping the red O icon. You can double tap on a card to automatically place it in a hole.`;
 
+  let gsolitaire = play.gsolitaire;
+  let cardGame = play.cardGame;
+
   let dTutorial = new ATutorial(this, ctx, {
     header: textHeader,
     contents: [
@@ -27,18 +31,42 @@ export default function SoliTutorial(play, ctx, bs) {
       text5,
       text6
     ],
+    onClose() {
+      fadeIn(false);
+    },
+    onDontShow() {
+      cardGame.userActionOptionShowTutorialCheck('solitaire');
+    },
     ...bs
   });
 
+  let dFadingTut = new AFadingContent(this, ctx, {
+    content: dTutorial
+  });
+
+  const fadeIn = (fadeIn) => {
+    if (fadeIn) {
+      dTutorial.init();
+    }
+    dFadingTut.fadeIn(fadeIn);
+  };
+
   let container = this.container = new AContainer();
   const initContainer = () => {
-    container.addChild(dTutorial);
+    container.addChild(dFadingTut);
   };
   initContainer();
 
-  this.init = (data) => {
-    
-  };
+  gsolitaire.oShowTutorial.subscribe(_ => {
+    fadeIn(true);
+  });
+
+  cardGame
+    .oOptions
+    .showTutorial['solitaire']
+    .subscribe(_ => dTutorial.setDontShow(!_));
+
+  this.init = (data) => {};
 
   this.update = delta => {
     this.container.update(delta);

@@ -13,7 +13,7 @@ const pDelay = d => {
   return new Promise(resolve => setTimeout(resolve, d));
 };
 
-export default function Solitaire() {
+export default function Solitaire(cardGame) {
 
   let stacks = stackPlate.map(_ => observable(new SoliStack()));
   let holes = holePlate.map(_ => observable(new SoliHole()));
