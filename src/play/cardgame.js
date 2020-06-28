@@ -15,6 +15,9 @@ import SolitaireView from './solitaire';
 
 import SoliSideBar from './solisidebar';
 
+import ATransitionContent from './atransitioncontent';
+import { Transitions } from './atransitioncontent';
+
 import CardAiControl from './cardaicontrol';
 
 export default function CardGameView(play, ctx, pbs) {
@@ -44,6 +47,12 @@ export default function CardGameView(play, ctx, pbs) {
 
   let dPopupMenu = new CardGameMenu(this, ctx, bs);
 
+  let dPopupMenuTransition = new ATransitionContent(this, ctx, {
+    transition: Transitions.SlideDown,
+    content: dPopupMenu,
+    ...bs
+  });
+
   let dHome = new CardGameHome(this, ctx, bs);
 
   let dGameContainer = dContainer();
@@ -64,7 +73,7 @@ export default function CardGameView(play, ctx, pbs) {
     
     container.addChild(dBar);
 
-    container.addChild(dPopupMenu);
+    container.addChild(dPopupMenuTransition);
   };
 
   initContainer();
@@ -102,6 +111,10 @@ export default function CardGameView(play, ctx, pbs) {
     if (sideView) {
       sideView.container.move(bs.bar.x, bs.bar.y);
     }
+  });
+
+  cardGame.oHamburger.subscribe(({ open }) => {
+    dPopupMenuTransition.transition(open);
   });
 
   let { optionsStore } = ctx;

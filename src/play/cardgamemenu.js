@@ -10,6 +10,8 @@ import VScrollList from './vscrolllist';
 import OptionShowTutorial from './options/showtutorial';
 import OptionSoliCardsPerDraw from './options/solicardsperdraw';
 
+import { hitTest, moveHandler } from './util';
+
 export default function CardGameMenu(play, ctx, pbs) {
 
   this.cardGame = play.cardGame;
@@ -66,8 +68,6 @@ export default function CardGameMenu(play, ctx, pbs) {
       height
     };
   })();
-
-  let iOffsetY = new iPol(1, 1, {});
 
   let dBg = new ASprite(this, ctx, {
     width: bs.menu.width,
@@ -160,39 +160,13 @@ export default function CardGameMenu(play, ctx, pbs) {
     }
   });
 
-  this.cardGame.oHamburger.subscribe(({ open }) => {
-    smoothopen(open);
-  });
-
-  const smoothopen = (show) => {
-    iOffsetY.value(iOffsetY.value());
-    iOffsetY.target(show?0:1);
-  };
-
   this.init = (data) => {};
 
   this.update = delta => {
-    iOffsetY.update(delta / 200);
-
     this.container.update(delta);
   };
 
-  let topOffsetY = -bs.height;
-
   this.render = () => {
-
-    let vOffsetY = iOffsetY.easing(Easings.easeInOutQuad);
-
-    let offsetY = vOffsetY * topOffsetY;
-    
-    this.container.moveY(offsetY);
-
-    if (vOffsetY === 1) {
-      this.container.visible(false);
-    } else {
-      this.container.visible(true);
-    }
-
     this.container.render();
   };
 }

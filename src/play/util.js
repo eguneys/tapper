@@ -15,14 +15,14 @@ export function moveHandler({ onBegin,
     if (current) {
       let { epos } = current;
       if (!running) {
-        onBegin(epos);
+        callMaybe(onBegin, epos);
       } else {
-        onUpdate(epos);
+        callMaybe(onUpdate, epos);
       }
       running = epos;
      } else {
       if (running) {
-        onEnd(running);
+        callMaybe(onEnd, running);
         running = undefined;
       }
     }

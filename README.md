@@ -30,6 +30,7 @@
 - [x] Same suit ace appeared
 
 * Features
+- [x] Show tutorial
 - [ ] X sign when no reshuffle on over sprite
 - [x] Save progress on unload and continue on resume
 - [x] Deal Options
