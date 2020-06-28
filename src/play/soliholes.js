@@ -3,6 +3,7 @@ import ASprite from './asprite';
 
 import CardCard from './cardcard';
 import CardPlaceholder from './cardplaceholder';
+import CardHighlightEffect from './cardhighlighteffect';
 
 import { isN } from '../soliutils';
 
@@ -87,6 +88,11 @@ function SoliHole(play, ctx, bs) {
     texture: mcards['highlight']
   });
 
+  let dHighlightEffect = new CardHighlightEffect(this, ctx, {
+    width: cWidth + 2,
+    height: cHeight + 2
+  });
+
   let dPlaceholder = new CardPlaceholder(this, ctx, bs);
 
   let dTop = new CardCard(this, ctx, bs);
@@ -109,9 +115,12 @@ function SoliHole(play, ctx, bs) {
 
     container.addChild(dPlaceholder);
     container.addChild(dTop);
-    
-    dHighlight.container.move(-1, -1);
+
+    dHighlight.container.move(-1, -1);    
     container.addChild(dHighlight);
+
+    dHighlightEffect.container.move(-1, -1);
+    container.addChild(dHighlightEffect);
     
     dTop.highlight(false);
   };
@@ -127,6 +136,10 @@ function SoliHole(play, ctx, bs) {
       dHighlight.visible(true);
       dTop.container.visible(false);
     }
+  });
+
+  gsolitaire.holeInN(n).subscribe(_ => {
+    dHighlightEffect.init();
   });
 
   this.highlight = dTop.highlight;

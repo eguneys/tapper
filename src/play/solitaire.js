@@ -9,6 +9,7 @@ import CardBackground from './cardbackground';
 import GSolitaire from '../gsolitaire';
 import Solitaire from '../solitaire';
 
+import SoliHoller from './soliholler';
 import SoliTutorial from './solitutorial';
 import SoliSoul from './solisoul';
 import SoliHoles from './soliholes';
@@ -125,6 +126,8 @@ export default function SolitaireView(play, ctx, pbs) {
   this.dDrawN = dDraw.dDrawN;
   this.dDraw = dDraw;
 
+  let dHoller = new SoliHoller(this, ctx, bs);
+
   this.getHitKeyForEpos = epos => {
 
     let res = [dStacks, 
@@ -161,14 +164,20 @@ export default function SolitaireView(play, ctx, pbs) {
 
     container.addChild(dTutorial);
     dTutorial.container.center(bs.width, bs.height);
+
+    container.addChild(dHoller);
   };
   initContainer();
 
-  let { playStore, optionsStore } = ctx;
+  let { fixtures, playStore, optionsStore } = ctx;
 
   this.init = (data) => {
+    let play = playStore.play('solitaire');
+
+    play = fixtures.playEnding;
+
     gsolitaire.userInit({
-      play: playStore.play('solitaire'),
+      play,
       options: optionsStore.solitaire()
     });
   };

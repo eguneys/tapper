@@ -138,7 +138,7 @@ export function SoliHole(cards = []) {
   };
 
   this.isDone = () => {
-    return false;
+    return cards.length === 13;
   };
 
   this.write = () => {

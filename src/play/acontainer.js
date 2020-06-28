@@ -68,6 +68,8 @@ export default function aContainer() {
 
   this.alpha = (alpha) => container.alpha = alpha;
 
+  this.rotation = (angle) => container.rotation = angle;
+
   this.scale = (x, y) => container.scale.set(x, y);
 
   this.pivot = (x, y) => container.pivot.set(x, y);

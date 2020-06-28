@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import sprites from './sprites';
 
+import Fixtures from './fixtures';
 import OptionsStore from './optionsstore';
 import PlayStore from './playstore';
 
@@ -50,7 +51,10 @@ export function app(element, options) {
       const optionsStore = new OptionsStore(),
             playStore = new PlayStore();
 
+      const fixtures = new Fixtures();
+
       const ctx = {
+        fixtures,
         playStore,
         optionsStore,
         canvas,

@@ -121,7 +121,6 @@ export default function ATutorial(play, ctx, bs) {
                              bs.uiMargin * 2.0);
 
     let pageTextBounds = dPageText.container.bounds();
-    console.log(pageTextBounds);
     dPageText.container
       .move(bs.tutorial.width - 
             pageTextBounds.width * 0.5 -

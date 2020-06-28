@@ -25,9 +25,9 @@ export default function SoliDeal() {
 
     let count = 0;
     do {
-      i = (i + 1) % dealsData.length;
+      i = (i + 1) % deals.length;
 
-      if (count++ > dealsData.length) {
+      if (count++ > deals.length) {
         done = true;
         break;
       }

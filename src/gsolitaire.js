@@ -6,6 +6,7 @@ import { stackPlate,
          SoliHole,
          SoliDrawDeck } from './soliutils';
 import SoliDeal from './solideal';
+import SoliHoller from './soliholler';
 
 import { pobservable, observable } from './observable';
 
@@ -35,6 +36,8 @@ export default function GSolitaire(cardGame) {
 
   let dealer = new SoliDeal();
 
+  let holler = new SoliHoller();
+
   let fxs = {
     'deal': pobservable(),
     'settle': pobservable(),
@@ -43,6 +46,12 @@ export default function GSolitaire(cardGame) {
     'dealdraw': pobservable(),
     'unreveal': pobservable()
   };
+
+  let holeEnd = holePlate.map(_ => observable(null));
+  let holeIn = holePlate.map(_ => observable(null));
+
+  let holeEndN = this.holeEndN = n => holeEnd[n];
+  let holeInN = this.holeInN = n => holeIn[n];
 
   let holeN = this.holeN = n => holes[n];
   let stackN = this.stackN = n => stacks[n];
@@ -310,6 +319,57 @@ export default function GSolitaire(cardGame) {
   };
 
   /*
+   * Game Over
+   */
+  const actionGameOver = async () => {
+
+    holler.init();
+
+    while (isRunning) {
+      let _holeN = holler.acquireHole();
+
+      if (!isN(_holeN)) {
+        break;
+      }
+
+      await pDelay(100 + Math.random() * 200);
+      await actionHollCard(_holeN);
+    }
+  };
+
+  const actionHollCard = async (_holeN) => {
+    let hole = holeN(_holeN);
+
+    let card = hole.mutate(_ => _.remove());
+
+    holeEndN(_holeN).set(_ => card);
+
+    holeInN(_holeN).set(fId);
+  };
+
+  /*
+   *  Action Hole Add
+   */
+  const actionHoleAdd = async (_holeN, card) => {
+
+    holeInN(_holeN).set(fId);
+    
+    effectHoleAdd(_holeN, card);
+
+    let allDone = true;
+    holePlate.forEach(i => {
+      let hole = holeN(i);
+      
+      allDone = allDone && hole
+        .apply(_ => _.isDone());
+    });
+
+    if (allDone) {
+      await actionGameOver();
+    }
+  };
+
+  /*
    * Stack, Hole Effects
    */
 
@@ -524,7 +584,7 @@ export default function GSolitaire(cardGame) {
       cards
     });
 
-    effectHoleAdd(dstHoleN, cards[0]);
+    actionHoleAdd(dstHoleN, cards[0]);
 
     let revealCard = await actionRevealStack(srcStackN);
 
@@ -603,7 +663,7 @@ export default function GSolitaire(cardGame) {
 
     effectDrawerCommitDraw();
 
-    effectHoleAdd(dstHoleN, card);
+    actionHoleAdd(dstHoleN, card);
 
     actionPushUndoAndSaveState(async () => {
       await actionUndoHoleSrcDraw(dstHoleN, card);
@@ -748,7 +808,7 @@ export default function GSolitaire(cardGame) {
 
     effectDrawerCommitDraw();
 
-    effectHoleAdd(dstHoleN, card);
+    actionHoleAdd(dstHoleN, card);
 
     actionPushUndoAndSaveState(async () => {
       await actionUndoHoleSrcDraw(dstHoleN, card);
@@ -769,7 +829,7 @@ export default function GSolitaire(cardGame) {
     let revealCard = await pReveal;
     await pMove;
 
-    effectHoleAdd(dstHoleN, card);
+    actionHoleAdd(dstHoleN, card);
 
     actionPushUndoAndSaveState(async () => {
       await actionUndoHole(srcStackN, dstHoleN, cards, revealCard);

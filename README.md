@@ -40,7 +40,7 @@
 - [ ] Animations
   - [ ] Shift cards on draw
   - [ ] Draw card
-  - [ ] Place hole
+  - [x] Place hole
   - [ ] End game
   - [x] Move cards
 - [ ] Side bar
