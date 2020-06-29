@@ -8,6 +8,9 @@ import AContainer from './acontainer';
 import CardGame from '../cardgame';
 import SolitaireAi from '../aisolitaire';
 
+import CEmptyContainer from './cemptycontainer';
+
+import CRouter from './crouter';
 import CardGameHome from './cardgamehome';
 import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
@@ -27,6 +30,20 @@ export default function CardGameView(play, ctx, pbs) {
   let bs = (() => {
     let { width, height } = pbs;
 
+    let stackMargin = Math.round(height * 0.04 / 
+                                 4);
+    let heightMargin = Math.round(height * 0.02 /
+                                  4);
+
+    let cRatio = 64 / 89;
+    let cMargin = stackMargin * 0.1,
+        cHeight = height / 4 - 
+        heightMargin * 4.0,
+        cWidth = cRatio * cHeight;
+    cHeight = Math.floor(cHeight);
+    cWidth = Math.floor(cWidth);
+    let card = rect(0, 0, cWidth, cHeight);
+
     let barWidth = width * 0.09,
         barHeight = height * 0.4,
         boundsMargin = width * 0.01;
@@ -37,6 +54,7 @@ export default function CardGameView(play, ctx, pbs) {
                    height - barHeight - boundsMargin * 2.0);
 
     return {
+      card,
       bar,
       width,
       height
@@ -55,22 +73,27 @@ export default function CardGameView(play, ctx, pbs) {
 
   let dHome = new CardGameHome(this, ctx, bs);
 
-  let dGameContainer = dContainer();
-
   let dSolitaire = new SolitaireView(this, ctx, bs);
   let dSoliSideBar = new SoliSideBar(dSolitaire, ctx, bs);
 
-  const dViewMap = {
-    'home': [dHome, null],
+  let dEmptyContainer = new CEmptyContainer(this, ctx, bs);
+
+  const routes = {
+    'home': [dHome, dEmptyContainer],
     'solitaire': [dSolitaire, dSoliSideBar],
     'spider': [dSolitaire, dSoliSideBar],
     'freecell': [dSolitaire, dSoliSideBar]
   };
 
+  let dRouter = new CRouter(this, ctx, {
+    routes,
+    ...bs
+  });
+
   let container = this.container = new AContainer();
   const initContainer = () => {
-    container.c.addChild(dGameContainer);
-    
+    container.addChild(dRouter);
+
     container.addChild(dBar);
 
     container.addChild(dPopupMenuTransition);
@@ -78,38 +101,13 @@ export default function CardGameView(play, ctx, pbs) {
 
   initContainer();
 
-  let dLastView;
-
-  let lastAi;
-
   cardGame.oView.subscribe(view => {
     let { home, game } = view;
 
-    let dView;
-
     if (home) {
-      dView = dViewMap['home'];
+      dRouter.route('home');
     } else {
-      dView = dViewMap[game];
-    }
-
-    if (dLastView) {
-      dLastView.forEach(_ => {
-        if (!_) { return; };
-        _.remove();
-        container.removeChild(_, dGameContainer);
-      });
-    }
-    dLastView = dView;
-
-    dView.forEach(_ => {
-      if (!_) return;
-      container.addChild(_, dGameContainer);
-      _.init();
-    });
-    let sideView = dView[1];
-    if (sideView) {
-      sideView.container.move(bs.bar.x, bs.bar.y);
+      dRouter.route(game);
     }
   });
 

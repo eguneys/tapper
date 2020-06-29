@@ -9,6 +9,7 @@ import CardBackground from './cardbackground';
 import GSolitaire from '../gsolitaire';
 import Solitaire from '../solitaire';
 
+import SoliGameOver from './soligameover';
 import SoliHoller from './soliholler';
 import SoliTutorial from './solitutorial';
 import SoliSoul from './solisoul';
@@ -101,6 +102,8 @@ export default function SolitaireView(play, ctx, pbs) {
   let gsolitaire = this.gsolitaire = new GSolitaire(cardGame);
   let solitaire = this.solitaire = new Solitaire();
 
+  let dGameOver = new SoliGameOver(this, ctx, bs);
+
   let dTutorial = new SoliTutorial(this, ctx, bs);
 
   let dSoul = new SoliSoul(this, ctx, bs);
@@ -166,15 +169,22 @@ export default function SolitaireView(play, ctx, pbs) {
     dTutorial.container.center(bs.width, bs.height);
 
     container.addChild(dHoller);
+
+    container.addChild(dGameOver);
   };
   initContainer();
 
   let { fixtures, playStore, optionsStore } = ctx;
 
+  let once = true;
+
   this.init = (data) => {
     let play = playStore.play('solitaire');
 
-    play = fixtures.playEnding;
+    if (once) {
+      once = false;
+      play = fixtures.playEnding;
+    }
 
     gsolitaire.userInit({
       play,

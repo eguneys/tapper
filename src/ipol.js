@@ -1,5 +1,6 @@
 export default function interpolator(a, b = a, { 
   yoyo = 0,
+  onLap
 }) {
   let v = 0;
   let direction = 1;
@@ -24,6 +25,14 @@ export default function interpolator(a, b = a, {
     }
   };
 
+  const doLap = () => {
+    repeat--;
+    direction *= -1;
+    if (onLap) {
+      onLap();
+    }
+  };
+
   return {
     update(dt) {
       v += dt * direction;
@@ -33,15 +42,13 @@ export default function interpolator(a, b = a, {
           return;
         }
         if (repeat > 0) {
-          repeat--;
-          direction *= -1;
+          doLap();
         }
       }
       if (v < 0) {
         v = 0;
         if (repeat > 0) {
-          repeat--;
-          direction *= -1;
+          doLap();
         }
       }
     },

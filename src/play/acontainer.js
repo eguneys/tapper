@@ -35,6 +35,10 @@ export default function aContainer() {
     this.vcenter(height, yOffset);
   };
 
+  this.bottom = (y) => {
+    this.moveY(y - this.bounds().height);
+  };
+
   let active = true;
   this.hideStopUpdate = () => {
     active = false;

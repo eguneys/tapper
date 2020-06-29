@@ -23,6 +23,7 @@
          - [x] Freecell
 - [x] Continue game from last position
 - [x] New game starts a new game
+- [ ] Save options
 
 ### Solitaire Issues
 * Bugs
@@ -30,6 +31,10 @@
 - [x] Same suit ace appeared
 
 * Features
+- [ ] Game over popup
+  - [ ] Show score / stats
+  - [x] Main menu
+  - [x] New game
 - [x] Show tutorial
 - [ ] X sign when no reshuffle on over sprite
 - [x] Save progress on unload and continue on resume
@@ -41,7 +46,7 @@
   - [ ] Shift cards on draw
   - [ ] Draw card
   - [x] Place hole
-  - [ ] End game
+  - [x] End game
   - [x] Move cards
 - [ ] Side bar
   - [ ] Score

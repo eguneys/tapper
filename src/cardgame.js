@@ -1,5 +1,6 @@
 import { objForeach } from './util2';
 import { pobservable, observable } from './observable';
+import { fId, fConstant, fNull, fToggle } from './futils';
 
 export default function CardGame() {
 
@@ -24,15 +25,12 @@ export default function CardGame() {
   };
 
   this.userActionSelectGame = (game) => {
-    effectViewGame(game);
+    actionGoGame(game);
   };
 
   this.userActionSelectBack = () => {
-    effectViewHome();
+    actionGoHome();
   };
-
-  const fId = _ => _;
-  const fToggle = _ => !_;
 
   this.userActionOptionShowTutorialCheck = key => {
     let option = oOptions.showTutorial[key];
@@ -65,7 +63,17 @@ export default function CardGame() {
   const actionReset = async () => {
     effectViewHome();
     effectHamburger(false);
+
+    // debug
     effectViewGame('solitaire');
+  };
+
+  const actionGoGame = async (game) => {
+    effectViewGame(game);
+  };
+
+  const actionGoHome = async () => {
+    effectViewHome();
   };
 
   const effectHamburger = (open) => {

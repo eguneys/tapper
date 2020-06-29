@@ -16,6 +16,10 @@ export default function sprites(resources) {
   const sT = atlas =>
         (x, y, w, h) => slice9(texture(atlas), x, y, w, h);
 
+  const mscreen = fT('mscreen');
+  const mscreenAnimation = aT('mscreen');
+  const mscreenSlice = sT('mscreen');
+
   const mcards = fT('mcards');
 
   const mhud = fT('mhud');
@@ -33,11 +37,21 @@ export default function sprites(resources) {
     'pkerning': json('plettersjson'),
     'greenbg': texture('greenbg'),
     'mbg': texture('mbg'),
+    'mscreen': screen(mscreen, mscreenAnimation, mscreenSlice),
     'mcards': cards(mcards),
     'mhud': hud(mhud, mhudAnimation, mhudSlice),
     'mhud2': hud2(mhud2, mhud2Animation, mhud2Slice)
   };
 }
+
+const screen = (mscreen, manimation, mslice) => {
+  return {
+    'menubg': mscreen(0, 0, 89, 64),
+    spades: {
+      shine: manimation(0, 64, 32, 32, 7)
+    }
+  };
+};
 
 const hud2 = (mhud, mhudAnimation, mslice) => {
   return {
@@ -47,6 +61,7 @@ const hud2 = (mhud, mhudAnimation, mslice) => {
 
 const hud = (mhud, mhudAnimation, mslice) => {
   return {
+    'rbutton': mslice(144, 0, 16, 32/3),
     'wbutton': mhud(96, 0, 48, 32),
     'menubg9': mslice(48, 0, 16, 16),
     'menubg': mhud(48, 0, 48),

@@ -47,6 +47,9 @@ export default function SoliSoul(play, ctx, bs) {
         epos,
         ...dest
       });
+      if (!pLastDrop) {
+        debugger;
+      }
     }
   }, events);
 

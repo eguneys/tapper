@@ -1,9 +1,11 @@
+import * as math from './math';
 import iPol from '../ipol';
 import AContainer from './acontainer';
 
 export const Transitions = {
   Fade: 'fade',
-  SlideDown: 'slidedown'
+  SlideDown: 'slidedown',
+  Scale: 'scale'
 };
 
 
@@ -27,6 +29,7 @@ export default function AFadingContent(play, ctx, bs) {
     } else {
       iTransition.value(iTransition.value());
       iTransition.target(0);
+      
     }
   };
 
@@ -35,7 +38,7 @@ export default function AFadingContent(play, ctx, bs) {
   };
 
   this.update = delta => {
-    iTransition.update(delta / 200);
+    iTransition.update(delta / 100);
     if (iTransition.value() === 0 && iTransition.settled()) {
       container.hideStopUpdate();
     }
@@ -48,17 +51,22 @@ export default function AFadingContent(play, ctx, bs) {
 
     if (transition === Transitions.Fade) {
       container.alpha(vTransition);
-    } else {
+    } else if (transition === Transitions.SlideDown) {
       let offsetY = (1.0 - vTransition) * topOffsetY;
       
       this.container.moveY(offsetY);
+    } else if (transition === Transitions.Scale) {
 
-      if (vTransition === 0) {
-        this.container.visible(false);
-      } else {
-        this.container.visible(true);
-      }
+      this.container.scale(vTransition, vTransition);
+
     }
+
+    if (vTransition === 0) {
+      this.container.visible(false);
+    } else {
+      this.container.visible(true);
+    }
+
     this.container.render();
   };
 }

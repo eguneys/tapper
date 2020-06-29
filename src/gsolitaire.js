@@ -10,6 +10,8 @@ import SoliHoller from './soliholler';
 
 import { pobservable, observable } from './observable';
 
+import { fId, fConstant, fNull, fBoolean } from './futils';
+
 const pDelay = d => {
   return new Promise(resolve => setTimeout(resolve, d));
 };
@@ -17,9 +19,11 @@ const pDelay = d => {
 export default function GSolitaire(cardGame) {
   
 
-  let stacks = stackPlate.map(_ => observable(new SoliStack()));
+  let stacks = stackPlate.map(_ => 
+    observable(new SoliStack()));
 
-  let holes = holePlate.map(_ => observable(new SoliHole()));
+  let holes = holePlate.map(_ => 
+    observable(new SoliHole()));
 
   let drawer = observable(new SoliDrawDeck());
 
@@ -36,6 +40,8 @@ export default function GSolitaire(cardGame) {
 
   let oGameReset = this.oGameReset = observable(null);
 
+  let oGameOver = this.oGameOver = observable(null);
+
   let dealer = new SoliDeal();
 
   let holler = new SoliHoller();
@@ -49,8 +55,12 @@ export default function GSolitaire(cardGame) {
     'unreveal': pobservable()
   };
 
-  let holeEnd = holePlate.map(_ => observable(null));
-  let holeIn = holePlate.map(_ => observable(null));
+  let holeEnd = holePlate
+      .map(_ => 
+        observable(null));
+  let holeIn = holePlate
+      .map(_ =>
+        observable(null));
 
   let holeEndN = this.holeEndN = n => holeEnd[n];
   let holeInN = this.holeInN = n => holeIn[n];
@@ -100,6 +110,7 @@ export default function GSolitaire(cardGame) {
 
   this.userActionNewGame = async (options) => {
     await this.userInit({options});
+    await actionSaveState();
   };
 
   this.userInit = async (data) => {
@@ -141,6 +152,8 @@ export default function GSolitaire(cardGame) {
     drawer.mutate(_ => _.options(options));
 
     oGameReset.set(fId);
+
+    oGameOver.set(fNull);
   };
 
   const actionResume = async play => {
@@ -324,9 +337,16 @@ export default function GSolitaire(cardGame) {
   };
 
   /*
-   * Game Over
+   * Game Over Holl Cards
    */
   const actionGameOver = async () => {
+    let gameOverData = {};
+    oGameOver.set(fConstant(gameOverData));
+
+    await actionHollCards();
+  };
+
+  const actionHollCards = async () => {
 
     holler.init();
 
@@ -337,7 +357,7 @@ export default function GSolitaire(cardGame) {
         break;
       }
 
-      await pDelay(50 + Math.random() * 200);
+      await pDelay(20 + Math.random() * 50);
       await actionHollCard(_holeN);
     }
   };
@@ -441,16 +461,19 @@ export default function GSolitaire(cardGame) {
   /*
    * Save State Effect
    */
-  const effectSaveState = (state) => {
-    oSaveState.set(_ => state);
-  };
-
   const actionPushUndoAndSaveState = undo => {
     effectUndoPush(undo);
 
-    let state = writeState();
+    actionSaveState();
+  };
 
-    effectSaveState(state);
+  const actionSaveState = () => {
+    let state = writeState();
+    effectSaveState(state);    
+  };
+
+  const effectSaveState = (state) => {
+    oSaveState.set(_ => state);
   };
 
   /*
@@ -1090,8 +1113,6 @@ export default function GSolitaire(cardGame) {
     });
   };
 
-  const fId = _ => _;
-
   const actionDragEnd = async (dest) => {
     let { epos, decay } = dest;
 
@@ -1207,32 +1228,42 @@ export default function GSolitaire(cardGame) {
 
   let userActionsQueue = serialPromise();
 
-  this.userActionDealDraw = async () => {
+  const whilePlaying = fn => {
+    return async (...args) => {
+      let gameOver = oGameOver.apply(fBoolean);
+      if (gameOver) {
+        return;
+      }
+      await fn(...args);
+    };
+  };
+
+  this.userActionDealDraw = whilePlaying(async () => {
     await userActionsQueue(actionDealDraw);
-  };
+  });
 
-  this.userActionDragStart = async (orig) => {
+  this.userActionDragStart = whilePlaying(async (orig) => {
     await actionDragStart(orig);
-  };
+  });
   
-  this.userActionDragMove = async (epos) => {
+  this.userActionDragMove = whilePlaying(async (epos) => {
     await actionDragMove(epos);
-  };
+  });
 
-  this.userActionDragEnd = async (dest) => {
+  this.userActionDragEnd = whilePlaying(async (dest) => {
     await actionDragEnd(dest);
-  };
+  });
 
-  this.userActionDoubleClick = async (dest) => {
+  this.userActionDoubleClick = whilePlaying(async (dest) => {
     await actionDoubleClick(dest);
-  };
+  });
 
-  this.userActionShuffle = async () => {
+  this.userActionShuffle = whilePlaying(async () => {
     await userActionsQueue(actionShuffleDraw);
-  };
+  });
 
-  this.userActionUndo = async () => {
+  this.userActionUndo = whilePlaying(async () => {
     await userActionsQueue(actionUndos);
-  };
+  });
   
 }
