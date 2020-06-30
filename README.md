@@ -32,7 +32,8 @@
   - [ ] Collect hole animation
   - [ ] Move cards animation with juice
 - [ ] According to rules
-- [ ] Deal cards
+- [x] Undo moves
+- [x] Deal cards
 - [ ] Collect holes
 - [x] Persist Selection
 - [x] Drag drop stacks

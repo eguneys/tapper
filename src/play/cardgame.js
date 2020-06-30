@@ -54,7 +54,13 @@ export default function CardGameView(play, ctx, pbs) {
                    barWidth, 
                    height - barHeight - boundsMargin * 2.0);
 
+    let text = {
+      p: width * 0.03,
+      h1: width * 0.05,
+    };
+
     return {
+      text,
       card,
       bar,
       width,
@@ -92,7 +98,7 @@ export default function CardGameView(play, ctx, pbs) {
   const routes = {
     'home': [dHome, dEmptyContainer],
     'solitaire': [dSolitaire, dSoliSideBar],
-    'spider': [dSpider, dSoliSideBar],
+    'spider': [dSpider, dEmptyContainer],
     'freecell': [dSolitaire, dSoliSideBar]
   };
 

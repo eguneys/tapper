@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { memo } from './util';
 
 export default function Canvas(element) {
   
@@ -34,7 +35,9 @@ export default function Canvas(element) {
 
   this.withApp = fn => fn(app);
 
-  this.bounds = element.getBoundingClientRect();
+  this.fBounds = memo(() => 
+    element.getBoundingClientRect()
+  );
 
   let memoizes = new WeakMemoizes();
 

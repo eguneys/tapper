@@ -63,6 +63,7 @@ const hud = (mhud, mhudAnimation, mslice) => {
   return {
     'rbutton': mslice(144, 0, 16, 32/3),
     'wbutton': mhud(96, 0, 48, 32),
+    'sidelabel': mhud(192, 0, 32),
     'menubg9': mslice(48, 0, 16, 16),
     'menubg': mhud(48, 0, 48),
     'undo': mhud(0, 0, 32),

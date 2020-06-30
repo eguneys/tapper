@@ -4,6 +4,7 @@ import AContainer from './acontainer';
 import GSpider from '../gspider';
 
 import CardBackground from './cardbackground';
+import SpiderSideBar from './spidersidebar';
 import SpiderSoul from './spidersoul';
 import SpiderStacks from './spiderstacks';
 import SpiderDeal from './spideal';
@@ -21,6 +22,7 @@ export default function Spider(play,
   let bs = (() => {
     let { width, 
           height,
+          text,
           bar } = pbs;
 
     let gameWidth = width - bar.width;
@@ -51,6 +53,9 @@ export default function Spider(play,
 
 
     return {
+      uiMargin,
+      text,
+      bar,
       width,
       height,
       card,
@@ -62,6 +67,8 @@ export default function Spider(play,
 
   let cardGame = this.cardGame = play.cardGame;
   let gspider = this.gspider = new GSpider(cardGame);
+
+  let dSidebar = new SpiderSideBar(this, ctx, bs);
 
   let dSoul = new SpiderSoul(this, ctx, bs);
 
@@ -93,7 +100,6 @@ export default function Spider(play,
 
   let container = this.container = new AContainer();
   const initContainer = () => {
-
     container.addChild(dSoul);
 
     container.addChild(dBg);
@@ -110,6 +116,8 @@ export default function Spider(play,
     container.addChild(dSpiderDeal);
     container.addChild(dSpiderReveal);
     container.addChild(dSpiderMove);
+
+    container.addChild(dSidebar);
 
     container.addChild(dSpiderDrag);
   };

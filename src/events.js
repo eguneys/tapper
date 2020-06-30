@@ -61,6 +61,9 @@ export default function Events(canvas) {
 
     unbinds.push(unbindable(document, 'wheel', onWheel));
 
+    const onScroll = () => canvas.fBounds.clear();
+    unbinds.push(unbindable(document, 'scroll', onScroll));
+
     return () => { unbinds.forEach(_ => _()); };
   };
 
@@ -79,14 +82,19 @@ export default function Events(canvas) {
   };
 
   const eventPositionDocument = e => {
-    if (e.clientX || e.clientX === 0) return [e.clientX, e.clientY];
-    if (e.touches && e.targetTouches[0]) return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
+    if (e.clientX || e.clientX === 0) 
+      return [e.clientX, e.clientY];
+    if (e.touches && e.targetTouches[0]) 
+      return [e.targetTouches[0].clientX, 
+              e.targetTouches[0].clientY];
     return undefined;
   };
 
   const eventPosition = e => {
     let edoc = eventPositionDocument(e);
-    let { bounds } = canvas;
+    let { fBounds } = canvas;
+
+    let bounds = fBounds();
 
     return [edoc[0] - bounds.x,
             edoc[1] - bounds.y];

@@ -32,6 +32,7 @@ export default function GSpider() {
   let fxs = {
     'move': pobservable(),
     'deal': pobservable(),
+    'undeal': pobservable(),
     'settle': pobservable(),
     'reveal': pobservable(),
     'unreveal': pobservable()
@@ -43,6 +44,8 @@ export default function GSpider() {
 
   let deck = makeTwoDeck();
   let dealer = new SpiDeal();
+
+  let undoer = new Undoer();
 
   this.userInit = async (data) => {
     await actionCancel();
@@ -116,6 +119,25 @@ export default function GSpider() {
         _.add1(cards);
       });      
     }
+  };
+
+
+  /*
+   * Action Save State
+   */
+  const actionPushUndoAndSaveState = undo => {
+    undoer.effectUndoPush(undo);
+
+    actionSaveState();
+  };
+
+  const actionSaveState = () => {
+    //let state = writeState();
+    //effectSaveState(state);    
+  };
+
+  const effectSaveState = (state) => {
+    // oSaveState.set(_ => state);
   };
 
   /*
@@ -231,9 +253,9 @@ export default function GSpider() {
 
     let revealCard = await actionRevealStack(srcStackN);
 
-    // actionPushUndoAndSaveState(async () => {
-    //   await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
-    // });
+    actionPushUndoAndSaveState(async () => {
+      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+    });
   };
 
   const actionSettleStackCancel = async (stackN, cards, hasMoved) => {
@@ -301,6 +323,51 @@ export default function GSpider() {
   };
 
   /*
+   *  Undo Actions
+   */
+
+  const actionUndoDealDraw = async () => {
+    for (let i = stackPlate.length - 1; i >= 0; i--) {
+      let card = stackN(i)
+          .mutate(_ => _.cutLast());
+      
+      await fx('undeal').begin({
+        stackN: i,
+        card
+      });
+
+      drawer
+        .mutate(_ => _.undealOne(card));
+    }
+  };
+
+  const actionUndoStackStack = async (srcStackN, dstStackN, cards, revealCard) => {
+
+    if (revealCard) {
+
+      stackN(srcStackN).mutate(_ => _.unreveal1(revealCard));
+
+      await fx('unreveal').begin({
+        stackN: srcStackN,
+        card: revealCard
+      });
+
+      stackN(srcStackN).mutate(_ => _.unreveal2(revealCard));
+    }
+
+    effectStackCutLastCards(dstStackN, cards);
+
+    await fx('move').begin({
+          srcStackN: dstStackN,
+          dstStackN: srcStackN,
+          cards
+        });
+
+
+    effectStackAdd1(srcStackN, cards);
+  };
+
+  /*
    * Action Move Cards
    */
 
@@ -320,9 +387,9 @@ export default function GSpider() {
 
     effectStackAdd1(dstStackN, cards);
 
-    // actionPushUndoAndSaveState(async () => {
-    //   await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
-    // });
+    actionPushUndoAndSaveState(async () => {
+      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+    });
   };
 
   /*
@@ -394,9 +461,9 @@ export default function GSpider() {
       }, true);
     }
 
-    // actionPushUndoAndSaveState(async () => {
-    //   await actionUndoDealDraw(cards);
-    // });
+    actionPushUndoAndSaveState(async () => {
+      await actionUndoDealDraw();
+    });
   };
 
     /*
@@ -495,4 +562,29 @@ export default function GSpider() {
   this.userActionDragEnd = whilePlaying(async (dest) => {
     await actionDragEnd(dest);
   });
+
+  this.userActionUndo = whilePlaying(async () => {
+    await userActionsQueue(undoer.actionUndos);
+  });
+}
+
+function Undoer() {
+
+  let undoer = observable([]);
+
+  this.effectUndoPush = undo => {
+    undoer.mutate(_ => _.push(undo));
+  };
+
+  this.actionUndos = async () => {
+    let canUndo = undoer.apply(_ => _.length > 0);
+
+    if (!canUndo) {
+      return;
+    }
+
+    let undoAction = undoer.mutate(_ => _.pop());
+
+    await undoAction();
+  };
 }

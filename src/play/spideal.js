@@ -37,6 +37,23 @@ export default function SpiDeal(play, ctx, bs) {
       }, resolve);
   });
 
+  gspider
+    .fx('undeal')
+    .subfun(({ 
+      stackN,
+      card }, resolve) => {
+
+      let dDstStack = play.dStackN(stackN);
+      let settleSource = dDstStack.nextCardGlobalPosition();
+      let settleTarget = play.dDraw.deckGlobalPosition();
+        
+      dDeal.beginDeal({
+        card,
+        settleSource,
+        settleTarget
+      }, resolve);
+  });
+
   this.init = (data) => {
     
   };

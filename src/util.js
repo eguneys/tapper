@@ -48,3 +48,13 @@ export const makeId = (prefix) => {
     return prefix + n++;
   };
 };
+
+export const memo = (fn) => {
+  let v;
+  const ret = () => {
+    if (v === undefined) v = fn();
+    return v;
+  };
+  ret.clear = () => { v = undefined; };
+  return ret;
+};

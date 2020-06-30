@@ -11,7 +11,6 @@ export default function AVContanier(play, ctx, bs) {
 
     contents.forEach(_ => {
       container.addChild(_);
-
       _.container.moveY(offsetY);
       let bounds = _.container.bounds();
       offsetY += bounds.height + gap;

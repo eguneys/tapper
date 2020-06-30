@@ -24,4 +24,8 @@ export function SpiDrawDeck() {
   this.dealOnlyOne = () => {
     return [cards.pop()];
   };
+
+  this.undealOne = (card) => {
+    cards.push(card);
+  };
 }
