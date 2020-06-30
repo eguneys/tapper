@@ -48,12 +48,18 @@ export default function Play(play, ctx, bs) {
     iDeal.begin(oDeal, resolve);
   };
 
+  let duration = (1000 / 60);
+  this.slow = (slow) => {
+    duration = slow ? (1000 / 30) :
+      (1000 / 60);
+  };
+
   this.init = (data) => {
     
   };
 
   this.update = delta => {
-    iDeal.update(delta / (1000 / 60));
+    iDeal.update(delta / duration);
     this.container.update(delta);
   };
 

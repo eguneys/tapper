@@ -16,13 +16,20 @@ export default function SpiDeal(play, ctx, bs) {
 
   gspider
     .fx('deal')
-    .subfun(({ isHidden, stackN, cards }, resolve) => {
-      let card = isHidden ? backCard : cards[0];
+    .subfun(({ 
+      slow,
+      hidden, 
+      stackN,
+      cards }, resolve) => {
+
+      let card = hidden ? backCard : cards[0];
 
       let dDstStack = play.dStackN(stackN);
       let settleTarget = dDstStack.nextCardGlobalPosition();
       let settleSource = play.dDraw.deckGlobalPosition();
 
+        dDeal.slow(slow);
+        
       dDeal.beginDeal({
         card,
         settleSource,

@@ -75,13 +75,13 @@ export default function GSpider() {
       _.mutate(_ => _.clear()));
   };
   
-
+  let dealing;
   const actionDealCards = async () => {
     deck.shuffle();
 
     drawer.mutate(_ => _.init(deck.drawRest()));
     dealer.init();
-    
+    dealing = true;
     while (isRunning) {
       let res = dealer.acquireDeal();
 
@@ -91,9 +91,10 @@ export default function GSpider() {
 
       await actionDealCard(res);      
     }
+    dealing = false;
   };
 
-  const actionDealCard = async (oDeal) => {
+  const actionDealCard = async (oDeal, slow) => {
     let { i, hidden } = oDeal;
 
     let cards = drawer
@@ -102,7 +103,8 @@ export default function GSpider() {
     await fx('deal').begin({
       stackN: i,
       cards,
-      hidden
+      hidden,
+      slow
     });
 
     if (hidden) {
@@ -381,6 +383,20 @@ export default function GSpider() {
    */
 
   const actionDealDraw = async () => {
+    if (dealing) {
+      return;
+    }
+
+    for (let i = 0; i < stackPlate.length; i++) {
+      await actionDealCard({
+        i: stackPlate[i],
+        hidden: false
+      }, true);
+    }
+
+    // actionPushUndoAndSaveState(async () => {
+    //   await actionUndoDealDraw(cards);
+    // });
   };
 
     /*
