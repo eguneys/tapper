@@ -3,7 +3,7 @@ import AContainer from './acontainer';
 
 import CardReveal from './cardreveal';
 
-export default function Play(play, ctx, bs) {
+export default function SoliRevael(play, ctx, bs) {
 
   let dReveal = new CardReveal(this, ctx, bs);
 

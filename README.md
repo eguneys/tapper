@@ -25,6 +25,18 @@
 - [x] New game starts a new game
 - [ ] Save options
 
+### Spider Issues
+
+* Features
+- [ ] Animation
+  - [ ] Collect hole animation
+  - [ ] Move cards animation with juice
+- [ ] According to rules
+- [ ] Deal cards
+- [ ] Collect holes
+- [x] Persist Selection
+- [x] Drag drop stacks
+
 ### Solitaire Issues
 * Bugs
 - [ ] After double click the behind card stays selected
@@ -69,7 +81,7 @@
   - [x] persist select stack
 - [x] User select deck to show draw cards
 - [x] User drags draw cards
-- [+] User selects a card stack highlights
+- [ ] User selects a card stack highlights
   - [ ] selecting a card stack highlights cards up to highest stack
   - [x] selecting a card  again highlights up to selected card
 - [x] User selects a card then selects another card to move it.

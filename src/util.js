@@ -15,6 +15,11 @@ export const throttle = (fn, delay = 50) => {
   };
 };
 
+export const pDelay = d => {
+  return new Promise(resolve => 
+    setTimeout(resolve, d));
+};
+
 export function withDelay(fn, delay, { onUpdate }) {
   let lastUpdate = 0;
 

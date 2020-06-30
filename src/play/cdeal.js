@@ -1,21 +1,15 @@
 import AContainer from './acontainer';
+import CardCard from './cardcard';
 import { iPolPlus } from './util2';
-
-import { backCard } from '../cards';
 import * as v from '../vec2';
 
-import CardCard from './cardcard';
-
-export default function SoliDeal(play, ctx, bs) {
-
-  this.gsolitaire = play.gsolitaire;
-  this.solitaire = play.solitaire;
+export default function Play(play, ctx, bs) {
 
   let dCards = new CardCard(this, ctx, bs);
-  
+
   let container = this.container = new AContainer();
   const initContainer = () => {
-    
+    container.addChild(dCards);
   };
   initContainer();
 
@@ -23,28 +17,24 @@ export default function SoliDeal(play, ctx, bs) {
       settleTargetDiff;
 
   let iDeal = new iPolPlus({
-    onBegin(oDeal) {
-      let { cards,
-            stackN,
-            isHidden } = oDeal;
+    onBegin({
+      card,
+      settleTarget,
+      settleSource: _settleSource
+    }) {
 
       dCards.container.visible(true);
-      if (isHidden) {
-        dCards.init(backCard);
-      } else {
-        dCards.init(cards[0]);
-      }
 
-      settleSource = play.dDraw.deckGlobalPosition();
-      let dDstStack = play.dStackN(stackN);
-      let settleTarget = dDstStack.nextCardGlobalPosition();
+      dCards.init(card);
 
-      settleTargetDiff = [settleTarget[0] - settleSource[0],
-                          settleTarget[1] - settleSource[1]];
-
+      settleSource = _settleSource;
+      settleTargetDiff = 
+        [settleTarget[0] - settleSource[0],
+         settleTarget[1] - settleSource[1]];
     },
     onUpdate(_, i) {
       let vSettleTarget = v.cscale(settleTargetDiff, i);
+
       dCards.container
         .move(settleSource[0] + vSettleTarget[0],
               settleSource[1] + vSettleTarget[1]);
@@ -54,16 +44,16 @@ export default function SoliDeal(play, ctx, bs) {
     }
   });
 
-  this.gsolitaire.fx('deal').subfun((oDeal, resolve) => {
+  this.beginDeal = (oDeal, resolve) => {
     iDeal.begin(oDeal, resolve);
-  });
+  };
 
   this.init = (data) => {
     
   };
 
   this.update = delta => {
-    iDeal.update(delta / (1000 / 30));
+    iDeal.update(delta / (1000 / 60));
     this.container.update(delta);
   };
 

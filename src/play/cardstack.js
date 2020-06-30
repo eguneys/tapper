@@ -58,7 +58,8 @@ export default function CardStack(play, ctx, bs) {
   this.extend = (eHeight) => {
     let nbCards = dCards.length;
     let cardExtend = eHeight / (nbCards + 3);
-    cardExtend = Math.min(cardExtend, bs.card.width * 0.5);
+    cardExtend = Math.min(cardExtend, 
+                          bs.card.width * 0.4);
 
     iExtend.value(iExtend.value());
     iExtend.target(cardExtend);

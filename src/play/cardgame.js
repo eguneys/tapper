@@ -15,6 +15,7 @@ import CardGameHome from './cardgamehome';
 import CardGameMenu from './cardgamemenu';
 import CardGameBar from './cardgamebar';
 import SolitaireView from './solitaire';
+import SpiderView from './spider';
 
 import SoliSideBar from './solisidebar';
 
@@ -73,15 +74,25 @@ export default function CardGameView(play, ctx, pbs) {
 
   let dHome = new CardGameHome(this, ctx, bs);
 
-  let dSolitaire = new SolitaireView(this, ctx, bs);
-  let dSoliSideBar = new SoliSideBar(dSolitaire, ctx, bs);
+  let dSolitaire = new SolitaireView(this,
+                                     ctx,
+                                     bs);
+  let dSoliSideBar = new SoliSideBar(dSolitaire, 
+                                     ctx,
+                                     bs);
 
-  let dEmptyContainer = new CEmptyContainer(this, ctx, bs);
+  let dSpider = new SpiderView(this,
+                               ctx,
+                               bs);
+
+  let dEmptyContainer = new CEmptyContainer(this,
+                                            ctx,
+                                            bs);
 
   const routes = {
     'home': [dHome, dEmptyContainer],
     'solitaire': [dSolitaire, dSoliSideBar],
-    'spider': [dSolitaire, dSoliSideBar],
+    'spider': [dSpider, dSoliSideBar],
     'freecell': [dSolitaire, dSoliSideBar]
   };
 

@@ -65,7 +65,7 @@ export default function CardGame() {
     effectHamburger(false);
 
     // debug
-    effectViewGame('solitaire');
+    effectViewGame('spider');
   };
 
   const actionGoGame = async (game) => {

@@ -1079,6 +1079,9 @@ export default function GSolitaire(cardGame) {
     }    
   };
 
+  /*
+   * Action Drag Start
+   */
   const actionDragStart = async (orig) => {
     let { epos, decay } = orig;
     let { stackN, holeN, drawN } = orig;
