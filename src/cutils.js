@@ -1,3 +1,6 @@
+import { readStack,
+         writeStack } from './fen';
+
 export const isN = n => (n || n === 0) && !(n < 0);
 
 

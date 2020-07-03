@@ -23,6 +23,7 @@ export function app(element, options) {
   // https://pixijs.download/dev/docs/PIXI.settings.html
   // PIXI.settings.RESOLUTION = window.devicePixelRatio;
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+  PIXI.settings.MIPMAP_TEXTURES = PIXI.MIPMAP_MODES.OFF;
 
   PIXI.Loader.shared
     .add('mall', aBase('all.png'))

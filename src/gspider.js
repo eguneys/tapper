@@ -29,6 +29,9 @@ export default function GSpider() {
 
   let oPersistSelection = this.oPSelection = observable({});
 
+  let oSaveState = this.oSaveState = observable(null);
+
+
   let fxs = {
     'move': pobservable(),
     'deal': pobservable(),
@@ -47,12 +50,17 @@ export default function GSpider() {
 
   let undoer = new Undoer();
 
+  this.userActionNewGame = async (options) => {
+    await this.userInit({options});
+    await actionSaveState();
+  };
+
   this.userInit = async (data) => {
     await actionCancel();
     await actionReset(data.options);
 
     if (data.play) {
-      // await actionResume(data.play);
+      await actionResume(data.play);
     } else {
       await actionDealCards();
     }
@@ -74,8 +82,22 @@ export default function GSpider() {
 
   const actionReset = () => {
     isRunning = true;
+
+    undoer.clear();
+
     stacks.forEach(_ =>
       _.mutate(_ => _.clear()));
+  };
+
+  const actionResume = async play => {
+    let { eStacks,
+          eDrawer } = readState(play);
+
+    eStacks.forEach((eStack, i) => {
+      stackN(i).mutate(_ => _.read(eStack));
+    });
+
+    drawer.mutate(_ => _.read(eDrawer));
   };
   
   let dealing;
@@ -132,12 +154,16 @@ export default function GSpider() {
   };
 
   const actionSaveState = () => {
-    //let state = writeState();
-    //effectSaveState(state);    
+    let state = writeState({
+      stacks: stacks
+        .map(_ => _.apply(fId)),
+      drawer: drawer.apply(fId)
+    });
+    effectSaveState(state);
   };
 
   const effectSaveState = (state) => {
-    // oSaveState.set(_ => state);
+    oSaveState.set(_ => state);
   };
 
   /*
@@ -568,9 +594,30 @@ export default function GSpider() {
   });
 }
 
+const writeState = ({ stacks, drawer }) => {
+  let eStacks = stacks.map(_ => _.write());
+  let eDrawer = drawer.write();
+
+  return `${eStacks.join('!')} ${eDrawer}`;
+};
+
+const readState = (play) => {
+
+  let [eStacks, eDrawer] = play.split(' ');
+
+  eStacks = eStacks.split('!');
+
+  return {
+    eStacks,
+    eDrawer
+  };
+};
+
 function Undoer() {
 
   let undoer = observable([]);
+
+  this.clear = () => undoer.set(_ => []);
 
   this.effectUndoPush = undo => {
     undoer.mutate(_ => _.push(undo));

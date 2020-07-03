@@ -3,13 +3,14 @@ import CardCard from './cardcard';
 import { iPolPlus } from './util2';
 import * as v from '../vec2';
 
-export default function Play(play, ctx, bs) {
+export default function CDeal(play, ctx, bs) {
 
   let dCards = new CardCard(this, ctx, bs);
 
   let container = this.container = new AContainer();
   const initContainer = () => {
     container.addChild(dCards);
+    dCards.container.visible(false);
   };
   initContainer();
 

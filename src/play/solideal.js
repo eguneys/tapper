@@ -15,7 +15,8 @@ export default function SoliDeal(play, ctx, bs) {
   
   let container = this.container = new AContainer();
   const initContainer = () => {
-    
+    container.addChild(dCards);
+    dCards.container.visible(false);
   };
   initContainer();
 

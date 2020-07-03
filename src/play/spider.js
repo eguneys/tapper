@@ -123,10 +123,22 @@ export default function Spider(play,
   };
   initContainer();
 
+  let { fixtures, 
+        playStore,
+        optionsStore } = ctx;
+
   this.init = (data) => {
+    let play = playStore.play('spider');
+
     gspider.userInit({
+      play,
+      options: optionsStore.spider()
     });
   };
+
+  gspider.oSaveState.subscribe(state => {
+    playStore.play('spider', state);
+  });
 
   this.remove = () => {};
 

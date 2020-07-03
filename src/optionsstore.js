@@ -15,6 +15,10 @@ export default function OptionsStore() {
                               ou.oneCard)
   };
 
+  let spider = {
+    
+  };
+
   this.getOptions = () => {
     return {
       showTutorial: 
@@ -28,6 +32,12 @@ export default function OptionsStore() {
     return objMap(solitaire,
                   (_, storage) => 
                   storage.apply());
+  };
+
+  this.spider = () => {
+    return objMap(spider,
+                  (_, storage) => 
+                  storage.apply());    
   };
 
   this.setSolitaireCardsPerDraw = (value) => {

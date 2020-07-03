@@ -31,6 +31,10 @@
 - [ ] Animation
   - [ ] Collect hole animation
   - [ ] Move cards animation with juice
+- [ ] Settings
+  - [ ] 1/2/4 Suits
+- [ ] Save resume state
+- [x] New game
 - [ ] According to rules
 - [x] Undo moves
 - [x] Deal cards

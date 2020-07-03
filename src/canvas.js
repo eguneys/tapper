@@ -27,8 +27,8 @@ export default function Canvas(element) {
   this.aspect = this.width / this.height;
 
   const app = this.app = new PIXI.Application({
-    width: displayWidth,
-    height: displayHeight
+    width: this.width,
+    height: this.height
   });
 
   element.appendChild(app.view);  
