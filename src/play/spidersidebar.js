@@ -7,7 +7,7 @@ export default function SpiderSidebar(play, ctx, bs) {
   let { optionsStore } = ctx;
   let dBar = new CSidebar(this, ctx, {
     onNewgame() {
-      let options = optionsStore.solitaire();
+      let options = optionsStore.spider();
       gspider.userActionNewGame(options);
     },
     onUndo() {

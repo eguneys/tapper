@@ -48,7 +48,36 @@ export default function SpiderStacks(play, ctx, bs) {
       }
   };
 
+  const observeFailSelection = ({
+    active,
+    stackN,
+    cardN
+  }) => {
+    if (!isN(stackN)) {
+      return;
+    }
+
+    let dStack = this.dStackN(stackN);
+
+    if (active) {
+      dStack.blackoutCards(cardN);
+    } else {
+      dStack.blackout(false);
+    }
+  };
+
+  const observeEmptyStacks = (stacks) => {
+    stacks
+      .map(_ => this.dStackN(_))
+      .forEach(_ => _.highlightEffect());
+
+  };
+
   gspider.oPSelection.subscribe(observePSelection);
+
+  gspider.oFailSelection.subscribe(observeFailSelection);
+
+  gspider.oEmptyStacks.subscribe(observeEmptyStacks);
 
   stackPlate.forEach(n => {
     let dStack = this.dStackN(n);

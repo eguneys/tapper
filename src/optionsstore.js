@@ -16,15 +16,15 @@ export default function OptionsStore() {
   };
 
   let spider = {
-    
+    nbSuits: new Storage('spider.nbSuits', ou.fourSuits)
   };
 
   this.getOptions = () => {
     return {
       showTutorial: 
       objMap(showTutorial, (_, storage) => storage.boolean()),
-      solitaire:
-      objMap(solitaire, (_, storage) => storage.apply())
+      solitaire: this.solitaire(),
+      spider: this.spider()
     };
   };
 
@@ -42,6 +42,10 @@ export default function OptionsStore() {
 
   this.setSolitaireCardsPerDraw = (value) => {
     solitaire.cardsPerDraw.apply(value);
+  };
+
+  this.setSpiderNbSuits = value => {
+    spider.nbSuits.apply(value);
   };
 
   this.setShowTutorial = (key, value) => {

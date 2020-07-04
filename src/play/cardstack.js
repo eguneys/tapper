@@ -79,6 +79,16 @@ export default function CardStack(play, ctx, bs) {
     cards.forEach((n, i) => this.highlightCard(dCards.length - 1 - i));
   };
 
+  this.blackoutCards = cardN => {
+    for (let i = dCards.length - 1; i >= cardN; i--) {
+      dCards[i].blackout(true);
+    }
+  };
+
+  this.blackout = value => {
+    dCards.forEach(_ => _.blackout(value));
+  };
+
   const getHitCardForEpos = epos => {
     let iCardExtend = iExtend.value();
 

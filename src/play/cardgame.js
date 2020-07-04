@@ -163,6 +163,14 @@ function bindOptionsHandlers(optionsStore, cardGame) {
 
   cardGame
     .oOptions
+    .spider
+    .nbSuits
+    .subscribe(value => {
+      optionsStore.setSpiderNbSuits(value);
+    });
+
+  cardGame
+    .oOptions
     .solitaire
     .cardsPerDraw
     .subscribe(value => {

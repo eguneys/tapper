@@ -127,8 +127,15 @@ export default function Spider(play,
         playStore,
         optionsStore } = ctx;
 
+  let once = true;
+
   this.init = (data) => {
     let play = playStore.play('spider');
+
+    if (once) {
+      once = false;
+      play = fixtures.spiderEnding;
+    }
 
     gspider.userInit({
       play,

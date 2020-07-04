@@ -9,6 +9,7 @@ import ASprite from './asprite';
 import VScrollList from './vscrolllist';
 import OptionShowTutorial from './options/showtutorial';
 import OptionSoliCardsPerDraw from './options/solicardsperdraw';
+import OptionSpiderSuits from './options/spidersuits';
 
 import { hitTest, moveHandler } from './util';
 
@@ -100,6 +101,7 @@ export default function CardGameMenu(play, ctx, pbs) {
     width: bs.menuInside.width,
     height: bs.menuInside.height,
     contents: [
+      new OptionSpiderSuits(this, ctx, bs),
       ...gameOptions()
     ]
   });

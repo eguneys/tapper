@@ -3,6 +3,7 @@ import AContainer from './acontainer';
 import CardStack from './cardstack';
 import CardPlaceholder from './cardplaceholder';
 import { hiddenStacks } from '../cards';
+import CardHighlightEffect from './cardhighlighteffect';
 
 export default function SpiStack(play, ctx, bs) {
 
@@ -13,6 +14,14 @@ export default function SpiStack(play, ctx, bs) {
   let dBacks = new CardStack(this, ctx, bs);
 
   let dPlaceholder = new CardPlaceholder(this, ctx, bs);
+
+  let cWidth = bs.card.width,
+      cHeight = bs.card.height;
+
+  let dHighlightEffect = new CardHighlightEffect(this, ctx, {
+    width: cWidth + 2,
+    height: cHeight + 2
+  });
 
   this.getHitCardForEpos = epos => {
     let res = [dFronts, dPlaceholder].
@@ -25,6 +34,9 @@ export default function SpiStack(play, ctx, bs) {
     }
     return res;
   };
+
+  this.blackout = dFronts.blackout;
+  this.blackoutCards = dFronts.blackoutCards;
   this.highlight = dFronts.highlight;
   this.highlightCards = dFronts.highlightCards;
   this.nextCardGlobalPosition = dFronts.nextCardGlobalPosition;
@@ -32,6 +44,9 @@ export default function SpiStack(play, ctx, bs) {
 
   let container = this.container = new AContainer();
   const initContainer = () => {
+    dHighlightEffect.container.move(-1, -1);
+    container.addChild(dHighlightEffect);
+
     container.addChild(dPlaceholder);
     container.addChild(dBacks);
     container.addChild(dFronts);
@@ -72,6 +87,10 @@ export default function SpiStack(play, ctx, bs) {
     dBacks.render();
     dFronts.render();
     this.render();
+  };
+
+  this.highlightEffect = () => {
+    dHighlightEffect.init();
   };
 
   const initStack = stack => {

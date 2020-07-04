@@ -1,6 +1,10 @@
 import { serialPromise } from './util2';
 
-import { makeTwoDeck } from './deck';
+import * as ou from './optionutils';
+
+import { oneSuitDeckRaw,
+         twoSuitDeckRaw,
+         makeTwoDeck } from './deck';
 
 import { pobservable,
          observable } from './observable';
@@ -12,7 +16,10 @@ import { pDelay } from './util';
 
 import { stackPlate, 
          isN,
+         canEndStack,
          canAddToStack,
+         canMoveStackWithCardN as _canMoveStackWithCardN,
+         orderedLowestCardN,
          SpiStack,
          SpiDrawDeck } from './spiderutils';
 import SpiDeal from './spideal';
@@ -29,8 +36,12 @@ export default function GSpider() {
 
   let oPersistSelection = this.oPSelection = observable({});
 
+  let oFailSelection = this.oFailSelection = observable({});
+
   let oSaveState = this.oSaveState = observable(null);
 
+
+  let oEmptyStacks = this.oEmptyStacks = observable([]);
 
   let fxs = {
     'move': pobservable(),
@@ -45,7 +56,14 @@ export default function GSpider() {
   let fx = this.fx = name => fxs[name];
   this.drawer = drawer;
 
-  let deck = makeTwoDeck();
+  let deckOptions = {
+    [ou.fourSuits]: makeTwoDeck(),
+    [ou.twoSuits]: makeTwoDeck(twoSuitDeckRaw()),
+    [ou.oneSuit]: makeTwoDeck(oneSuitDeckRaw())
+  };
+
+  let deck;
+
   let dealer = new SpiDeal();
 
   let undoer = new Undoer();
@@ -80,13 +98,15 @@ export default function GSpider() {
     }
   };
 
-  const actionReset = () => {
+  const actionReset = (options) => {
     isRunning = true;
 
     undoer.clear();
 
     stacks.forEach(_ =>
       _.mutate(_ => _.clear()));
+
+    deck = deckOptions[options.nbSuits];
   };
 
   const actionResume = async play => {
@@ -205,6 +225,12 @@ export default function GSpider() {
       // _.stackN = false;
       // _.cardN = false;
     });
+
+
+    // TODO maybe move to own function
+    oFailSelection.mutate(_ => {
+      _.active = false;
+    });
   };
 
   const effectPersistSelectStack = (_stackN, cards) => {
@@ -221,6 +247,14 @@ export default function GSpider() {
       _.stackN = _stackN;
       _.cardN = cardN;
       _.cards = cards;
+    });
+  };
+
+  const effectFailSelection = (stackN, cardN) => {
+    oFailSelection.mutate(_ => {
+      _.active = true;
+      _.stackN = stackN;
+      _.cardN = cardN;
     });
   };
 
@@ -257,12 +291,32 @@ export default function GSpider() {
       .mutate(_ => cards.forEach(__ => _.cutLast()));
   };
 
+  const effectEmptyStacks = () => {
+    let emptyStacks = stacks
+        .map((_, n) => ({ n, _ }))
+        .filter(({_, n}) => 
+          _.apply(_ => _.isEmpty()))
+        .map(_ => _.n);
+
+    oEmptyStacks.set(fConstant(emptyStacks));
+  };
+
   /*
    * Stack Permissions
    */
   const canSettleStack = (dstStackN, cards) => {
     return stackN(dstStackN)
       .apply(_ => canAddToStack(_, cards));
+  };
+
+  const canMoveStackWithCardN = (srcStackN, cardN) => {
+    return stackN(srcStackN)
+      .apply(_ => _canMoveStackWithCardN(_, cardN));
+  };
+
+  const canDealBecauseEmptyColumn = () => {
+    let emptyStack = stacks.find(_ => _.apply(_ => _.isEmpty()));
+    return !emptyStack;
   };
 
   /*
@@ -278,6 +332,8 @@ export default function GSpider() {
     effectStackAdd1(dstStackN, cards);
 
     let revealCard = await actionRevealStack(srcStackN);
+
+    let endStack = await actionEndStack(dstStackN);
 
     actionPushUndoAndSaveState(async () => {
       await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
@@ -321,6 +377,20 @@ export default function GSpider() {
     effectStackAdd1(_stackN, [last]);
 
     return last;
+  };
+
+  const actionEndStack = async (_stackN) => {
+    
+    let canEnd = stackN(_stackN)
+        .apply(_ => canEndStack(_));
+
+    console.log(canEnd);
+
+    if (!canEnd) {
+      return null;
+    }
+
+    return null;
   };
 
 
@@ -449,10 +519,10 @@ export default function GSpider() {
    */
 
   const actionSelectStack = async orig => {
-    let { stackN, cardN } = orig;
+    let { stackN: _stackN, cardN } = orig;
 
     let persistResult = 
-    await actionPersistSelectStack(stackN, cardN);
+    await actionPersistSelectStack(_stackN, cardN);
 
     if (persistResult) {
       return;
@@ -463,9 +533,15 @@ export default function GSpider() {
       return;
     }
 
-    let cards = effectStackCutInProgress(stackN, cardN);
+    if (!canMoveStackWithCardN(_stackN, cardN)) {
+      let lowestCardN = stackN(_stackN).apply(_ => orderedLowestCardN(_));
+      effectFailSelection(_stackN, lowestCardN);
+      return;
+    }
 
-    effectActiveSelectStack(stackN, cards);
+    let cards = effectStackCutInProgress(_stackN, cardN);
+
+    effectActiveSelectStack(_stackN, cards);
     effectPersistSelectEnd();
     effectBeginSelect(cards);
   };
@@ -480,12 +556,21 @@ export default function GSpider() {
       return;
     }
 
+    if (!canDealBecauseEmptyColumn()) {
+      effectEmptyStacks();
+      return;
+    }
+
+    dealing = true;
+
     for (let i = 0; i < stackPlate.length; i++) {
       await actionDealCard({
         i: stackPlate[i],
         hidden: false
       }, true);
     }
+
+    dealing = false;
 
     actionPushUndoAndSaveState(async () => {
       await actionUndoDealDraw();

@@ -61,6 +61,12 @@ export default function CardCard(play, ctx, bs) {
     texture: mcards['highlight']
   });
 
+  let dBlackout = new ASprite(this, ctx, {
+    width: cWidth,
+    height: cHeight,
+    texture: mcards['shadow']
+  });
+
   let container = this.container = new AContainer();
   const initContainer = () => {
 
@@ -82,6 +88,9 @@ export default function CardCard(play, ctx, bs) {
     
     dHighlight.move(-1, -1);
     container.addChild(dHighlight);
+
+    container.addChild(dBlackout);
+    dBlackout.alpha(0);
   };
   initContainer();
 
@@ -120,6 +129,14 @@ export default function CardCard(play, ctx, bs) {
       dHighlight.visible(true);
     } else {
       dHighlight.visible(false);
+    }
+  };
+
+  this.blackout = (value) => {
+    if (value) {
+      dBlackout.alpha(0.2);
+    } else {
+      dBlackout.alpha(0);
     }
   };
 

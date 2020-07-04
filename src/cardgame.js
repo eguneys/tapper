@@ -16,6 +16,9 @@ export default function CardGame() {
     },
     solitaire: {
       cardsPerDraw: observable(null)
+    },
+    spider: {
+      nbSuits: observable(null)
     }
   };
 
@@ -41,6 +44,10 @@ export default function CardGame() {
     oOptions.solitaire.cardsPerDraw.set(_ => key);
   };
 
+  this.userActionOptionSpiderNbSuits = key => {
+    oOptions.spider.nbSuits.set(_ => key);
+  };
+
   this.userActionSelectMenuBar = () => {
     let open = oHamburger.apply(_ => _.open);
     effectHamburger(!open);
@@ -48,7 +55,8 @@ export default function CardGame() {
 
   const actionSetOptions = (options) => {
     let { showTutorial,
-          solitaire 
+          solitaire,
+          spider
         } = options;
 
     objForeach(showTutorial, (key, value) => {
@@ -58,6 +66,11 @@ export default function CardGame() {
     oOptions.solitaire
       .cardsPerDraw
       .set(_ => solitaire.cardsPerDraw);
+
+
+    oOptions.spider
+      .nbSuits
+      .set(_ => spider.nbSuits);
   };
 
   const actionReset = async () => {

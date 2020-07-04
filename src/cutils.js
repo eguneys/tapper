@@ -14,6 +14,8 @@ export function CardStack(hidden = [],
   this.front = front;
   this.hidden = hidden;
 
+  this.isEmpty = () => front.length === 0;
+
   this.inProgress = () => inProgress;
 
   this.cutLast = () => front.pop();

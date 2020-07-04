@@ -4,7 +4,7 @@ import ASprite from './asprite';
 import { Easings } from '../ipol';
 import iPol from '../ipol';
 
-export default function Play(play, ctx, bs) {
+export default function CardHighlightEffect(play, ctx, bs) {
 
   const { textures } = ctx;
 
