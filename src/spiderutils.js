@@ -13,7 +13,7 @@ const canStack = (c1, c2) =>
       c1.sRank === c2.sRank + 1;
 
 export const canEndStack = (stack) => {
-  return orderedLowestCardN(stack) === 12;
+  return orderedCount(stack) === 13;
 };
 
 export const canAddToStack = (stack, cards) => {
@@ -30,6 +30,14 @@ export const canAddToStack = (stack, cards) => {
 export const canMoveStackWithCardN = (stack, cardN) => {
   let lowestN = orderedLowestCardN(stack);
   return cardN >= lowestN;
+};
+
+export const orderedCount = (stack) => {
+  let front = stack.front;
+
+  let lowestN = orderedLowestCardN(stack);
+
+  return front.length - lowestN;
 };
 
 export const orderedLowestCardN = (stack) => {

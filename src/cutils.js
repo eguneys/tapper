@@ -20,6 +20,18 @@ export function CardStack(hidden = [],
 
   this.cutLast = () => front.pop();
 
+  this.cutRun = () => {
+    let res = [];
+    for (let i = 0; i < 13; i++) {
+      res.push(this.cutLast());
+    }
+    return res;
+  };
+
+  this.addRun = (cards) => {
+    this.add1(cards.reverse());
+  };
+
   this.cut1 = n => front.splice(n, front.length - n);
 
   this.cutInProgress = n => {

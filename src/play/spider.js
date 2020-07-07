@@ -13,6 +13,9 @@ import SpiderDrag from './spiderdrag';
 import SpiderReveal from './spiderreveal';
 import SpiderMove from './spidermove';
 
+import SpiderGameOver from './spidergameover';
+import SpiderTutorial from './spidertutorial';
+
 export default function Spider(play,
                                ctx,
                                pbs) {
@@ -52,7 +55,16 @@ export default function Spider(play,
                       height - uiMargin * 2.0);
 
 
+
+    let tutorialWidth = width * 0.8,
+        tutorialHeight = height * 0.9;
+    let tutorial = rect(0,
+                        0,
+                        tutorialWidth,
+                        tutorialHeight);
+
     return {
+      tutorial,
       uiMargin,
       text,
       bar,
@@ -83,6 +95,9 @@ export default function Spider(play,
   let dSpiderDrag = new SpiderDrag(this, ctx, bs);
   let dSpiderReveal = new SpiderReveal(this, ctx, bs);
   let dSpiderMove = new SpiderMove(this, ctx, bs);
+
+  let dGameOver = new SpiderGameOver(this, ctx, bs);
+  let dTutorial = new SpiderTutorial(this, ctx, bs);
 
   this.dStackN = dStacks.dStackN;
   this.dDraw = dDraw;
@@ -120,6 +135,11 @@ export default function Spider(play,
     container.addChild(dSidebar);
 
     container.addChild(dSpiderDrag);
+
+    container.addChild(dTutorial);
+    dTutorial.container.center(bs.width, bs.height);
+
+    container.addChild(dGameOver);
   };
   initContainer();
 

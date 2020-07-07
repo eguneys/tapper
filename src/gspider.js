@@ -22,9 +22,12 @@ import { stackPlate,
          orderedLowestCardN,
          SpiStack,
          SpiDrawDeck } from './spiderutils';
+
+import * as su from './spiderutils';
+
 import SpiDeal from './spideal';
 
-export default function GSpider() {
+export default function GSpider(cardGame) {
 
   let stacks = stackPlate.map(_ => 
     observable(new SpiStack()));
@@ -39,6 +42,10 @@ export default function GSpider() {
   let oFailSelection = this.oFailSelection = observable({});
 
   let oSaveState = this.oSaveState = observable(null);
+
+  let oGameReset = this.oGameReset = observable(null);
+  let oGameOver = this.oGameOver = observable(null);
+  let oShowTutorial = this.oShowTutorial = observable(null);
 
 
   let oEmptyStacks = this.oEmptyStacks = observable([]);
@@ -107,6 +114,10 @@ export default function GSpider() {
       _.mutate(_ => _.clear()));
 
     deck = deckOptions[options.nbSuits];
+
+
+    oGameReset.set(fId);
+    oGameOver.set(fNull);
   };
 
   const actionResume = async play => {
@@ -163,6 +174,25 @@ export default function GSpider() {
     }
   };
 
+  /*
+   * Action Game Over
+   */
+  const actionCheckGameOver = async () => {
+    let allDone = stacks
+        .map(_ => 
+          _.apply(_ => 
+            _.isEmpty()))
+        .reduce((acc, value) => acc && value, true);
+
+    if (allDone) {
+      actionGameOver();
+    }
+  };
+
+  const actionGameOver = async () => {
+    let gameOverData = {};
+    oGameOver.set(fConstant(gameOverData));
+  };
 
   /*
    * Action Save State
@@ -184,6 +214,28 @@ export default function GSpider() {
 
   const effectSaveState = (state) => {
     oSaveState.set(_ => state);
+  };
+
+  /*
+   *  Show Tutorial
+   */
+  /*
+   * Show Tutorial
+   */
+  const actionMaybeShowTutorial = () => {
+    let showTutorial = cardGame
+        .oOptions
+        .showTutorial
+        .spider
+        .apply(fId);
+
+    if (showTutorial) {
+      effectShowTutorial();
+    }
+  };
+
+  const effectShowTutorial = () => {
+    oShowTutorial.set(fId);
   };
 
   /*
@@ -335,8 +387,14 @@ export default function GSpider() {
 
     let endStack = await actionEndStack(dstStackN);
 
+    await actionCheckGameOver();
+
     actionPushUndoAndSaveState(async () => {
-      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+      await actionUndoStackStack(srcStackN, 
+                                 dstStackN,
+                                 cards,
+                                 revealCard,
+                                 endStack);
     });
   };
 
@@ -384,13 +442,14 @@ export default function GSpider() {
     let canEnd = stackN(_stackN)
         .apply(_ => canEndStack(_));
 
-    console.log(canEnd);
-
     if (!canEnd) {
       return null;
     }
 
-    return null;
+    let cards = stackN(_stackN)
+        .mutate(_ => _.cutRun());
+
+    return cards;
   };
 
 
@@ -412,7 +471,7 @@ export default function GSpider() {
       effectStackCutInProgressCommit(stackN);
     } else {
       if (isN(dstStackN)) {
-        // actionMaybeShowTutorial();
+        actionMaybeShowTutorial();
       }
       await actionSettleStackCancel(stackN, cards, hasMoved);
     }
@@ -437,7 +496,7 @@ export default function GSpider() {
     }
   };
 
-  const actionUndoStackStack = async (srcStackN, dstStackN, cards, revealCard) => {
+  const actionUndoStackStack = async (srcStackN, dstStackN, cards, revealCard, endCards) => {
 
     if (revealCard) {
 
@@ -449,6 +508,11 @@ export default function GSpider() {
       });
 
       stackN(srcStackN).mutate(_ => _.unreveal2(revealCard));
+    }
+
+    if (endCards) {
+      stackN(dstStackN)
+        .mutate(_ => _.addRun(endCards));
     }
 
     effectStackCutLastCards(dstStackN, cards);
@@ -483,8 +547,16 @@ export default function GSpider() {
 
     effectStackAdd1(dstStackN, cards);
 
+    let endStack = await actionEndStack(dstStackN);
+
+    await actionCheckGameOver();
+
     actionPushUndoAndSaveState(async () => {
-      await actionUndoStackStack(srcStackN, dstStackN, cards, revealCard);
+      await actionUndoStackStack(srcStackN, 
+                                 dstStackN,
+                                 cards,
+                                 revealCard,
+                                 endStack);
     });
   };
 

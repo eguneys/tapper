@@ -144,7 +144,3 @@ export const Easings2 = {
     return (1 + Math.sin(Math.PI * t - Math.PI / 2)) / 2;
   }
 };
-
-// private easeCubicBezier(t, p1X, p1Y, p2X, p2Y) {
-//     return 3 * t * Math.pow(1 - t, 2) * p1X + 3 * t * t * (1 - t) * p2X + t * t * t;
-// }

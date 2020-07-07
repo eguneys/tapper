@@ -106,15 +106,19 @@ function Animationer({ textures,
                        duration,
                        loop }) {
 
-  let lastTextureI = textures.length - 1;
+  let lastTextureI = textures.length;
 
-  let iFrame = new iPol(0, lastTextureI, { yoyo: loop });
+  let iFrame = new iPol(0, lastTextureI, {});
 
   this.texture = () => {
 
     let vFrame = iFrame.value();
 
     let frame = Math.floor(vFrame);
+
+    if (frame === textures.length) {
+      frame = textures.length - 1;
+    }
 
     return textures[frame];
   };
@@ -134,6 +138,10 @@ function Animationer({ textures,
   };
   
   this.update = (delta) => {
+    if (loop && iFrame.settled()) {
+      this.reset();
+    }
+
     iFrame.update(delta / duration);
   };
 
